@@ -30,6 +30,9 @@ export const Navbar = () => {
   const searchInput = (
     <Input
       aria-label="Search"
+      labelPlacement="outside"
+      placeholder="Search..."
+      type="search"
       classNames={{
         inputWrapper: "bg-default-100",
         input: "text-sm",
@@ -39,12 +42,9 @@ export const Navbar = () => {
           K
         </Kbd>
       }
-      labelPlacement="outside"
-      placeholder="Search..."
       startContent={
         <SearchIcon className="pointer-events-none flex-shrink-0 text-base text-default-400" />
       }
-      type="search"
     />
   );
 
@@ -61,12 +61,12 @@ export const Navbar = () => {
           {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
+                color="foreground"
+                href={item.href}
                 className={clsx(
                   linkStyles({ color: "foreground" }),
                   "data-[active=true]:font-medium data-[active=true]:text-primary",
                 )}
-                color="foreground"
-                href={item.href}
               >
                 {item.label}
               </NextLink>
@@ -120,6 +120,8 @@ export const Navbar = () => {
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <Link
+                href="#"
+                size="lg"
                 color={
                   index === 2
                     ? "primary"
@@ -127,8 +129,6 @@ export const Navbar = () => {
                       ? "danger"
                       : "foreground"
                 }
-                href="#"
-                size="lg"
               >
                 {item.label}
               </Link>
