@@ -2,6 +2,7 @@
   "name": "next-app-template",
   "version": "0.0.1",
   "private": true,
+  "typings": "typings.d.ts",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
