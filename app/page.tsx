@@ -3,8 +3,11 @@ import { Link, Snippet, Code, Button } from "@nextui-org/react";
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
+import supabase from "@/lib/supabase";
 
-export default function Home() {
+export default async function Home() {
+  const { data: notes } = await supabase.from("notes").select();
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="inline-block max-w-lg justify-center text-center">
@@ -18,6 +21,8 @@ export default function Home() {
           Beautiful, fast and modern React UI library.
         </h2>
       </div>
+
+      <pre>{JSON.stringify(notes, null, 2)}</pre>
 
       <div className="flex gap-3">
         <Button

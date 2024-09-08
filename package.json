@@ -12,6 +12,7 @@
     "@nextui-org/react": "^2.4.0",
     "@react-aria/ssr": "^3.9.2",
     "@react-aria/visually-hidden": "^3.8.10",
+    "@supabase/supabase-js": "^2.45.3",
     "@types/node": "20.5.7",
     "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
