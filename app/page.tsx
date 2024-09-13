@@ -19,17 +19,37 @@ const fetchNotes = async () => {
 };
 
 export default function Home() {
-  const { data: notes, isLoading } = useSWR("notesKey", fetchNotes);
+  const { data: notes, isLoading } = useSWR<Note[]>("notesKey", fetchNotes);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget; // Store reference here
 
     const formData = new FormData(event.currentTarget);
+    const newNote: Note = { title: formData.get("name") as string };
 
-    await createPost(formData);
-    mutate("notesKey");
-    form.reset(); // Use the stored reference
+    try {
+      mutate(
+        "notesKey",
+        async (currentNotes: Note[] = []) => {
+          return [...currentNotes, newNote];
+        },
+        {
+          optimisticData: (currentNotes: Note[] = []) => [
+            ...currentNotes,
+            newNote,
+          ],
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false,
+          throwOnError: true,
+        },
+      );
+      await createPost(formData);
+      form.reset();
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
   };
 
   return (
