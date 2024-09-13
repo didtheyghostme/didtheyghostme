@@ -1,8 +1,8 @@
 "use client";
 
 import { Link, Snippet, Code, Button } from "@nextui-org/react";
-import { useRef } from "react";
-import useSWR from "swr";
+import { FormEvent, useRef } from "react";
+import useSWR, { mutate } from "swr";
 
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
@@ -21,7 +21,16 @@ const fetchNotes = async () => {
 export default function Home() {
   const { data: notes, isLoading } = useSWR("notesKey", fetchNotes);
 
-  const ref = useRef<HTMLFormElement>(null);
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget; // Store reference here
+
+    const formData = new FormData(event.currentTarget);
+
+    await createPost(formData);
+    mutate("notesKey");
+    form.reset(); // Use the stored reference
+  };
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -71,13 +80,14 @@ export default function Home() {
       </div>
 
       <form
-        ref={ref}
         className="flex flex-col gap-y-2"
-        action={async (formData) => {
-          await createPost(formData);
-          await fetchNotes();
-          ref?.current?.reset();
-        }}
+        onSubmit={handleSubmit}
+        // action={async (formData) => {
+        //   await createPost(formData);
+        //   // await fetchNotes();
+        //   mutate("notesKey");
+        //   ref?.current?.reset();
+        // }}
       >
         <input name="name" placeholder="Name" type="text" />
         <button type="submit">Create</button>
