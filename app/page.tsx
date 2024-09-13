@@ -1,12 +1,27 @@
+"use client";
+
 import { Link, Snippet, Code, Button } from "@nextui-org/react";
+import { useRef } from "react";
+import useSWR from "swr";
 
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import supabase from "@/lib/supabase";
+import createPost from "@/app/actions/createPost";
 
-export default async function Home() {
-  const { data: notes } = await supabase.from("notes").select();
+const fetchNotes = async () => {
+  const { data, error } = await supabase.from("notes").select();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
+export default function Home() {
+  const { data: notes, isLoading } = useSWR("notesKey", fetchNotes);
+
+  const ref = useRef<HTMLFormElement>(null);
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -54,6 +69,19 @@ export default async function Home() {
           </span>
         </Snippet>
       </div>
+
+      <form
+        ref={ref}
+        className="flex flex-col gap-y-2"
+        action={async (formData) => {
+          await createPost(formData);
+          await fetchNotes();
+          ref?.current?.reset();
+        }}
+      >
+        <input name="name" placeholder="Name" type="text" />
+        <button type="submit">Create</button>
+      </form>
     </section>
   );
 }
