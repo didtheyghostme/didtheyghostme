@@ -2,24 +2,17 @@
 
 import { Link, Snippet, Code, Button } from "@nextui-org/react";
 import { FormEvent, useRef } from "react";
-import useSWR, { mutate } from "swr";
 
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
-import supabase from "@/lib/supabase";
-import createPost from "@/app/actions/createPost";
-
-const fetchNotes = async () => {
-  const { data, error } = await supabase.from("notes").select();
-
-  if (error) throw new Error(error.message);
-
-  return data;
-};
+import { useCreateNote } from "@/lib/hooks/useCreateNote";
+import useReadNote from "@/lib/hooks/useReadNote";
 
 export default function Home() {
-  const { data: notes, isLoading } = useSWR<Note[]>("notesKey", fetchNotes);
+  const { data: notes, isLoading } = useReadNote();
+
+  const { createNote } = useCreateNote();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,23 +22,7 @@ export default function Home() {
     const newNote: Note = { title: formData.get("name") as string };
 
     try {
-      mutate(
-        "notesKey",
-        async (currentNotes: Note[] = []) => {
-          return [...currentNotes, newNote];
-        },
-        {
-          optimisticData: (currentNotes: Note[] = []) => [
-            ...currentNotes,
-            newNote,
-          ],
-          rollbackOnError: true,
-          populateCache: true,
-          revalidate: false,
-          throwOnError: true,
-        },
-      );
-      await createPost(formData);
+      await createNote(newNote);
       form.reset();
     } catch (error) {
       console.error("Error creating post:", error);

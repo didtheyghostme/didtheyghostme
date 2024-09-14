@@ -1,17 +1,19 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import supabase from "@/lib/supabase";
+
 const delay = () => new Promise<void>((res) => setTimeout(() => res(), 3000));
 
-const createPost = async (formData: FormData) => {
+const actionCreateNote = async (
+  key: string,
+  { arg: newNote }: { arg: Note },
+): Promise<Note> => {
   await delay();
 
   try {
-    const newNote: Note = {
-      title: formData.get("name") as string,
-    };
+    // const newNote: Note = {
+    //   title: formData.get("name") as string,
+    // };
 
     const { data, error } = await supabase
       .from("notes")
@@ -19,16 +21,17 @@ const createPost = async (formData: FormData) => {
       .select();
 
     if (error) {
-      console.error("Insert error:", error.message);
+      console.error("Insert error fail:", error.message);
       throw new Error(error.message);
     } else {
       console.log("Insert successful:", data);
     }
+
+    return data[0];
   } catch (err) {
     console.error("Error executing insert:", err);
+    throw err;
   }
-  console.warn("Note created");
-  // revalidatePath("/");
 };
 
-export default createPost;
+export default actionCreateNote;
