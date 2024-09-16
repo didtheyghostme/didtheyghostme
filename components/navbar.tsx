@@ -14,6 +14,7 @@ import {
   NavbarItem,
   NavbarMenuItem,
 } from "@nextui-org/react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -25,6 +26,7 @@ import {
   SearchIcon,
   Logo,
 } from "@/components/icons";
+
 
 export const Navbar = () => {
   const searchInput = (
@@ -103,6 +105,12 @@ export const Navbar = () => {
           >
             Sponsor
           </Button>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </NavbarItem>
       </NavbarContent>
 
