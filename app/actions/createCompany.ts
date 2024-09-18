@@ -4,17 +4,17 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 
 const delay = () => new Promise<void>((res) => setTimeout(() => res(), 3000));
 
-const actionCreateNote = async (key: string, { arg: newNote }: { arg: Note }): Promise<Note> => {
+const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Company }): Promise<Company> => {
+  //   await delay();
   const supabase = await createClerkSupabaseClientSsr();
-
-  await delay();
 
   try {
     // const newNote: Note = {
     //   title: formData.get("name") as string,
     // };
+    console.warn("new company is", newCompany);
 
-    const { data, error } = await supabase.from("notes").insert([newNote]).select();
+    const { data, error } = await supabase.from("company").insert(newCompany).select();
 
     if (error) {
       console.error("Insert error fail:", error.message);
@@ -30,4 +30,4 @@ const actionCreateNote = async (key: string, { arg: newNote }: { arg: Note }): P
   }
 };
 
-export default actionCreateNote;
+export default actionCreateCompany;

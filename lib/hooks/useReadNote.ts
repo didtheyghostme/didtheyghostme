@@ -1,8 +1,10 @@
 import useSWR from "swr";
 
-import supabase from "@/lib/supabase";
+import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 
 const fetchNote = async () => {
+  const supabase = await createClerkSupabaseClientSsr();
+
   const { data, error } = await supabase.from("notes").select();
 
   if (error) throw new Error(error.message);

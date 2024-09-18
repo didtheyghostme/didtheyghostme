@@ -3,15 +3,10 @@ import useSWRMutation, { SWRMutationConfiguration } from "swr/mutation";
 
 import actionCreateNote from "@/app/actions/createNote";
 
-const createMutationOptions = (
-  newNote: Note,
-): SWRMutationConfiguration<Note, any, string, Note, Note[]> => ({
+const createMutationOptions = (newNote: Note): SWRMutationConfiguration<Note, any, string, Note, Note[]> => ({
   optimisticData: (currentData: Note[] = []) => [...currentData, newNote],
   rollbackOnError: true,
-  populateCache: (noteInserted: Note, currentData: Note[] = []) => [
-    ...currentData,
-    noteInserted,
-  ],
+  populateCache: (noteInserted: Note, currentData: Note[] = []) => [...currentData, noteInserted],
   revalidate: false,
 });
 
