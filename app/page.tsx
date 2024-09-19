@@ -1,16 +1,17 @@
 "use client";
 
 import { Link, Snippet, Code, Button } from "@nextui-org/react";
-import { FormEvent, useRef } from "react";
+import { FormEvent } from "react";
+import useSWR from "swr";
 
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import { useCreateNote } from "@/lib/hooks/useCreateNote";
-import useReadNote from "@/lib/hooks/useReadNote";
+import { fetcher } from "@/lib/fetcher";
 
 export default function Home() {
-  const { data: notes, isLoading } = useReadNote();
+  const { data: notes, isLoading } = useSWR<Note[]>("/api/note", fetcher);
 
   const { createNote } = useCreateNote();
 
@@ -35,34 +36,17 @@ export default function Home() {
         <h1 className={title()}>Make&nbsp;</h1>
         <h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
         <br />
-        <h1 className={title()}>
-          websites regardless of your design experience.
-        </h1>
-        <h2 className={subtitle({ class: "mt-4" })}>
-          Beautiful, fast and modern React UI library.
-        </h2>
+        <h1 className={title()}>websites regardless of your design experience.</h1>
+        <h2 className={subtitle({ class: "mt-4" })}>Beautiful, fast and modern React UI library.</h2>
       </div>
 
       <pre>{JSON.stringify(notes, null, 2)}</pre>
 
       <div className="flex gap-3">
-        <Button
-          isExternal
-          as={Link}
-          color="primary"
-          href={siteConfig.links.docs}
-          radius="full"
-          variant="shadow"
-        >
+        <Button isExternal as={Link} color="primary" href={siteConfig.links.docs} radius="full" variant="shadow">
           Documentation
         </Button>
-        <Button
-          isExternal
-          as={Link}
-          href={siteConfig.links.github}
-          radius="full"
-          variant="bordered"
-        >
+        <Button isExternal as={Link} href={siteConfig.links.github} radius="full" variant="bordered">
           <GithubIcon size={20} />
           GitHub
         </Button>

@@ -12,7 +12,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export async function createClerkSupabaseClientSsr() {
   // The `useAuth()` hook is used to access the `getToken()` method
-  const { getToken } = auth();
+  const { getToken, userId } = auth();
+
+  // If no userId exists, treat this as an unauthenticated/anon request
+  if (!userId) {
+    // Return Supabase client with the anon key for unauthenticated requests
+    return createClient(supabaseUrl!, supabaseAnonKey!);
+  }
 
   return createClient(supabaseUrl!, supabaseAnonKey!, {
     global: {
