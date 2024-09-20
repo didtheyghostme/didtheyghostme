@@ -17,31 +17,34 @@ import {
   Pagination,
   SortDescriptor,
   Selection,
+  ChipProps,
 } from "@nextui-org/react";
 
-import { columns, users, statusOptions } from "./data";
+import { columns, users, ColumnKey, statusOptions, StatusKey } from "./data";
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
 
-const statusColorMap = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
-};
+type ChipColor = NonNullable<ChipProps["color"]>;
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
+const statusColorMap = {
+  Active: "success",
+  Paused: "danger",
+  Vacation: "warning",
+} satisfies Record<StatusKey, ChipColor>;
+
+const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"] as const satisfies readonly ColumnKey[];
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export default function App() {
+export default function TableCompany() {
   const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+  const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
+  const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "age",
     direction: "ascending",
   });
@@ -50,9 +53,9 @@ export default function App() {
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = React.useMemo(() => {
-    if (visibleColumns === "all") return columns;
+    if (visibleColumns === "all" || (visibleColumns instanceof Set && visibleColumns.has("all"))) return columns;
 
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    return columns.filter((column) => Array.from(visibleColumns).includes(column.name));
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
@@ -79,16 +82,16 @@ export default function App() {
 
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column];
-      const second = b[sortDescriptor.column];
+      const first = a[sortDescriptor.column as keyof typeof a];
+      const second = b[sortDescriptor.column as keyof typeof b];
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
 
-  const renderCell = React.useCallback((user, columnKey) => {
-    const cellValue = user[columnKey];
+  const renderCell = React.useCallback((user: (typeof users)[number], columnKey: ColumnKey) => {
+    const cellValue = user[columnKey as keyof typeof user];
 
     switch (columnKey) {
       case "name":
@@ -106,7 +109,7 @@ export default function App() {
         );
       case "status":
         return (
-          <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
+          <Chip className="capitalize" color={statusColorMap[user.status as keyof typeof statusColorMap]} size="sm" variant="flat">
             {cellValue}
           </Chip>
         );
@@ -144,12 +147,12 @@ export default function App() {
     }
   }, [page]);
 
-  const onRowsPerPageChange = React.useCallback((e) => {
+  const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
     setPage(1);
   }, []);
 
-  const onSearchChange = React.useCallback((value) => {
+  const onSearchChange = React.useCallback((value: string) => {
     if (value) {
       setFilterValue(value);
       setPage(1);
@@ -169,10 +172,14 @@ export default function App() {
         <div className="flex items-end justify-between gap-3">
           <Input
             isClearable
-            className="w-full sm:max-w-[44%]"
             placeholder="Search by name..."
-            startContent={<SearchIcon />}
+            startContent={<SearchIcon className="text-default-300" />}
             value={filterValue}
+            variant="bordered"
+            classNames={{
+              base: "w-full sm:max-w-[44%]",
+              inputWrapper: "border-1",
+            }}
             onClear={() => onClear()}
             onValueChange={onSearchChange}
           />
@@ -185,8 +192,8 @@ export default function App() {
               </DropdownTrigger>
               <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={statusFilter} selectionMode="multiple" onSelectionChange={setStatusFilter}>
                 {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                  <DropdownItem key={status} className="capitalize">
+                    {capitalize(status)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
@@ -199,7 +206,7 @@ export default function App() {
               </DropdownTrigger>
               <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={visibleColumns} selectionMode="multiple" onSelectionChange={setVisibleColumns}>
                 {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
+                  <DropdownItem key={column.name} className="capitalize">
                     {capitalize(column.name)}
                   </DropdownItem>
                 ))}
@@ -244,30 +251,30 @@ export default function App() {
 
   return (
     <Table
-      aria-label="Example table with custom cells, pagination and sorting"
       isHeaderSticky
+      aria-label="Example table with custom cells, pagination and sorting"
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
-      classNames={{
-        wrapper: "max-h-[382px]",
-      }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
       sortDescriptor={sortDescriptor}
       topContent={topContent}
       topContentPlacement="outside"
+      classNames={{
+        wrapper: "max-h-[382px]",
+      }}
       onSelectionChange={setSelectedKeys}
       onSortChange={setSortDescriptor}
     >
       <TableHeader columns={headerColumns}>
         {(column) => (
-          <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"} allowsSorting={column.sortable}>
+          <TableColumn key={column.name} align={column.name === "actions" ? "center" : "start"} allowsSorting={column.sortable} className="uppercase">
             {column.name}
           </TableColumn>
         )}
       </TableHeader>
       <TableBody emptyContent={"No users found"} items={sortedItems}>
-        {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}</TableRow>}
+        {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
       </TableBody>
     </Table>
   );

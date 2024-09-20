@@ -1,19 +1,25 @@
-const columns = [
-  { name: "ID", uid: "id", sortable: true },
-  { name: "NAME", uid: "name", sortable: true },
-  { name: "AGE", uid: "age", sortable: true },
-  { name: "ROLE", uid: "role", sortable: true },
-  { name: "TEAM", uid: "team" },
-  { name: "EMAIL", uid: "email" },
-  { name: "STATUS", uid: "status", sortable: true },
-  { name: "ACTIONS", uid: "actions" },
+type ColumnKey = "id" | "name" | "age" | "role" | "team" | "email" | "status" | "actions";
+
+type Column = {
+  name: ColumnKey;
+  sortable?: boolean;
+  width?: number;
+};
+
+const columns: Column[] = [
+  { name: "id", sortable: true },
+  { name: "name", sortable: true, width: 10 },
+  { name: "age", sortable: true },
+  { name: "role", sortable: true },
+  { name: "team" },
+  { name: "email" },
+  { name: "status", sortable: true },
+  { name: "actions" },
 ];
 
-const statusOptions = [
-  { name: "Active", uid: "active" },
-  { name: "Paused", uid: "paused" },
-  { name: "Vacation", uid: "vacation" },
-];
+const statusOptions = ["Active", "Paused", "Vacation"] as const;
+
+type StatusKey = (typeof statusOptions)[number];
 
 const users = [
   {
@@ -218,4 +224,4 @@ const users = [
   },
 ];
 
-export { columns, users, statusOptions };
+export { columns, users, statusOptions, type ColumnKey, type StatusKey };

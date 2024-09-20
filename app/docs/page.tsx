@@ -4,16 +4,16 @@ import { Button, Input, Spacer } from "@nextui-org/react";
 import { FormEvent } from "react";
 import useSWR from "swr";
 
+import TableCompany from "./TableCompany";
+
 import { title } from "@/components/primitives";
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
-
 import { fetcher } from "@/lib/fetcher";
-import TableCompany from "./TableCompany";
 
 export default function DocsPage() {
   const { createCompany } = useCreateCompany();
 
-  const { data, isLoading } = useSWR<Company[]>("/api/company", fetcher);
+  const { data } = useSWR<Company[]>("/api/company", fetcher);
 
   console.warn("Companies are", data);
 
@@ -41,8 +41,10 @@ export default function DocsPage() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <TableCompany />
+
+      {/* Form creation below */}
 
       <h1 className={title()}>Docs</h1>
 
@@ -61,7 +63,7 @@ export default function DocsPage() {
 
       <DatePicker isRequired className="max-w-[284px]" label="Birth date" /> */}
 
-      <Spacer y={24} />
+      <Spacer y={6} />
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Input isClearable isRequired label="Enter Company Name" name="companyName" type="text" />
