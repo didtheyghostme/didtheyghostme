@@ -8,6 +8,7 @@ import { title } from "@/components/primitives";
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 
 import { fetcher } from "@/lib/fetcher";
+import TableCompany from "./TableCompany";
 
 export default function DocsPage() {
   const { createCompany } = useCreateCompany();
@@ -41,6 +42,8 @@ export default function DocsPage() {
 
   return (
     <div>
+      <TableCompany />
+
       <h1 className={title()}>Docs</h1>
 
       <h1 className={title({ color: "yellow" })}>Add a new job</h1>
