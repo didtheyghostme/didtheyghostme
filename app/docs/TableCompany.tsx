@@ -33,11 +33,16 @@ type CustomSortDescriptor = SortDescriptor & {
 
 type ChipColor = NonNullable<ChipProps["color"]>;
 
-const statusColorMap = {
-  Active: "success",
-  Paused: "danger",
-  Vacation: "warning",
-} satisfies Record<StatusKey, ChipColor>;
+type StatusInfo = {
+  color: ChipColor;
+  priority: number;
+};
+
+const statusMap = {
+  Active: { color: "success", priority: 1 },
+  Vacation: { color: "warning", priority: 2 },
+  Paused: { color: "danger", priority: 3 },
+} satisfies Record<StatusKey, StatusInfo>;
 
 const INITIAL_VISIBLE_COLUMNS = ["company_name", "company_url", "status", "actions"] as const;
 
@@ -52,7 +57,7 @@ export default function TableCompany() {
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [sortDescriptor, setSortDescriptor] = React.useState<CustomSortDescriptor>({
     column: "company_name",
     direction: "ascending",
@@ -95,17 +100,40 @@ export default function TableCompany() {
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
+  // const sortedItems = React.useMemo(() => {
+  //   return [...items].sort((a, b) => {
+  //     const first = a[sortDescriptor.column as keyof Company];
+  //     const second = b[sortDescriptor.column as keyof Company];
+
+  //     if (first == null || second == null) return 0;
+  //     const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+  //     return sortDescriptor.direction === "descending" ? -cmp : cmp;
+  //   });
+  // }, [sortDescriptor, items]);
+
   const sortedItems = React.useMemo(() => {
-    return [...items].sort((a, b) => {
+    return [...filteredItems].sort((a, b) => {
       const first = a[sortDescriptor.column as keyof Company];
       const second = b[sortDescriptor.column as keyof Company];
+
+      if (sortDescriptor.column === "status") {
+        return ((statusMap[a.status as StatusKey]?.priority || 0) - (statusMap[b.status as StatusKey]?.priority || 0)) * (sortDescriptor.direction === "descending" ? -1 : 1);
+      }
 
       if (first == null || second == null) return 0;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, items]);
+  }, [sortDescriptor, filteredItems]);
+
+  const paginatedItems = React.useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return sortedItems.slice(start, end);
+  }, [page, rowsPerPage, sortedItems]);
 
   const renderCell = React.useCallback((company: Company, columnKey: ColumnKey) => {
     const cellValue = company[columnKey as keyof Company];
@@ -122,7 +150,7 @@ export default function TableCompany() {
         );
       case "status":
         return (
-          <Chip className="capitalize" color={statusColorMap[company.status as keyof typeof statusColorMap]} size="sm" variant="flat">
+          <Chip className="capitalize" color={statusMap[company.status as StatusKey]?.color} size="sm" variant="flat">
             {cellValue}
           </Chip>
         );
@@ -290,7 +318,7 @@ export default function TableCompany() {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No users found"} items={sortedItems}>
+      <TableBody emptyContent={"No users found"} items={paginatedItems}>
         {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
       </TableBody>
     </Table>
