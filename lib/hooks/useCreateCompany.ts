@@ -3,12 +3,13 @@ import useSWRMutation from "swr/mutation";
 
 import actionCreateCompany from "@/app/actions/createCompany";
 import { getErrorMessage } from "@/lib/errorHandling";
+import { CompanyFormData } from "@/lib/schema/companySchema";
 
 const useCreateCompany = () => {
   const { trigger, isMutating } = useSWRMutation("/api/company", actionCreateCompany);
 
   return {
-    createCompany: async (newCompany: Company) => {
+    createCompany: async (newCompany: CompanyFormData) => {
       try {
         const result = await trigger(newCompany);
 

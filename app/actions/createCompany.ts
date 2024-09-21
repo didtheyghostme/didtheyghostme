@@ -1,21 +1,19 @@
 "use server";
 
+import { z } from "zod";
+
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
+import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
 
-const delay = () => new Promise<void>((res) => setTimeout(() => res(), 3000));
-
-const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Company }): Promise<Company> => {
-  //   await delay();
+const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<Company> => {
   const supabase = await createClerkSupabaseClientSsr();
 
   try {
-    // const newNote: Note = {
-    //   title: formData.get("name") as string,
-    // };
-    console.warn("new company is", newCompany);
+    // Server-side validation
+    const validatedData = companySchema.parse(newCompany);
 
-    const { data, error } = await supabase.from("company").insert(newCompany).select();
+    const { data, error } = await supabase.from("company").insert(validatedData).select();
 
     if (error) {
       console.error("Insert error fail:", error.message);
@@ -23,12 +21,14 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
         throw new Error(ERROR_MESSAGES.DUPLICATE_URL);
       }
       throw new Error(error.message);
-    } else {
-      console.log("Insert successful:", data);
     }
 
     return data[0];
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      console.error("Zod validation error:", err.errors);
+      throw new Error(err.errors.map((issue) => issue.message).join(", "));
+    }
     console.error("Error executing insert:", err);
     throw err;
   }

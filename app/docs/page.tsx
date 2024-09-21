@@ -1,42 +1,40 @@
 "use client";
 
 import { Button, Input, Spacer } from "@nextui-org/react";
-import { FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import TableCompany from "./TableCompany";
 
 import { title } from "@/components/primitives";
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { getErrorMessage, isDuplicateUrlError } from "@/lib/errorHandling";
+import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
 
 export default function DocsPage() {
   const { createCompany } = useCreateCompany();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.warn("Form submitted handle..");
-    const form = event.currentTarget;
-    const formData = new FormData(event.currentTarget);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<CompanyFormData>({
+    resolver: zodResolver(companySchema),
+  });
 
-    console.log("Form data:", formData.get("companyName"), formData.get("companyURL"));
+  const onSubmit = async (data: CompanyFormData) => {
+    console.log("Form data:", data);
 
-    // Check if inputs are empty
-    if (!formData.get("companyName") || !formData.get("companyURL")) {
-      console.error("Company name and URL are required");
-
-      // Show error message or toast to user here
-      return;
-    }
-
-    const newCompany: Company = {
-      company_name: formData.get("companyName") as string,
-      company_url: formData.get("companyURL") as string,
-      // status: "pending",
-    };
+    // const newCompany: Company = {
+    //   company_name: formData.get("companyName") as string,
+    //   company_url: formData.get("companyURL") as string,
+    //   // status: "pending",
+    // };
 
     try {
-      await createCompany(newCompany);
-      form.reset();
+      await createCompany(data);
+      reset();
     } catch (error) {
       console.error("Error creating post:!!", getErrorMessage(error));
       if (isDuplicateUrlError(error)) {
@@ -70,10 +68,10 @@ export default function DocsPage() {
 
       <Spacer y={6} />
 
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <Input isClearable isRequired label="Enter Company Name" name="companyName" type="text" />
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <Input {...register("company_name")} isClearable isRequired errorMessage={errors.company_name?.message} isInvalid={!!errors.company_name} label="Enter Company Name" />
 
-        <Input isClearable isRequired label="Enter URL" name="companyURL" type="text" />
+        <Input {...register("company_url")} isClearable isRequired errorMessage={errors.company_url?.message} isInvalid={!!errors.company_url} label="Enter URL" />
 
         <Button color="success" type="submit" variant="bordered">
           Submit
