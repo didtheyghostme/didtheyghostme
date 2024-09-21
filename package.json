@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.5.2",
+    "@hookform/resolvers": "^3.9.0",
     "@nextui-org/react": "^2.4.0",
     "@react-aria/ssr": "^3.9.2",
     "@react-aria/visually-hidden": "^3.8.10",
@@ -39,10 +40,12 @@
     "postcss": "8.4.38",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-hook-form": "^7.53.0",
     "swr": "^2.2.5",
     "tailwind-variants": "^0.1.20",
     "tailwindcss": "3.4.3",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "prettier-plugin-tailwindcss": "^0.6.0",
