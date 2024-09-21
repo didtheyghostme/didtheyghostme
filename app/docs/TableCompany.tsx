@@ -13,16 +13,23 @@ import {
   DropdownMenu,
   DropdownItem,
   Chip,
-  User,
   Pagination,
   SortDescriptor,
   Selection,
   ChipProps,
 } from "@nextui-org/react";
+import useSWR from "swr";
 
-import { columns, users, ColumnKey, statusOptions, StatusKey } from "./data";
+import { columns, statusOptions, StatusKey } from "./data";
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
+import { fetcher } from "@/lib/fetcher";
+
+type ColumnKey = keyof Company | "actions";
+
+type CustomSortDescriptor = SortDescriptor & {
+  column: ColumnKey;
+};
 
 type ChipColor = NonNullable<ChipProps["color"]>;
 
@@ -32,22 +39,30 @@ const statusColorMap = {
   Vacation: "warning",
 } satisfies Record<StatusKey, ChipColor>;
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"] as const satisfies readonly ColumnKey[];
+const INITIAL_VISIBLE_COLUMNS = ["company_name", "company_url", "status", "actions"] as const;
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export default function TableCompany() {
+  const { data: companies = [], isLoading } = useSWR<Company[]>("/api/company", fetcher);
+
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-    column: "age",
+  const [sortDescriptor, setSortDescriptor] = React.useState<CustomSortDescriptor>({
+    column: "company_name",
     direction: "ascending",
   });
+  const handleSortChange = (descriptor: SortDescriptor) => {
+    setSortDescriptor({
+      column: descriptor.column as ColumnKey,
+      direction: descriptor.direction,
+    });
+  };
   const [page, setPage] = React.useState(1);
 
   const hasSearchFilter = Boolean(filterValue);
@@ -59,17 +74,17 @@ export default function TableCompany() {
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
-    let filteredUsers = [...users];
+    let filteredCompanies = [...companies];
 
     if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) => user.name.toLowerCase().includes(filterValue.toLowerCase()));
+      filteredCompanies = filteredCompanies.filter((company) => company.company_name.toLowerCase().includes(filterValue.toLowerCase()));
     }
     if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-      filteredUsers = filteredUsers.filter((user) => Array.from(statusFilter).includes(user.status));
+      filteredCompanies = filteredCompanies.filter((company) => Array.from(statusFilter).includes(company.status as string));
     }
 
-    return filteredUsers;
-  }, [users, filterValue, statusFilter]);
+    return filteredCompanies;
+  }, [companies, filterValue, statusFilter]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -82,34 +97,32 @@ export default function TableCompany() {
 
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof typeof a];
-      const second = b[sortDescriptor.column as keyof typeof b];
+      const first = a[sortDescriptor.column as keyof Company];
+      const second = b[sortDescriptor.column as keyof Company];
+
+      if (first == null || second == null) return 0;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
 
-  const renderCell = React.useCallback((user: (typeof users)[number], columnKey: ColumnKey) => {
-    const cellValue = user[columnKey as keyof typeof user];
+  const renderCell = React.useCallback((company: Company, columnKey: ColumnKey) => {
+    const cellValue = company[columnKey as keyof Company];
 
     switch (columnKey) {
-      case "name":
-        return (
-          <User avatarProps={{ radius: "lg", src: user.avatar }} description={user.email} name={cellValue}>
-            {user.email}
-          </User>
-        );
-      case "role":
+      case "company_name":
+        return <p className="text-bold text-tiny capitalize">{company.company_name}</p>;
+      case "company_url":
         return (
           <div className="flex flex-col">
             <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-400">{user.team}</p>
+            <p className="text-bold text-tiny capitalize text-default-400">{company.company_url}</p>
           </div>
         );
       case "status":
         return (
-          <Chip className="capitalize" color={statusColorMap[user.status as keyof typeof statusColorMap]} size="sm" variant="flat">
+          <Chip className="capitalize" color={statusColorMap[company.status as keyof typeof statusColorMap]} size="sm" variant="flat">
             {cellValue}
           </Chip>
         );
@@ -172,7 +185,7 @@ export default function TableCompany() {
         <div className="flex items-end justify-between gap-3">
           <Input
             isClearable
-            placeholder="Search by name..."
+            placeholder="Search by company name..."
             startContent={<SearchIcon className="text-default-300" />}
             value={filterValue}
             variant="bordered"
@@ -218,7 +231,7 @@ export default function TableCompany() {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-small text-default-400">Total {users.length} users</span>
+          <span className="text-small text-default-400">Total {companies.length} companies</span>
           <label className="flex items-center text-small text-default-400">
             Rows per page:
             <select className="bg-transparent text-small text-default-400 outline-none" onChange={onRowsPerPageChange}>
@@ -230,7 +243,7 @@ export default function TableCompany() {
         </div>
       </div>
     );
-  }, [filterValue, statusFilter, visibleColumns, onRowsPerPageChange, users.length, onSearchChange, hasSearchFilter]);
+  }, [filterValue, statusFilter, visibleColumns, onRowsPerPageChange, companies.length, onSearchChange, hasSearchFilter]);
 
   const bottomContent = React.useMemo(() => {
     return (
@@ -249,6 +262,10 @@ export default function TableCompany() {
     );
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a skeleton/loading component
+  }
+
   return (
     <Table
       isHeaderSticky
@@ -264,7 +281,7 @@ export default function TableCompany() {
         wrapper: "max-h-[382px]",
       }}
       onSelectionChange={setSelectedKeys}
-      onSortChange={setSortDescriptor}
+      onSortChange={handleSortChange}
     >
       <TableHeader columns={headerColumns}>
         {(column) => (

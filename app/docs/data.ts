@@ -1,4 +1,6 @@
-type ColumnKey = "id" | "name" | "age" | "role" | "team" | "email" | "status" | "actions";
+// type ColumnKey = "id" | "name" | "age" | "role" | "team" | "email" | "status" | "actions";
+
+type ColumnKey = keyof Company | "actions";
 
 type Column = {
   name: ColumnKey;
@@ -6,20 +8,23 @@ type Column = {
   width?: number;
 };
 
-const columns: Column[] = [
-  { name: "id", sortable: true },
-  { name: "name", sortable: true, width: 10 },
-  { name: "age", sortable: true },
-  { name: "role", sortable: true },
-  { name: "team" },
-  { name: "email" },
-  { name: "status", sortable: true },
-  { name: "actions" },
-];
+// const columns: Column[] = [
+//   { name: "id", sortable: true },
+//   { name: "name", sortable: true, width: 10 },
+//   { name: "age", sortable: true },
+//   { name: "role", sortable: true },
+//   { name: "team" },
+//   { name: "email" },
+//   { name: "status", sortable: true },
+//   { name: "actions" },
+// ];
+//disable prettier warning for next line
+const columns: Column[] = [{ name: "company_name", sortable: true }, { name: "company_url", sortable: true }, { name: "status", sortable: true }, { name: "actions" }];
 
 const statusOptions = ["Active", "Paused", "Vacation"] as const;
 
-type StatusKey = (typeof statusOptions)[number];
+// type StatusKey = (typeof statusOptions)[number];
+type StatusKey = "Active" | "Vacation" | "Paused";
 
 const users = [
   {
