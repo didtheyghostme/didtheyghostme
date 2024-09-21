@@ -2,13 +2,23 @@
 import useSWRMutation from "swr/mutation";
 
 import actionCreateCompany from "@/app/actions/createCompany";
+import { getErrorMessage } from "@/lib/errorHandling";
 
 const useCreateCompany = () => {
-  const { trigger, isMutating } = useSWRMutation("companyKey", actionCreateCompany);
+  const { trigger, isMutating } = useSWRMutation("/api/company", actionCreateCompany);
 
   return {
-    createCompany: (newCompany: Company) => {
-      trigger(newCompany);
+    createCompany: async (newCompany: Company) => {
+      try {
+        const result = await trigger(newCompany);
+
+        return result;
+      } catch (err) {
+        const errorMessage = getErrorMessage(err);
+
+        console.error("Error creating company:", errorMessage);
+        throw err; // Re-throw the error so it can be caught in the component
+      }
     },
     isCreating: isMutating,
   };

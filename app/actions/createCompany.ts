@@ -1,5 +1,6 @@
 "use server";
 
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 
 const delay = () => new Promise<void>((res) => setTimeout(() => res(), 3000));
@@ -18,6 +19,9 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
 
     if (error) {
       console.error("Insert error fail:", error.message);
+      if (error.code === ERROR_CODES.UNIQUE_VIOLATION) {
+        throw new Error(ERROR_MESSAGES.DUPLICATE_URL);
+      }
       throw new Error(error.message);
     } else {
       console.log("Insert successful:", data);

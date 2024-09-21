@@ -2,20 +2,15 @@
 
 import { Button, Input, Spacer } from "@nextui-org/react";
 import { FormEvent } from "react";
-import useSWR from "swr";
 
 import TableCompany from "./TableCompany";
 
 import { title } from "@/components/primitives";
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
-import { fetcher } from "@/lib/fetcher";
+import { getErrorMessage, isDuplicateUrlError } from "@/lib/errorHandling";
 
 export default function DocsPage() {
   const { createCompany } = useCreateCompany();
-
-  const { data } = useSWR<Company[]>("/api/company", fetcher);
-
-  console.warn("Companies are", data);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -25,19 +20,29 @@ export default function DocsPage() {
 
     console.log("Form data:", formData.get("companyName"), formData.get("companyURL"));
 
+    // Check if inputs are empty
+    if (!formData.get("companyName") || !formData.get("companyURL")) {
+      console.error("Company name and URL are required");
+
+      // Show error message or toast to user here
+      return;
+    }
+
     const newCompany: Company = {
       company_name: formData.get("companyName") as string,
       company_url: formData.get("companyURL") as string,
+      // status: "pending",
     };
 
     try {
       await createCompany(newCompany);
       form.reset();
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error creating post:!!", getErrorMessage(error));
+      if (isDuplicateUrlError(error)) {
+        console.error("Duplicate company URL");
+      }
     }
-
-    form.reset();
   };
 
   return (
