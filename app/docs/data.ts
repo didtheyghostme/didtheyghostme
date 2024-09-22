@@ -21,10 +21,10 @@ type Column = {
 //disable prettier warning for next line
 const columns: Column[] = [{ name: "company_name", sortable: true }, { name: "company_url", sortable: true }, { name: "status", sortable: true }, { name: "actions" }];
 
-const statusOptions = ["Active", "Paused", "Vacation"] as const;
+// const statusOptions = ["Active", "Paused", "Vacation"] as const;
 
-// type StatusKey = (typeof statusOptions)[number];
-type StatusKey = "Active" | "Vacation" | "Paused";
+// type StatusKey = (typeof statusOptions)[number] | "default";
+// type StatusKey = "Active" | "Vacation" | "Paused" | "default";
 
 const users = [
   {
@@ -229,4 +229,4 @@ const users = [
   },
 ];
 
-export { columns, users, statusOptions, type ColumnKey, type StatusKey };
+export { columns, users, type ColumnKey };

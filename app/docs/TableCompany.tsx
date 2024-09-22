@@ -20,31 +20,44 @@ import {
 } from "@nextui-org/react";
 import useSWR from "swr";
 
-import { columns, statusOptions, StatusKey } from "./data";
+import { columns } from "./data";
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
 
 type ColumnKey = keyof Company | "actions";
 
-type CustomSortDescriptor = SortDescriptor & {
+type CustomSortDescriptor = Omit<SortDescriptor, "column"> & {
   column: ColumnKey;
 };
 
 type ChipColor = NonNullable<ChipProps["color"]>;
 
-type StatusInfo = {
+type StatusColorPriority = {
   color: ChipColor;
   priority: number;
 };
 
-const statusMap = {
+const STATUS_MAP = {
   Active: { color: "success", priority: 1 },
   Vacation: { color: "warning", priority: 2 },
   Paused: { color: "danger", priority: 3 },
-} satisfies Record<StatusKey, StatusInfo>;
+  default: { color: "default", priority: Number.MAX_SAFE_INTEGER },
+} as const;
+
+const statusOptions = Object.keys(STATUS_MAP).filter((key): key is Exclude<keyof typeof STATUS_MAP, "default"> => key !== "default");
+
+const getStatusColorPriority = (status: string | undefined): StatusColorPriority => {
+  if (status && status in STATUS_MAP) {
+    return STATUS_MAP[status as keyof typeof STATUS_MAP];
+  }
+
+  return STATUS_MAP.default;
+};
 
 const INITIAL_VISIBLE_COLUMNS = ["company_name", "company_url", "status", "actions"] as const;
+
+const MAX_ROWS_PER_PAGE = 10;
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -57,7 +70,7 @@ export default function TableCompany() {
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(MAX_ROWS_PER_PAGE);
   const [sortDescriptor, setSortDescriptor] = React.useState<CustomSortDescriptor>({
     column: "company_name",
     direction: "ascending",
@@ -100,28 +113,22 @@ export default function TableCompany() {
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
-  // const sortedItems = React.useMemo(() => {
-  //   return [...items].sort((a, b) => {
-  //     const first = a[sortDescriptor.column as keyof Company];
-  //     const second = b[sortDescriptor.column as keyof Company];
-
-  //     if (first == null || second == null) return 0;
-  //     const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-  //     return sortDescriptor.direction === "descending" ? -cmp : cmp;
-  //   });
-  // }, [sortDescriptor, items]);
-
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a, b) => {
       const first = a[sortDescriptor.column as keyof Company];
       const second = b[sortDescriptor.column as keyof Company];
 
       if (sortDescriptor.column === "status") {
-        return ((statusMap[a.status as StatusKey]?.priority || 0) - (statusMap[b.status as StatusKey]?.priority || 0)) * (sortDescriptor.direction === "descending" ? -1 : 1);
+        const priorityA = getStatusColorPriority(a.status).priority;
+        const priorityB = getStatusColorPriority(b.status).priority;
+
+        return (priorityA - priorityB) * (sortDescriptor.direction === "descending" ? -1 : 1);
       }
 
-      if (first == null || second == null) return 0;
+      if (first == null && second == null) return 0;
+      if (first == null) return sortDescriptor.direction === "descending" ? 1 : -1;
+      if (second == null) return sortDescriptor.direction === "descending" ? -1 : 1;
+
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -149,9 +156,11 @@ export default function TableCompany() {
           </div>
         );
       case "status":
+        const statusInfo = getStatusColorPriority(company.status);
+
         return (
-          <Chip className="capitalize" color={statusMap[company.status as StatusKey]?.color} size="sm" variant="flat">
-            {cellValue}
+          <Chip className="capitalize" color={statusInfo.color} size="sm" variant="flat">
+            {cellValue ?? "Unknown"}
           </Chip>
         );
       case "actions":
@@ -306,7 +315,7 @@ export default function TableCompany() {
       topContent={topContent}
       topContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[382px]",
+        wrapper: "max-h-[500px]",
       }}
       onSelectionChange={setSelectedKeys}
       onSortChange={handleSortChange}
