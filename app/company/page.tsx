@@ -11,7 +11,7 @@ import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { getErrorMessage, isDuplicateUrlError } from "@/lib/errorHandling";
 import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
 
-export default function DocsPage() {
+export default function CompanyPage() {
   const { createCompany } = useCreateCompany();
 
   const {
@@ -49,7 +49,7 @@ export default function DocsPage() {
 
       {/* Form creation below */}
 
-      <h1 className={title()}>Docs</h1>
+      <h1 className={title()}>Companies</h1>
 
       <h1 className={title({ color: "yellow" })}>Add a new job</h1>
 

@@ -19,6 +19,7 @@ import {
   ChipProps,
 } from "@nextui-org/react";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
 
 import { columns } from "./data";
 
@@ -65,6 +66,7 @@ function capitalize(str: string) {
 
 export default function TableCompany() {
   const { data: companies = [], isLoading } = useSWR<Company[]>("/api/company", fetcher);
+  const router = useRouter();
 
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
@@ -216,6 +218,18 @@ export default function TableCompany() {
     setPage(1);
   }, []);
 
+  const handleOnRowClick = (key: React.Key) => {
+    console.log("Row clicked, key:", key);
+    console.log("Current paginatedItems:", paginatedItems);
+
+    const clickedCompany = paginatedItems.find((company) => company.id === Number(key));
+
+    if (clickedCompany) {
+      console.log("Clicked company:", clickedCompany.company_name);
+      router.push(`/company/${clickedCompany.id}`);
+    }
+  };
+
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
@@ -317,6 +331,7 @@ export default function TableCompany() {
       classNames={{
         wrapper: "max-h-[500px]",
       }}
+      onRowAction={handleOnRowClick}
       onSelectionChange={setSelectedKeys}
       onSortChange={handleSortChange}
     >
