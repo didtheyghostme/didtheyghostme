@@ -21,12 +21,12 @@ type Company = {
 
 type JobPosting = {
   id: number;
-  company_id: number;
   title: string;
   country: string;
   created_at: string;
-  user_id: string;
   closed_at: string | null;
+  user_id: string;
+  company_id: number;
 };
 
 type Application = {

@@ -10,10 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { fetcher } from "@/lib/fetcher";
 import COUNTRIES from "@/lib/countries";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
+import { useCreateJob } from "@/lib/hooks/useCreateJob";
 
 export default function CompanyDetailsPage() {
   const { id } = useParams();
   const { data: company, error, isLoading } = useSWR<Company>(`/api/company/${id}`, fetcher);
+
+  const { createJob } = useCreateJob(Number(id));
+
   const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,10 +46,15 @@ export default function CompanyDetailsPage() {
   if (error) return <div>Error loading company data</div>;
   if (!company) return <div>Company not found</div>;
 
-  const handleAddThisJob = handleSubmit((data) => {
+  const handleAddThisJob = handleSubmit(async (data: AddJobFormData) => {
     console.log("Form data", data);
 
     // TODO: add this job to the company using server action and mutation
+    try {
+      await createJob(data);
+    } catch (err) {
+      console.error("Error adding job:", err);
+    }
     handleCloseModal();
   });
 
