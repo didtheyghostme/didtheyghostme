@@ -13,10 +13,14 @@ import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
 
 export default function CompanyDetailsPage() {
-  const { id } = useParams();
-  const { data: company, error, isLoading } = useSWR<Company>(`/api/company/${id}`, fetcher);
+  const { id: company_id } = useParams();
+  const { data: company, error, isLoading } = useSWR<Company>(`/api/company/${company_id}`, fetcher);
 
-  const { createJob } = useCreateJob(Number(id));
+  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(`/api/company/${company_id}/job`, fetcher);
+
+  // console.warn("jobs", allJobs);
+
+  const { createJob } = useCreateJob(Number(company_id));
 
   const router = useRouter();
 
@@ -46,16 +50,20 @@ export default function CompanyDetailsPage() {
   if (error) return <div>Error loading company data</div>;
   if (!company) return <div>Company not found</div>;
 
+  if (jobIsLoading) return <div>Loading...</div>;
+  if (jobError) return <div>Error loading job data</div>;
+  if (!allJobs) return <div>Job not found</div>;
+
   const handleAddThisJob = handleSubmit(async (data: AddJobFormData) => {
     console.log("Form data", data);
 
     // TODO: add this job to the company using server action and mutation
     try {
       await createJob(data);
+      handleCloseModal();
     } catch (err) {
       console.error("Error adding job:", err);
     }
-    handleCloseModal();
   });
 
   const handleOpenModal = () => {
@@ -66,6 +74,20 @@ export default function CompanyDetailsPage() {
     setIsModalOpen(false);
     reset();
   };
+
+  const handleViewJobClick = (job: JobPosting) => {
+    console.log("Viewing job", job);
+    // TODO: implement go to the job page, show all the interview experiences
+    // TODO: on job page, have button to "Track this job", which then add to Application table with today date
+    // TODO: the button then changes to "View my application", next step is fill in date of when the first contact -> round 0 = applied, round 1 = contacted
+    // TODO: after that, have a button to "Add Interview Experience" with markdown editor
+    // router.push(`/company/${company_id}/job/${job.id}`);
+    
+  };
+
+  const handleViewMoreButtonClick = (job: JobPosting) => {
+    handleViewJobClick(job);
+  }
 
   return (
     <div className="mx-auto max-w-[1024px] p-4">
@@ -140,7 +162,7 @@ export default function CompanyDetailsPage() {
               />
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onClick={handleCloseModal}>
+              <Button color="danger" variant="light" onPress={handleCloseModal}>
                 Cancel
               </Button>
               <Button color="primary" type="submit">
@@ -153,16 +175,18 @@ export default function CompanyDetailsPage() {
 
       {/* Job Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {[1, 2, 3].map((job) => (
-          <Card key={job}>
+        {allJobs.map((job) => (
+          <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
             <CardBody>
-              <h3 className="mb-2 text-xl font-semibold">Software Engineer Intern Summer 2025</h3>
-              <p className="mb-4 text-default-500">Singapore • Ongoing</p>
+              <h3 className="mb-2 text-xl font-semibold">{job.title}</h3>
+              <p className="mb-4 text-default-500">{job.country} • Ongoing</p>
               <Chip className="mb-4" color="secondary" variant="flat">
                 New
               </Chip>
               <Spacer y={2} />
-              <Button size="sm">View More</Button>
+              <Button as="span" size="sm" variant="flat" onPress={() => handleViewMoreButtonClick(job)}>
+                View More
+              </Button>
             </CardBody>
           </Card>
         ))}

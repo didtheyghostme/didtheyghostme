@@ -40,6 +40,7 @@ type Application = {
 type InterviewExperience = {
   id: number;
   round_no: number;
+  difficulty: "Easy" | "Medium" | "Hard";
   created_at: string;
   application_id: number;
   user_id: string;
