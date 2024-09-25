@@ -37,6 +37,7 @@ export default function CompanyDetailsPage() {
     defaultValues: {
       title: "",
       country: "Singapore",
+      url: null,
     },
   });
 
@@ -46,7 +47,7 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading company...</div>;
   if (error) return <div>Error loading company data</div>;
   if (!company) return <div>Company not found</div>;
 
@@ -81,13 +82,12 @@ export default function CompanyDetailsPage() {
     // TODO: on job page, have button to "Track this job", which then add to Application table with today date
     // TODO: the button then changes to "View my application", next step is fill in date of when the first contact -> round 0 = applied, round 1 = contacted
     // TODO: after that, have a button to "Add Interview Experience" with markdown editor
-    // router.push(`/company/${company_id}/job/${job.id}`);
-    
+    router.push(`/job/${job.id}`);
   };
 
   const handleViewMoreButtonClick = (job: JobPosting) => {
     handleViewJobClick(job);
-  }
+  };
 
   return (
     <div className="mx-auto max-w-[1024px] p-4">
@@ -146,6 +146,26 @@ export default function CompanyDetailsPage() {
                 control={control}
                 name="title"
                 render={({ field }) => <Input {...field} errorMessage={errors.title?.message} isInvalid={!!errors.title} label="Job Title" placeholder="Enter job title" variant="bordered" />}
+              />
+              <Controller
+                control={control}
+                name="url"
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    errorMessage={errors.url?.message}
+                    isInvalid={!!errors.url && field.value !== null}
+                    label="Job URL (optional)"
+                    placeholder="Enter job application URL from the company"
+                    value={field.value ?? ""}
+                    variant="bordered"
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+
+                      field.onChange(value === "" ? null : value);
+                    }}
+                  />
+                )}
               />
               <Controller
                 control={control}

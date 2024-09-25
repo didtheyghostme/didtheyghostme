@@ -1,5 +1,4 @@
 const COUNTRIES = [
-  "Remote",
   "Afghanistan",
   "Albania",
   "Algeria",
@@ -157,6 +156,7 @@ const COUNTRIES = [
   "Seychelles",
   "Sierra Leone",
   "Singapore",
+  "Remote",
   "Slovakia",
   "Slovenia",
   "Solomon Islands",
@@ -187,7 +187,7 @@ const COUNTRIES = [
   "Ukraine",
   "United Arab Emirates",
   "United Kingdom",
-  "United States of America",
+  "United States",
   "Uruguay",
   "Uzbekistan",
   "Vanuatu",

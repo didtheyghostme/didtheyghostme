@@ -23,6 +23,7 @@ type JobPosting = {
   id: number;
   title: string;
   country: string;
+  url: string | null;
   created_at: string;
   closed_at: string | null;
   user_id: string;
