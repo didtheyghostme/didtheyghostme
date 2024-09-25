@@ -21,7 +21,7 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
     const validatedData = addJobSchema.parse(newJob);
 
     const { data, error } = await supabase
-      .from("job_posting")
+      .from("job_posting_v2")
       .insert({ ...validatedData, company_id, user_id })
       .select();
 

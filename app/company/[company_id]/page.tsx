@@ -13,7 +13,7 @@ import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
 
 export default function CompanyDetailsPage() {
-  const { id: company_id } = useParams();
+  const { company_id } = useParams();
   const { data: company, error, isLoading } = useSWR<Company>(`/api/company/${company_id}`, fetcher);
 
   const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(`/api/company/${company_id}/job`, fetcher);
