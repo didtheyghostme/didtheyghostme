@@ -3,13 +3,6 @@ type Note = {
   title: string;
 };
 
-enum ApplicationStatus {
-  APPLIED = "APPLIED",
-  INTERVIEWING = "INTERVIEWING",
-  REJECTED = "REJECTED",
-  HIRED = "HIRED",
-}
-
 type Company = {
   id: number; // Optional for new entries
   company_name: string;
@@ -30,12 +23,16 @@ type JobPosting = {
   company_id: number;
 };
 
+type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Hired" | "Ghosted" | "Offer";
+
 type Application = {
   id: number;
-  status: ApplicationStatus;
+  status: ApplicationStatus; // default start with APPLIED
+  applied_at: string;
+  first_response_at: string | null;
   created_at: string;
-  job_posting_id: number;
   user_id: string;
+  job_posting_id: number;
 };
 
 type InterviewExperience = {
@@ -43,6 +40,6 @@ type InterviewExperience = {
   round_no: number;
   difficulty: "Easy" | "Medium" | "Hard";
   created_at: string;
-  application_id: number;
   user_id: string;
+  application_id: number;
 };

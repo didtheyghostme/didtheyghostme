@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
+import { DB_TABLE } from "@/lib/constants/dbTables";
 
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<Company> => {
   const supabase = await createClerkSupabaseClientSsr();
@@ -13,7 +14,7 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
     // Server-side validation
     const validatedData = companySchema.parse(newCompany);
 
-    const { data, error } = await supabase.from("company").insert(validatedData).select();
+    const { data, error } = await supabase.from(DB_TABLE.COMPANY).insert(validatedData).select();
 
     if (error) {
       console.error("Insert error fail:", error.message);
