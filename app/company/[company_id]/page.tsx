@@ -8,9 +8,9 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { fetcher } from "@/lib/fetcher";
-import COUNTRIES from "@/lib/countries";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
+import COUNTRIES from "@/lib/constants/countries";
 
 export default function CompanyDetailsPage() {
   const { company_id } = useParams();
