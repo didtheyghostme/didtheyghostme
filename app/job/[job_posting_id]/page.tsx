@@ -5,13 +5,14 @@ import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
 
 import ReportLinkModal from "./ReportLinkModal";
+import TrackThisJobModal from "./TrackThisJobModal";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
-import TrackThisJobModal from "./TrackThisJobModal";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
+import { API_ROUTES } from "@/lib/constants/apiRoutes";
 
-type JobDetails = {
+export type JobDetails = {
   id: number;
   title: string;
   country: string;
@@ -24,7 +25,10 @@ type JobDetails = {
 
 export default function JobDetailsPage() {
   const { job_posting_id } = useParams();
-  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
+  const apiRoute = API_ROUTES.JOB_POSTING.getById(job_posting_id as string);
+  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(apiRoute, fetcher);
+
+  // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
   const router = useRouter();
   const { isOpen: isReportModalOpen, onOpen: onReportModalOpen, onClose: onReportModalClose } = useDisclosure();
   const { isOpen: isTrackModalOpen, onOpen: onTrackModalOpen, onClose: onTrackModalClose } = useDisclosure();

@@ -7,6 +7,7 @@ import { DB_TABLE } from "@/lib/constants/dbTables";
 
 export async function GET(request: Request, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
+  // TODO: generate supabase type gen link to supabaseclient
   const { data, error } = await supabase
     .from(DB_TABLE.JOB_POSTING)
     .select(
@@ -23,6 +24,8 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     )
     .eq("id", params.job_posting_id)
     .single();
+
+  console.error("data in route handler of this joaab", data, error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

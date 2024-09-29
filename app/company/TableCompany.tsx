@@ -25,6 +25,7 @@ import { columns } from "./data";
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
+import { API_ROUTES } from "@/lib/constants/apiRoutes";
 
 type ColumnKey = keyof Company | "actions";
 
@@ -65,7 +66,9 @@ function capitalize(str: string) {
 }
 
 export default function TableCompany() {
-  const { data: companies = [], isLoading } = useSWR<Company[]>("/api/company", fetcher);
+  const apiRoute = API_ROUTES.COMPANY.getAll;
+
+  const { data: companies = [], isLoading } = useSWR<Company[]>(apiRoute, fetcher);
   const router = useRouter();
 
   const [filterValue, setFilterValue] = React.useState("");
