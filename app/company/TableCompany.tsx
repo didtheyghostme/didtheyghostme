@@ -66,9 +66,7 @@ function capitalize(str: string) {
 }
 
 export default function TableCompany() {
-  const apiRoute = API.COMPANY.getAll;
-
-  const { data: companies = [], isLoading } = useSWR<Company[]>(apiRoute, fetcher);
+  const { data: companies = [], isLoading } = useSWR<Company[]>(API.COMPANY.getAll, fetcher);
   const router = useRouter();
 
   const [filterValue, setFilterValue] = React.useState("");

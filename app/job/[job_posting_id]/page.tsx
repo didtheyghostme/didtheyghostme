@@ -25,15 +25,14 @@ export type JobDetails = {
 
 export default function JobDetailsPage() {
   const { job_posting_id } = useParams();
-  const apiRoute = API.JOB_POSTING.getById(job_posting_id as string);
-  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(apiRoute, fetcher);
+  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id as string), fetcher);
 
   // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
   const router = useRouter();
   const { isOpen: isReportModalOpen, onOpen: onReportModalOpen, onClose: onReportModalClose } = useDisclosure();
   const { isOpen: isTrackModalOpen, onOpen: onTrackModalOpen, onClose: onTrackModalClose } = useDisclosure();
 
-  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<Application[]>(`/api/job/${job_posting_id}/application`, fetcher);
+  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<ApplicationResponse>(API.APPLICATION.getByJobPostingId(job_posting_id as string), fetcher);
 
   console.warn("applications", applications);
 
@@ -76,6 +75,10 @@ export default function JobDetailsPage() {
     // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
   };
 
+  const handleViewMyApplicationClick = () => {
+    console.log("View my application clicked");
+  };
+
   return (
     <div className="mx-auto max-w-[1024px]">
       <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
@@ -104,15 +107,20 @@ export default function JobDetailsPage() {
           <Chip color="primary" variant="flat">
             Closed
           </Chip>
-
-          <Button
-            className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
-            color="primary"
-            variant="bordered"
-            onPress={handleTrackThisJobClick}
-          >
-            Track this job
-          </Button>
+          {applications.hasCurrentUserItem ? (
+            <Button className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground" color="success" variant="flat" onPress={handleViewMyApplicationClick}>
+              View my application
+            </Button>
+          ) : (
+            <Button
+              className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
+              color="primary"
+              variant="bordered"
+              onPress={handleTrackThisJobClick}
+            >
+              Track this job
+            </Button>
+          )}
         </CardBody>
       </Card>
 
@@ -151,7 +159,7 @@ export default function JobDetailsPage() {
 
       {/* TODO: add application cards below */}
       <div className="flex gap-4">
-        {applications.map((application) => (
+        {applications.data.map((application) => (
           <Card key={application.id} isPressable className="w-full" onPress={handleApplicationClick}>
             <CardHeader>
               <h2 className="text-xl font-bold">

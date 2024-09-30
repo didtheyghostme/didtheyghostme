@@ -15,13 +15,10 @@ import { API } from "@/lib/constants/apiRoutes";
 
 export default function CompanyDetailsPage() {
   const { company_id } = useParams();
-  const apiRoute = API.COMPANY.getById(company_id as string);
 
-  const { data: company, error, isLoading } = useSWR<Company>(apiRoute, fetcher);
+  const { data: company, error, isLoading } = useSWR<Company>(API.COMPANY.getById(company_id as string), fetcher);
 
-  const jobApiRoute = API.JOB_POSTING.getAllByCompanyId(company_id as string);
-
-  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(jobApiRoute, fetcher);
+  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
 
   // console.warn("jobs", allJobs);
 
@@ -150,7 +147,9 @@ export default function CompanyDetailsPage() {
               <Controller
                 control={control}
                 name="title"
-                render={({ field }) => <Input {...field} errorMessage={errors.title?.message} isInvalid={!!errors.title} label="Job Title" placeholder="Enter job title" variant="bordered" />}
+                render={({ field }) => (
+                  <Input {...field} isRequired errorMessage={errors.title?.message} isInvalid={!!errors.title} label="Job Title" placeholder="Enter job title" variant="bordered" />
+                )}
               />
               <Controller
                 control={control}

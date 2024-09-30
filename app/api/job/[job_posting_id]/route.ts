@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     title,
     country,
     url,
-    ${DBTable.COMPANY}:company_id (
+    ${DBTable.COMPANY}!inner(
       id,
       company_name
     )
