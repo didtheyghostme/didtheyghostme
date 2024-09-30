@@ -2,7 +2,7 @@ import type { GET as JobGET } from "@/app/api/job/[job_posting_id]/route";
 
 // Import the return type of the GET function
 
-export const API_ROUTES = {
+export const API = {
   COMPANY: {
     getAll: "/api/company",
     getById: (id: string) => `/api/company/${id}`,
@@ -13,4 +13,4 @@ export const API_ROUTES = {
   },
 } as const;
 
-export type ApiRoutes = typeof API_ROUTES;
+export type ApiRoutes = typeof API;

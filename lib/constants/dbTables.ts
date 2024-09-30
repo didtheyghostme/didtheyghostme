@@ -1,4 +1,4 @@
-export const DB_TABLE = {
+export const DBTable = {
   COMPANY: "company",
   JOB_POSTING: "job_posting",
   APPLICATION: "application",

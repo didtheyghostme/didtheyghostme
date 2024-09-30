@@ -11,15 +11,15 @@ import { fetcher } from "@/lib/fetcher";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
 import COUNTRIES from "@/lib/constants/countries";
-import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { API } from "@/lib/constants/apiRoutes";
 
 export default function CompanyDetailsPage() {
   const { company_id } = useParams();
-  const apiRoute = API_ROUTES.COMPANY.getById(company_id as string);
+  const apiRoute = API.COMPANY.getById(company_id as string);
 
   const { data: company, error, isLoading } = useSWR<Company>(apiRoute, fetcher);
 
-  const jobApiRoute = API_ROUTES.JOB_POSTING.getAllByCompanyId(company_id as string);
+  const jobApiRoute = API.JOB_POSTING.getAllByCompanyId(company_id as string);
 
   const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(jobApiRoute, fetcher);
 

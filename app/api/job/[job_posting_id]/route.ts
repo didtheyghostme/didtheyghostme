@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { DB_TABLE } from "@/lib/constants/dbTables";
+import { DBTable } from "@/lib/constants/dbTables";
 
 // TODO: on this job specific page, select all the applications for this job
 
@@ -9,14 +9,14 @@ export async function GET(request: Request, { params }: { params: { job_posting_
   const supabase = await createClerkSupabaseClientSsr();
   // TODO: generate supabase type gen link to supabaseclient
   const { data, error } = await supabase
-    .from(DB_TABLE.JOB_POSTING)
+    .from(DBTable.JOB_POSTING)
     .select(
       `
     id,
     title,
     country,
     url,
-    ${DB_TABLE.COMPANY}:company_id (
+    ${DBTable.COMPANY}:company_id (
       id,
       company_name
     )

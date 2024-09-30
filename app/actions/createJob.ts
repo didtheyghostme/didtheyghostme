@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
-import { DB_TABLE } from "@/lib/constants/dbTables";
+import { DBTable } from "@/lib/constants/dbTables";
 
 export type CreateJobArgs = {
   company_id: number;
@@ -22,7 +22,7 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
     const validatedData = addJobSchema.parse(newJob);
 
     const { data, error } = await supabase
-      .from(DB_TABLE.JOB_POSTING)
+      .from(DBTable.JOB_POSTING)
       .insert({ ...validatedData, company_id, user_id })
       .select();
 

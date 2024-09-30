@@ -10,7 +10,7 @@ import TrackThisJobModal from "./TrackThisJobModal";
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
-import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { API } from "@/lib/constants/apiRoutes";
 
 export type JobDetails = {
   id: number;
@@ -25,7 +25,7 @@ export type JobDetails = {
 
 export default function JobDetailsPage() {
   const { job_posting_id } = useParams();
-  const apiRoute = API_ROUTES.JOB_POSTING.getById(job_posting_id as string);
+  const apiRoute = API.JOB_POSTING.getById(job_posting_id as string);
   const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(apiRoute, fetcher);
 
   // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);

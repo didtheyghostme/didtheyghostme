@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { DB_TABLE } from "@/lib/constants/dbTables";
+import { DBTable } from "@/lib/constants/dbTables";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
 export type CreateApplicationArgs = {
@@ -22,7 +22,7 @@ const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplic
 
   try {
     const { data, error } = await supabase
-      .from(DB_TABLE.APPLICATION)
+      .from(DBTable.APPLICATION)
       .insert({
         status: APPLICATION_STATUS.APPLIED,
         applied_at,
