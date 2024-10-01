@@ -69,10 +69,11 @@ export default function JobDetailsPage() {
     }
   };
 
-  const handleApplicationClick = () => {
+  const handleApplicationClick = (application: Application) => {
     console.log("Application clicked");
     // TODO: go to specific application page, with application id, show all interview experiences of this application
     // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
+    router.push(`/interview/${application.id}`);
   };
 
   const handleViewMyApplicationClick = () => {
@@ -160,7 +161,7 @@ export default function JobDetailsPage() {
       {/* TODO: add application cards below */}
       <div className="flex gap-4">
         {applications.data.map((application) => (
-          <Card key={application.id} isPressable className="w-full" onPress={handleApplicationClick}>
+          <Card key={application.id} isPressable className="w-full" onPress={() => handleApplicationClick(application)}>
             <CardHeader>
               <h2 className="text-xl font-bold">
                 {application.id} - {application.created_at}

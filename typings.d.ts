@@ -9,11 +9,12 @@ type Company = {
   company_url: string;
   created_at: string;
   user_id: string;
-  status?: string;
+  status: string | null; //todo remove this when updating the company table page
+  // logo_url: string; // todo: add logo.dev API url to this?
 };
 
 type JobPosting = {
-  id: number;
+  id: number; // TODO: change to uuid from postgres gen_random_uuid(), which is string
   title: string;
   country: string;
   url: string | null;
@@ -28,7 +29,7 @@ type JobPosting = {
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Hired" | "Ghosted" | "Offer";
 
 type Application = {
-  id: number;
+  id: string;
   status: ApplicationStatus; // default start with APPLIED
   applied_at: string;
   first_response_at: string | null;
@@ -43,7 +44,7 @@ type InterviewExperience = {
   difficulty: "Easy" | "Medium" | "Hard";
   created_at: string;
   user_id: string;
-  application_id: number;
+  application_id: string;
 };
 
 // process to convert T[] to ProcessedData<T>, boolean if current user_id is in T[]

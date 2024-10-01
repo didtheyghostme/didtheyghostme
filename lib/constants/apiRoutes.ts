@@ -10,4 +10,7 @@ export const API = {
   APPLICATION: {
     getByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/application`,
   },
+  INTERVIEW: {
+    getByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`,
+  },
 } as const;

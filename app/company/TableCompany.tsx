@@ -49,7 +49,7 @@ const STATUS_MAP = {
 
 const statusOptions = Object.keys(STATUS_MAP).filter((key): key is Exclude<keyof typeof STATUS_MAP, "default"> => key !== "default");
 
-const getStatusColorPriority = (status: string | undefined): StatusColorPriority => {
+const getStatusColorPriority = (status: string | null): StatusColorPriority => {
   if (status && status in STATUS_MAP) {
     return STATUS_MAP[status as keyof typeof STATUS_MAP];
   }
