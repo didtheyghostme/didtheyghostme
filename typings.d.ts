@@ -26,7 +26,7 @@ type JobPosting = {
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
 };
 
-type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Hired" | "Ghosted" | "Offer";
+type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Hired" | "Ghosted" | "Offered";
 
 type Application = {
   id: string;
