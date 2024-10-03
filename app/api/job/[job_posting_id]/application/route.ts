@@ -7,7 +7,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 export async function GET(request: Request, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const { data, error } = await supabase.from(DBTable.APPLICATION).select().eq("job_posting_id", params.job_posting_id);
+  const { data, error } = await supabase.from(DBTable.APPLICATION).select("*").eq("job_posting_id", params.job_posting_id);
 
   console.warn("data in route handler applications", data);
 

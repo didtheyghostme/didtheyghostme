@@ -69,7 +69,7 @@ export default function JobDetailsPage() {
     }
   };
 
-  const handleApplicationClick = (application: Application) => {
+  const handleApplicationClick = (application: ProcessedItem<Application>) => {
     console.log("Application clicked");
     // TODO: go to specific application page, with application id, show all interview experiences of this application
     // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
