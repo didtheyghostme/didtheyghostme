@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 
-export function processUserData<T extends User>(data: T[]): ProcessedData<T> {
+type DataRequired = {
+  id: string;
+  user_id: string;
+};
+
+export function processUserData<T extends DataRequired>(data: T[]): ProcessedData<T> {
   const { userId } = auth();
 
   const processedData = data.map(({ user_id, ...rest }) => ({
@@ -8,10 +13,10 @@ export function processUserData<T extends User>(data: T[]): ProcessedData<T> {
     isCurrentUserItem: user_id === userId,
   }));
 
-  const hasCurrentUserItem = processedData.some((item) => item.isCurrentUserItem);
+  const currentUserItem = processedData.find((item) => item.isCurrentUserItem);
 
   return {
     data: processedData,
-    hasCurrentUserItem,
+    currentUserItemId: currentUserItem ? currentUserItem.id : null,
   };
 }

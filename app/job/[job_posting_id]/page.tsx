@@ -76,8 +76,9 @@ export default function JobDetailsPage() {
     router.push(`/interview/${application.id}`);
   };
 
-  const handleViewMyApplicationClick = () => {
-    console.log("View my application clicked");
+  const handleViewMyApplicationClick = (applicationId: string) => {
+    console.log("View my application clicked", applicationId);
+    router.push(`/interview/${applicationId}`);
   };
 
   return (
@@ -108,8 +109,13 @@ export default function JobDetailsPage() {
           <Chip color="primary" variant="flat">
             Closed
           </Chip>
-          {applications.hasCurrentUserItem ? (
-            <Button className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground" color="success" variant="flat" onPress={handleViewMyApplicationClick}>
+          {applications.currentUserItemId ? (
+            <Button
+              className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
+              color="success"
+              variant="flat"
+              onPress={() => handleViewMyApplicationClick(applications.currentUserItemId!)}
+            >
               View my application
             </Button>
           ) : (

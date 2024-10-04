@@ -57,7 +57,7 @@ type ProcessedItem<T extends User> = Omit<T, "user_id"> & WithCurrentUserFlag;
 // process to convert T[] to ProcessedData<T>, boolean if current user_id is in T[]
 type ProcessedData<T extends User> = {
   data: ProcessedItem<T>[];
-  hasCurrentUserItem: boolean;
+  currentUserItemId: string | null;
 };
 
 type ApplicationResponse = ProcessedData<Application>;
