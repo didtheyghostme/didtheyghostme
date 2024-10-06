@@ -11,7 +11,7 @@ export type CreateApplicationArgs = {
   applied_at: string;
 };
 
-const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplicationArgs }): Promise<Application> => {
+const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplicationArgs }): Promise<ApplicationTable> => {
   const { job_posting_id, applied_at } = arg;
   const supabase = await createClerkSupabaseClientSsr();
   const { userId: user_id } = auth();

@@ -11,7 +11,7 @@ import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
-  const { data: applicationDetails, error, isLoading } = useSWR<ApplicationResponse>(API.INTERVIEW.getByApplicationId(application_id as string), fetcher);
+  const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
 
   const router = useRouter();
 
@@ -66,7 +66,10 @@ export default function InterviewExperiencePage() {
           <div>
             <span>Status:</span> <Chip color="primary">Applied</Chip>
           </div>
-          <p>First response: 12/12/2024</p>
+          {/* TODO: first, use date picker input */}
+          <p>First response: {applicationDetails.first_response_at} </p>
+
+          {/* TODO: add calendar icon to update the first response date instead of the dropdown below? */}
         </CardBody>
         {/* TODO: add a dropdown to select the application status and call API to update the application status */}
         <Dropdown>
@@ -122,20 +125,19 @@ export default function InterviewExperiencePage() {
 
       <h2 className="mb-4 text-2xl font-semibold">Interview Rounds</h2>
 
-      {applicationDetails.data.map((application) => (
-        <Card key={application.id} className="mb-4">
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Round {application.first_response_at}</h3>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <span>
-              Difficulty: <Chip color={application.status === "Applied" ? "success" : application.status === "Interviewing" ? "warning" : "danger"}>Medium</Chip>
-            </span>
-            <p>Date: {new Date(application.created_at).toLocaleDateString()}</p>
-          </CardBody>
-        </Card>
-      ))}
+      {/* TODO: interviews.map(interview) here */}
+      <Card key={applicationDetails.id} className="mb-4">
+        <CardHeader>
+          <h3 className="text-xl font-semibold">Round {applicationDetails.first_response_at}</h3>
+        </CardHeader>
+        <Divider />
+        <CardBody>
+          <span>
+            Difficulty: <Chip color={applicationDetails.status === "Applied" ? "success" : applicationDetails.status === "Interviewing" ? "warning" : "danger"}>Medium</Chip>
+          </span>
+          <p>Date: {new Date(applicationDetails.created_at).toLocaleDateString()}</p>
+        </CardBody>
+      </Card>
 
       <Spacer y={4} />
 

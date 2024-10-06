@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
   `,
     )
     .eq("id", params.job_posting_id)
-    .single();
+    .maybeSingle();
 
   console.error("data in route handler of this joaab", data, error);
 

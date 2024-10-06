@@ -7,7 +7,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
 import { DBTable } from "@/lib/constants/dbTables";
 
-const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<Company> => {
+const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyTable> => {
   const supabase = await createClerkSupabaseClientSsr();
 
   try {

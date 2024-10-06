@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { processUserData } from "@/lib/processUserData";
 import { DBTable } from "@/lib/constants/dbTables";
+import { processDataArray } from "@/lib/processDataOwnership";
 
 export async function GET(request: Request, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const processedData = processUserData(data);
+  const processedData = processDataArray(data);
 
   return NextResponse.json(processedData);
 }

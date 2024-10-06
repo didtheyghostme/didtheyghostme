@@ -32,7 +32,7 @@ export default function JobDetailsPage() {
   const { isOpen: isReportModalOpen, onOpen: onReportModalOpen, onClose: onReportModalClose } = useDisclosure();
   const { isOpen: isTrackModalOpen, onOpen: onTrackModalOpen, onClose: onTrackModalClose } = useDisclosure();
 
-  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<ApplicationResponse>(API.APPLICATION.getByJobPostingId(job_posting_id as string), fetcher);
+  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<ProcessedApplications>(API.APPLICATION.getByJobPostingId(job_posting_id as string), fetcher);
 
   console.warn("applications", applications);
 
@@ -43,7 +43,7 @@ export default function JobDetailsPage() {
   if (!jobDetails) return <div>Job not found</div>;
   if (applicationsIsLoading) return <div>Loading applications...</div>;
   if (applicationsError) return <div>Error loading applications</div>;
-  if (!applications) return <div>Applications not found</div>;
+  if (!applications?.data) return <div>Applications not found</div>;
 
   const handleBackClick = () => {
     router.push(`/company/${jobDetails.company.id}`);
@@ -69,8 +69,8 @@ export default function JobDetailsPage() {
     }
   };
 
-  const handleApplicationClick = (application: ProcessedItem<Application>) => {
-    console.log("Application clicked");
+  const handleApplicationClick = (application: ProcessedApplication) => {
+    console.log("Application clicked", application);
     // TODO: go to specific application page, with application id, show all interview experiences of this application
     // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
     router.push(`/interview/${application.id}`);
