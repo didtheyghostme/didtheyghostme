@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { CompanyFormData, companySchema } from "@/lib/schema/companySchema";
+import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
 import { DBTable } from "@/lib/constants/dbTables";
 
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyTable> => {

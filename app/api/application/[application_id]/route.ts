@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { processDataItem } from "@/lib/processDataOwnership";
+import { processDataOwnershipItem } from "@/lib/processDataOwnership";
 
 export async function GET(request: Request, { params }: { params: { application_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: { application_
     return NextResponse.json({ error: "Application of interview not found" }, { status: 404 });
   }
 
-  const processedData = processDataItem(data);
+  const processedData = processDataOwnershipItem(data);
 
   return NextResponse.json(processedData);
 }

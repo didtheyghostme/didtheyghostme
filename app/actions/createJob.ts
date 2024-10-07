@@ -12,7 +12,7 @@ export type CreateJobArgs = {
   newJob: AddJobFormData;
 };
 
-const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Promise<JobPosting> => {
+const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Promise<JobPostingTable> => {
   const supabase = await createClerkSupabaseClientSsr();
   const { userId: user_id } = auth();
   const { company_id, newJob } = arg;

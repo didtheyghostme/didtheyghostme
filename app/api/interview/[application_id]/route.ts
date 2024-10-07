@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { processDataArray } from "@/lib/processDataOwnership";
+import { processDataOwnershipArray } from "@/lib/processDataOwnership";
 
 export async function GET(request: Request, { params }: { params: { application_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { application_
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const processedData = processDataArray(data);
+  const processedData = processDataOwnershipArray(data);
 
   return NextResponse.json(processedData);
 }

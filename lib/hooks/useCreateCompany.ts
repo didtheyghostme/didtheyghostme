@@ -3,7 +3,7 @@ import useSWRMutation from "swr/mutation";
 
 import actionCreateCompany from "@/app/actions/createCompany";
 import { getErrorMessage } from "@/lib/errorHandling";
-import { CompanyFormData } from "@/lib/schema/companySchema";
+import { CompanyFormData } from "@/lib/schema/addCompanySchema";
 
 const useCreateCompany = () => {
   const { trigger, isMutating } = useSWRMutation("/api/company", actionCreateCompany);

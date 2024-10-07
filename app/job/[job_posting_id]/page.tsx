@@ -12,15 +12,8 @@ import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 
-export type JobDetails = {
-  id: number;
-  title: string;
-  country: string;
-  url: string | null;
-  company: {
-    id: number;
-    company_name: string;
-  };
+export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
+  company: Pick<CompanyTable, "id" | "company_name">;
 };
 
 export default function JobDetailsPage() {

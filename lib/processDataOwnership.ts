@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 
-export function processDataArray<T extends DataRequired>(data: T[]): ProcessedDataArray<T> {
+export function processDataOwnershipArray<T extends DataRequired>(data: T[]): ProcessedDataArray<T> {
   const { userId } = auth();
 
   const processedData = data.map(({ user_id, ...rest }) => ({
@@ -16,7 +16,7 @@ export function processDataArray<T extends DataRequired>(data: T[]): ProcessedDa
   };
 }
 
-export function processDataItem<T extends DataRequired>(data: T): ProcessedDataObject<T> {
+export function processDataOwnershipItem<T extends DataRequired>(data: T): ProcessedDataObject<T> {
   const { userId } = auth();
 
   return {
