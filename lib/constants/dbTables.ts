@@ -4,3 +4,5 @@ export const DBTable = {
   APPLICATION: "application",
   // Add other table names here
 } as const;
+
+export type DBTableValues = (typeof DBTable)[keyof typeof DBTable];

@@ -11,14 +11,16 @@ import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
+import { DBTable } from "@/lib/constants/dbTables";
 
 export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
-  company: Pick<CompanyTable, "id" | "company_name">;
+  [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name">;
 };
 
 export default function JobDetailsPage() {
   const { job_posting_id } = useParams();
   const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id as string), fetcher);
+  console.log("jobDetails from page", jobDetails);
 
   // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
   const router = useRouter();
