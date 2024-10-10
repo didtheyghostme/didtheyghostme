@@ -23,7 +23,7 @@ const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplic
   try {
     const { data, error } = await supabase
       .from(DBTable.APPLICATION)
-      .insert({
+      .insert<InsertApplication>({
         status: APPLICATION_STATUS.APPLIED,
         applied_at,
         user_id,
