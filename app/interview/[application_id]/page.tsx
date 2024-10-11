@@ -2,18 +2,25 @@
 
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, DatePicker } from "@nextui-org/react";
+import { useState } from "react";
+import { today, getLocalTimeZone, CalendarDate, toZoned } from "@internationalized/date";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { AddNoteIcon, ArrowLeftIcon, DeleteDocumentIcon, EditDocumentIcon, FlagIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
+import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
   const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
 
+  const { updateApplicationFirstResponseDate, isUpdating } = useUpdateApplicationFirstResponseDate(application_id as string);
+
   const router = useRouter();
+
+  const [firstResponseDate, setFirstResponseDate] = useState<CalendarDate | null>(null);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading application details</div>;
@@ -45,6 +52,23 @@ export default function InterviewExperiencePage() {
     // if status is rejected or offered, show calendar to ask when the date is for first_response_at
   };
 
+  const handleFirstResponseDateChange = async (date: CalendarDate) => {
+    setFirstResponseDate(date);
+    // TODO: Add API call useUpdateHook and server action? to update the first_response_at date
+    const utcDate = toZoned(date, "UTC").toAbsoluteString();
+
+    console.log("Updating first response date to:", date, utcDate);
+
+    try {
+      await updateApplicationFirstResponseDate(utcDate);
+      // The SWR cache will be automatically updated, so you don't need to manually update applicationDetails
+      console.log("first response date updated");
+    } catch (error) {
+      console.error("Failed to update first response date:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
+  };
+
   const iconClasses = "text-xl text-default-500 pointer-events-none flex-shrink-0";
 
   return (
@@ -67,7 +91,11 @@ export default function InterviewExperiencePage() {
             <span>Status:</span> <Chip color="primary">Applied</Chip>
           </div>
           {/* TODO: first, use date picker input */}
-          <p>First response: {applicationDetails.first_response_at} </p>
+          <p>First response: {String(applicationDetails.first_response_at)} </p>
+
+          <div className="flex w-1/2 flex-wrap gap-4 md:flex-nowrap">
+            <DatePicker label="First Response Date" maxValue={today(getLocalTimeZone())} value={firstResponseDate} onChange={handleFirstResponseDateChange} />
+          </div>
 
           {/* TODO: add calendar icon to update the first response date instead of the dropdown below? */}
         </CardBody>
