@@ -223,7 +223,7 @@ export default function TableCompany() {
     console.log("Row clicked, key:", key);
     console.log("Current paginatedItems:", paginatedItems);
 
-    const clickedCompany = paginatedItems.find((company) => company.id === Number(key));
+    const clickedCompany = paginatedItems.find((company) => company.id === key);
 
     if (clickedCompany) {
       console.log("Clicked company:", clickedCompany.company_name);

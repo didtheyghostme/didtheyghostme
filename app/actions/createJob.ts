@@ -7,8 +7,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { DBTable } from "@/lib/constants/dbTables";
 
-export type CreateJobArgs = {
-  company_id: number;
+export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
   newJob: AddJobFormData;
 };
 

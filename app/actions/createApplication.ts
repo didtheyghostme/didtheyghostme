@@ -6,13 +6,10 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
-export type CreateApplicationArgs = {
-  job_posting_id: number;
-  applied_at: string;
-};
+export type CreateApplicationArgs = Pick<ApplicationTable, "job_posting_id" | "applied_date">;
 
 const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplicationArgs }): Promise<ApplicationTable> => {
-  const { job_posting_id, applied_at } = arg;
+  const { job_posting_id, applied_date } = arg;
   const supabase = await createClerkSupabaseClientSsr();
   const { userId: user_id } = auth();
 
@@ -25,7 +22,7 @@ const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplic
       .from(DBTable.APPLICATION)
       .insert<InsertApplication>({
         status: APPLICATION_STATUS.APPLIED,
-        applied_at,
+        applied_date,
         user_id,
         job_posting_id,
       })

@@ -9,22 +9,22 @@ type User = {
 
 // Supabase database tables
 type CompanyTable = {
-  id: number; // Optional for new entries
+  id: string; // Optional for new entries
   company_name: string; // todo: rename to name
   company_url: string;
-  created_at: string;
   status: string | null; //todo remove this when updating the company table page
+  created_at: string;
   // logo_url: string; // todo: add logo.dev API url to this?
 } & User;
 
 type JobPostingTable = {
-  id: number; // TODO: change to uuid from postgres gen_random_uuid(), which is string
+  id: string;
   title: string;
   country: string;
   url: string | null;
+  closed_date: string | null;
   created_at: string;
-  closed_at: string | null;
-  company_id: number;
+  company_id: string;
   // add job_status: "Verified by admin?"
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
 } & User;
@@ -34,16 +34,18 @@ type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Hired" | "Gh
 type ApplicationTable = {
   id: string;
   status: ApplicationStatus; // default start with APPLIED
-  applied_at: string;
-  first_response_at: string | null;
+  applied_date: string;
+  first_response_date: string | null;
   created_at: string;
-  job_posting_id: number;
+  job_posting_id: string;
 } & User;
 
 type InterviewExperienceTable = {
-  id: number;
+  id: string;
   round_no: number;
   difficulty: "Easy" | "Medium" | "Hard";
+  // description ? from markdown?
+  // response_date for this round?
   created_at: string;
   application_id: string;
 } & User;

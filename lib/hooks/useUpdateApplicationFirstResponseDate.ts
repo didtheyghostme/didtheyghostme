@@ -7,9 +7,9 @@ export const useUpdateApplicationFirstResponseDate = (application_id: string) =>
   const { trigger, isMutating } = useSWRMutation(API.APPLICATION.getByApplicationId(application_id), actionUpdateApplicationFirstResponseDate);
 
   return {
-    updateApplicationFirstResponseDate: async (first_response_at: string) => {
+    updateApplicationFirstResponseDate: async (first_response_date: string) => {
       try {
-        const result = await trigger({ id: application_id, first_response_at });
+        const result = await trigger({ id: application_id, first_response_date });
 
         return result;
       } catch (err) {

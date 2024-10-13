@@ -22,7 +22,7 @@ export default function CompanyDetailsPage() {
 
   // console.warn("jobs", allJobs);
 
-  const { createJob } = useCreateJob(Number(company_id));
+  const { createJob } = useCreateJob(company_id as string);
 
   const router = useRouter();
 

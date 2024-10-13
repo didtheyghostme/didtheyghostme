@@ -2,13 +2,13 @@ import useSWRMutation from "swr/mutation";
 
 import actionCreateApplication from "@/app/actions/createApplication";
 
-export const useCreateApplication = (job_posting_id: number) => {
+export const useCreateApplication = (job_posting_id: string) => {
   const { trigger, isMutating } = useSWRMutation(`/api/job/${job_posting_id}/application`, actionCreateApplication);
 
   return {
-    createApplication: async (applied_at: string) => {
+    createApplication: async (applied_date: string) => {
       try {
-        const result = await trigger({ job_posting_id, applied_at });
+        const result = await trigger({ job_posting_id, applied_date });
 
         return result;
       } catch (err) {

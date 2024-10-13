@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from
 type ReportLinkModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  jobId: number;
+  jobId: string;
 };
 
 export default function ReportLinkModal({ isOpen, onClose, jobId }: ReportLinkModalProps) {
