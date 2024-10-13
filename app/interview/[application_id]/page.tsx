@@ -11,6 +11,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import { AddNoteIcon, ArrowLeftIcon, DeleteDocumentIcon, EditDocumentIcon, FlagIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
+import { formatDate } from "@/lib/formatDate";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -38,7 +39,7 @@ export default function InterviewExperiencePage() {
 
   const handleReceivedResponseClick = () => {
     console.log("I have received a response");
-    // TODO: show modal with calendar form to call API update the response date first_response_at, change application status to Interviewing
+    // TODO: show modal with calendar form to call API update the response date first_response_date, change application status to Interviewing
   };
 
   const handleGhostedClick = () => {
@@ -49,18 +50,16 @@ export default function InterviewExperiencePage() {
   const handleMenuItemClick = (key: React.Key) => {
     console.log("menu item clicked", key);
     // TODO: call API, if first response date, show calendar to set
-    // if status is rejected or offered, show calendar to ask when the date is for first_response_at
+    // if status is rejected or offered, show calendar to ask when the date is for first_response_date
   };
 
   const handleFirstResponseDateChange = async (date: CalendarDate) => {
     setFirstResponseDate(date);
-    // TODO: Add API call useUpdateHook and server action? to update the first_response_at date
-    const utcDate = toZoned(date, "UTC").toAbsoluteString();
 
-    console.log("Updating first response date to:", date, utcDate);
+    console.log("Updating first response date to:", date, date.toString());
 
     try {
-      await updateApplicationFirstResponseDate(utcDate);
+      await updateApplicationFirstResponseDate(date.toString());
       // The SWR cache will be automatically updated, so you don't need to manually update applicationDetails
       console.log("first response date updated");
     } catch (error) {
@@ -91,13 +90,14 @@ export default function InterviewExperiencePage() {
             <span>Status:</span> <Chip color="primary">Applied</Chip>
           </div>
           {/* TODO: first, use date picker input */}
-          <p>First response: {String(applicationDetails.first_response_at)} </p>
+          {applicationDetails.first_response_date && <p>First response date: {formatDate(applicationDetails.first_response_date)}</p>}
+
+          {/* change this to the add interview buttons, hide the datepicker if first response date is set */}
+          {!applicationDetails.first_response_date && <p>No first response date set</p>}
 
           <div className="flex w-1/2 flex-wrap gap-4 md:flex-nowrap">
             <DatePicker label="First Response Date" maxValue={today(getLocalTimeZone())} value={firstResponseDate} onChange={handleFirstResponseDateChange} />
           </div>
-
-          {/* TODO: add calendar icon to update the first response date instead of the dropdown below? */}
         </CardBody>
         {/* TODO: add a dropdown to select the application status and call API to update the application status */}
         <Dropdown>
@@ -153,10 +153,12 @@ export default function InterviewExperiencePage() {
 
       <h2 className="mb-4 text-2xl font-semibold">Interview Rounds</h2>
 
+      {/* TODO: add a button to add a new interview round if first response date is set */}
+
       {/* TODO: interviews.map(interview) here */}
       <Card key={applicationDetails.id} className="mb-4">
         <CardHeader>
-          <h3 className="text-xl font-semibold">Round {applicationDetails.first_response_at}</h3>
+          <h3 className="text-xl font-semibold">Round {applicationDetails.first_response_date}</h3>
         </CardHeader>
         <Divider />
         <CardBody>
