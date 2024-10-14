@@ -4,7 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, cn, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, DatePicker } from "@nextui-org/react";
 import { useState } from "react";
-import { today, getLocalTimeZone, CalendarDate, toZoned } from "@internationalized/date";
+import { today, getLocalTimeZone, CalendarDate } from "@internationalized/date";
+
+import { InterviewRoundForm } from "./InterviewRoundForm";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -12,6 +14,7 @@ import { AddNoteIcon, ArrowLeftIcon, DeleteDocumentIcon, EditDocumentIcon, FlagI
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
 import { formatDate } from "@/lib/formatDate";
+import { InterviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -22,6 +25,8 @@ export default function InterviewExperiencePage() {
   const router = useRouter();
 
   const [firstResponseDate, setFirstResponseDate] = useState<CalendarDate | null>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading application details</div>;
@@ -66,6 +71,10 @@ export default function InterviewExperiencePage() {
       console.error("Failed to update first response date:", error);
       // Handle error (e.g., show an error message to the user)
     }
+  };
+
+  const handleInterviewRoundSubmit = (data: InterviewRoundSchema[]) => {
+    console.log("interview round submitted", data);
   };
 
   const iconClasses = "text-xl text-default-500 pointer-events-none flex-shrink-0";
@@ -151,11 +160,16 @@ export default function InterviewExperiencePage() {
         </Dropdown>
       </Card>
 
-      <h2 className="mb-4 text-2xl font-semibold">Interview Rounds</h2>
+      <div className="mb-4 text-2xl font-semibold">
+        Interview Rounds
+        <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel Editing" : "Edit Interview Rounds"}</Button>
+      </div>
 
       {/* TODO: add a button to add a new interview round if first response date is set */}
+      <InterviewRoundForm isEditing={isEditing} onSubmit={handleInterviewRoundSubmit} />
 
       {/* TODO: interviews.map(interview) here */}
+
       <Card key={applicationDetails.id} className="mb-4">
         <CardHeader>
           <h3 className="text-xl font-semibold">Round {applicationDetails.first_response_date}</h3>

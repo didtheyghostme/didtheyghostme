@@ -44,8 +44,9 @@ type InterviewExperienceTable = {
   id: string;
   round_no: number;
   difficulty: "Easy" | "Medium" | "Hard";
-  // description ? from markdown?
-  // response_date for this round?
+  description: string; // ? from markdown?
+  response_date: string | null; // for this round?
+  // inteview_date ?
   created_at: string;
   application_id: string;
 } & User;
