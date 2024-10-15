@@ -73,13 +73,14 @@ export function InterviewRoundForm({ isEditing, initialData, onSubmit }: Intervi
             <Controller
               control={control}
               name={`interviewRounds.${index}.description`}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <Input
                   {...field}
+                  isRequired
                   className="mt-2"
                   disabled={!isEditing}
-                  errorMessage={errors.interviewRounds?.[index]?.description?.message}
-                  isInvalid={!!errors.interviewRounds?.[index]?.description}
+                  errorMessage={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
                   label="Description"
                   placeholder="Enter interview round description"
                 />
@@ -88,8 +89,16 @@ export function InterviewRoundForm({ isEditing, initialData, onSubmit }: Intervi
             <Controller
               control={control}
               name={`interviewRounds.${index}.interview_date`}
-              render={({ field }) => (
-                <DatePicker className="mt-2" label="Interview Date" value={field.value ? parseDate(field.value) : null} onChange={(date) => field.onChange(date ? date.toString() : null)} />
+              render={({ field, fieldState }) => (
+                <DatePicker
+                  isRequired
+                  className="mt-2"
+                  errorMessage={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
+                  label="Interview Date"
+                  value={field.value ? parseDate(field.value) : null}
+                  onChange={(date) => field.onChange(date ? date.toString() : null)}
+                />
               )}
             />
 
