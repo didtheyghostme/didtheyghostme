@@ -27,6 +27,7 @@ export default function InterviewExperiencePage() {
   const [firstResponseDate, setFirstResponseDate] = useState<CalendarDate | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
+  // TODO: isEditing is for both the calendar first response date and the interview rounds form, save button should be here too instead of in the form
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading application details</div>;
@@ -85,7 +86,10 @@ export default function InterviewExperiencePage() {
         Back to job
       </Button>
 
-      <h1 className="mb-4 text-3xl font-bold">Interview Experience</h1>
+      <div className="flex justify-between">
+        <h1 className="mb-4 text-3xl font-bold">Interview Experience</h1>
+        <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel Editing" : "Edit Interview Rounds"}</Button>
+      </div>
 
       <Card className="mb-8">
         <CardHeader>
@@ -160,11 +164,6 @@ export default function InterviewExperiencePage() {
         </Dropdown>
       </Card>
 
-      <div className="mb-4 text-2xl font-semibold">
-        Interview Rounds
-        <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel Editing" : "Edit Interview Rounds"}</Button>
-      </div>
-
       {/* TODO: add a button to add a new interview round if first response date is set */}
       <InterviewRoundForm isEditing={isEditing} onSubmit={handleInterviewRoundSubmit} />
 
@@ -184,10 +183,6 @@ export default function InterviewExperiencePage() {
       </Card>
 
       <Spacer y={4} />
-
-      <Button color="primary" onPress={handleAddNewInterviewRoundClick}>
-        Add New Interview Round
-      </Button>
     </div>
   );
 }

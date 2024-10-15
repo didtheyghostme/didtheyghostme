@@ -32,7 +32,7 @@ export function InterviewRoundForm({ isEditing, initialData, onSubmit }: Intervi
   });
 
   const handleAddNewInterviewRoundClick = () => {
-    append({ description: "", response_date: null });
+    append({ description: "", interview_date: "", response_date: null });
   };
 
   const onFormSubmit = handleSubmit((data) => onSubmit(data.interviewRounds));
@@ -45,68 +45,81 @@ export function InterviewRoundForm({ isEditing, initialData, onSubmit }: Intervi
   }, [isEditing, initialData, reset]);
 
   return (
-    <form className="space-y-4" onSubmit={onFormSubmit}>
-      {fields.map((field, index) => (
-        <div key={field.id} className="mb-4 rounded-md border p-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold">Round {index + 1}</h4>
-            {isEditing && (
-              <Tooltip content="Remove this interview round">
-                <Button
-                  color="danger"
-                  size="sm"
-                  type="button"
-                  onClick={() => {
-                    remove(index);
-                  }}
-                >
-                  Remove
-                </Button>
-              </Tooltip>
-            )}
-          </div>
-          <Controller
-            control={control}
-            name={`interviewRounds.${index}.description`}
-            render={({ field }) => (
-              <Input
-                {...field}
-                className="mt-2"
-                disabled={!isEditing}
-                errorMessage={errors.interviewRounds?.[index]?.description?.message}
-                isInvalid={!!errors.interviewRounds?.[index]?.description}
-                label="Description"
-                placeholder="Enter interview round description"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name={`interviewRounds.${index}.response_date`}
-            render={({ field }) => (
-              <DatePicker
-                className="mt-2"
-                isDisabled={!isEditing}
-                label="Response Date"
-                value={field.value ? parseDate(field.value) : null}
-                onChange={(date) => field.onChange(date ? date.toString() : null)}
-              />
-            )}
-          />
-          {errors.interviewRounds?.[index]?.response_date && <p className="mt-1 text-sm text-red-500">{errors.interviewRounds[index].response_date.message}</p>}
-        </div>
-      ))}
+    <>
+      {fields.length == 0 && <div className="mb-4 text-2xl font-semibold">There is no interviews yet</div>}
 
-      {isEditing && (
-        <div className="flex items-center space-x-4">
-          <Button type="button" onClick={handleAddNewInterviewRoundClick}>
-            Add New Round
-          </Button>
-          <Button color="primary" type="submit">
-            Save
-          </Button>
-        </div>
-      )}
-    </form>
+      <div className="mb-4 text-2xl font-semibold">Interview Rounds</div>
+
+      <form className="space-y-4" onSubmit={onFormSubmit}>
+        {fields.map((field, index) => (
+          <div key={field.id} className="mb-4 rounded-md border p-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold">Round {index + 1}</h4>
+              {isEditing && (
+                <Tooltip content="Remove this interview round">
+                  <Button
+                    color="danger"
+                    size="sm"
+                    type="button"
+                    onClick={() => {
+                      remove(index);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
+            <Controller
+              control={control}
+              name={`interviewRounds.${index}.description`}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  className="mt-2"
+                  disabled={!isEditing}
+                  errorMessage={errors.interviewRounds?.[index]?.description?.message}
+                  isInvalid={!!errors.interviewRounds?.[index]?.description}
+                  label="Description"
+                  placeholder="Enter interview round description"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name={`interviewRounds.${index}.interview_date`}
+              render={({ field }) => (
+                <DatePicker className="mt-2" label="Interview Date" value={field.value ? parseDate(field.value) : null} onChange={(date) => field.onChange(date ? date.toString() : null)} />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name={`interviewRounds.${index}.response_date`}
+              render={({ field }) => (
+                <DatePicker
+                  className="mt-2"
+                  isDisabled={!isEditing}
+                  label="Response Date"
+                  value={field.value ? parseDate(field.value) : null}
+                  onChange={(date) => field.onChange(date ? date.toString() : null)}
+                />
+              )}
+            />
+          </div>
+        ))}
+
+        {isEditing && (
+          <div className="flex items-center space-x-4">
+            <Button type="button" onClick={handleAddNewInterviewRoundClick}>
+              Add New Round
+            </Button>
+            <Button color="primary" type="submit">
+              Save
+            </Button>
+          </div>
+        )}
+      </form>
+    </>
   );
 }
