@@ -46,3 +46,63 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- update_interview_rounds function with upserting (current version)
+CREATE OR REPLACE FUNCTION update_interview_rounds(
+  p_user_id TEXT,
+  p_application_id UUID,
+  p_interview_rounds JSONB
+)
+RETURNS INTEGER AS $$
+DECLARE
+  affected_rows INTEGER;
+BEGIN
+  -- Upsert new or updated rounds directly from JSONB with ordinality to preserve order
+  WITH input_rounds AS (
+    SELECT 
+      ord AS round_no,
+      (x->>'description') AS description,
+      safe_to_date(x->>'interview_date') AS interview_date,
+      safe_to_date(x->>'response_date') AS response_date
+    FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY AS arr(x, ord)
+  )
+  INSERT INTO interview_experience (
+    round_no, 
+    description, 
+    interview_date, 
+    response_date, 
+    application_id, 
+    user_id
+  )
+  SELECT 
+    round_no,
+    description,
+    interview_date,
+    response_date,
+    p_application_id,
+    p_user_id
+  FROM input_rounds
+  ON CONFLICT (application_id, user_id, round_no)
+  DO UPDATE SET
+    description = EXCLUDED.description,
+    interview_date = EXCLUDED.interview_date,
+    response_date = EXCLUDED.response_date;
+
+  -- Delete any rounds that are no longer present in the input
+  DELETE FROM interview_experience
+  WHERE application_id = p_application_id 
+    AND user_id = p_user_id
+    AND round_no > (
+      SELECT COUNT(*) 
+      FROM jsonb_array_elements(p_interview_rounds)
+    );
+
+  -- Count the affected rows
+  SELECT COUNT(*) INTO affected_rows 
+  FROM interview_experience
+  WHERE application_id = p_application_id 
+    AND user_id = p_user_id;
+  
+  -- Return the count
+  RETURN affected_rows;
+END;
+$$ LANGUAGE plpgsql;

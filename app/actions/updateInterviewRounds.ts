@@ -10,7 +10,12 @@ export type UpdateInterviewRoundsArgs = Pick<InterviewExperienceTable, "applicat
   interviewRounds: InterviewRoundSchema[];
 };
 
-const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateInterviewRoundsArgs }): Promise<InterviewExperienceTable[]> => {
+type UpdateResult = {
+  success: boolean;
+  affected_rows: number;
+};
+
+const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateInterviewRoundsArgs }): Promise<UpdateResult> => {
   const { application_id, interviewRounds } = arg;
   const supabase = await createClerkSupabaseClientSsr();
   const { userId: user_id } = auth();
@@ -28,7 +33,10 @@ const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateIn
 
     if (error) throw error;
 
-    return data;
+    return {
+      success: true,
+      affected_rows: data as number,
+    };
   } catch (err) {
     console.error("Error updating interview rounds:", err);
     throw err;

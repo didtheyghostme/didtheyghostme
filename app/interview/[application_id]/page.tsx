@@ -91,8 +91,8 @@ export default function InterviewExperiencePage() {
     console.log("interview round submitted", data);
 
     try {
-      await updateInterviewRounds(data);
-      console.log("Interview rounds updated successfully");
+      const result = await updateInterviewRounds(data);
+      console.log("Interview rounds updated successfully", result);
     } catch (error) {
       console.error("Failed to update interview rounds:", error);
     }
