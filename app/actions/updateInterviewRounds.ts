@@ -20,36 +20,23 @@ const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateIn
   }
 
   try {
-    // First, get the current interview rounds for this application
-    const { data: existingRounds, error: fetchError } = await supabase.from(DBTable.INTERVIEW_EXPERIENCE).select("*").eq("application_id", application_id).order("round_no", { ascending: true });
+    // Begin Transaction
+    const { data: deletedData, error: deleteError } = await supabase.from(DBTable.INTERVIEW_EXPERIENCE).delete().eq("application_id", application_id).eq("user_id", user_id);
 
-    if (fetchError) throw fetchError;
+    if (deleteError) throw deleteError;
 
-    // Prepare the rounds to be upserted
-    const roundsToUpsert = interviewRounds.map((round, index) => ({
+    // Prepare the rounds to be inserted
+    const roundsToInsert = interviewRounds.map((round, index) => ({
       ...round,
       round_no: index + 1,
       application_id,
       user_id,
     }));
 
-    // Upsert the rounds
-    const { data, error } = await supabase.from(DBTable.INTERVIEW_EXPERIENCE).upsert(roundsToUpsert, { onConflict: "id" }).select();
+    // Insert the new rounds
+    const { data, error } = await supabase.from(DBTable.INTERVIEW_EXPERIENCE).insert(roundsToInsert).select();
 
     if (error) throw error;
-
-    // If there were more existing rounds than new rounds, delete the excess
-    if (existingRounds && existingRounds.length > roundsToUpsert.length) {
-      const roundsToDelete = existingRounds.slice(roundsToUpsert.length);
-
-      await supabase
-        .from(DBTable.INTERVIEW_EXPERIENCE)
-        .delete()
-        .in(
-          "id",
-          roundsToDelete.map((r) => r.id),
-        );
-    }
 
     return data;
   } catch (err) {

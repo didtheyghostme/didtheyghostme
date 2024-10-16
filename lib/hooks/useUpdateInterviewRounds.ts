@@ -4,7 +4,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import actionUpdateInterviewRounds, { UpdateInterviewRoundsArgs } from "@/app/actions/updateInterviewRounds";
 
 export const useUpdateInterviewRounds = (application_id: string) => {
-  const { trigger, isMutating } = useSWRMutation(API.INTERVIEW.getByApplicationId(application_id), actionUpdateInterviewRounds);
+  const { trigger, isMutating } = useSWRMutation(API.INTERVIEW.getAllByApplicationId(application_id), actionUpdateInterviewRounds);
 
   return {
     updateInterviewRounds: async (interviewRounds: UpdateInterviewRoundsArgs["interviewRounds"]) => {

@@ -8,10 +8,10 @@ export const API = {
     getById: (id: string) => `/api/job/${id}`,
   },
   APPLICATION: {
-    getByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/application`, // return all applications for a job posting
+    getAllByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/application`, // return all applications for a job posting
     getByApplicationId: (applicationId: string) => `/api/application/${applicationId}`, // return one application by id
   },
   INTERVIEW: {
-    getByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`, // return all interviews for an application
+    getAllByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`, // return all interviews for an application
   },
 } as const;

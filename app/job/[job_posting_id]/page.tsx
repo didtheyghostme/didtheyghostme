@@ -27,7 +27,7 @@ export default function JobDetailsPage() {
   const { isOpen: isReportModalOpen, onOpen: onReportModalOpen, onClose: onReportModalClose } = useDisclosure();
   const { isOpen: isTrackModalOpen, onOpen: onTrackModalOpen, onClose: onTrackModalClose } = useDisclosure();
 
-  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<ProcessedApplications>(API.APPLICATION.getByJobPostingId(job_posting_id as string), fetcher);
+  const { data: applications, error: applicationsError, isLoading: applicationsIsLoading } = useSWR<ProcessedApplications>(API.APPLICATION.getAllByJobPostingId(job_posting_id as string), fetcher);
 
   console.warn("applications", applications);
 
