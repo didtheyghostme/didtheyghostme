@@ -52,9 +52,7 @@ CREATE OR REPLACE FUNCTION update_interview_rounds(
   p_application_id UUID,
   p_interview_rounds JSONB
 )
-RETURNS INTEGER AS $$
-DECLARE
-  affected_rows INTEGER;
+RETURNS VOID AS $$
 BEGIN
   -- Upsert new or updated rounds directly from JSONB with ordinality to preserve order
   WITH input_rounds AS (
@@ -96,13 +94,6 @@ BEGIN
       FROM jsonb_array_elements(p_interview_rounds)
     );
 
-  -- Count the affected rows
-  SELECT COUNT(*) INTO affected_rows 
-  FROM interview_experience
-  WHERE application_id = p_application_id 
-    AND user_id = p_user_id;
-  
-  -- Return the count
-  RETURN affected_rows;
+  -- No return statement needed
 END;
 $$ LANGUAGE plpgsql;

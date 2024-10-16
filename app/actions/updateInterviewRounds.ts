@@ -12,7 +12,6 @@ export type UpdateInterviewRoundsArgs = Pick<InterviewExperienceTable, "applicat
 
 type UpdateResult = {
   success: boolean;
-  affected_rows: number;
 };
 
 const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateInterviewRoundsArgs }): Promise<UpdateResult> => {
@@ -25,7 +24,7 @@ const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateIn
   }
 
   try {
-    const { data, error } = await supabase.rpc(DB_RPC.UPDATE_INTERVIEW_ROUNDS, {
+    const { error } = await supabase.rpc(DB_RPC.UPDATE_INTERVIEW_ROUNDS, {
       p_user_id: user_id,
       p_application_id: application_id,
       p_interview_rounds: interviewRounds,
@@ -35,7 +34,6 @@ const actionUpdateInterviewRounds = async (key: string, { arg }: { arg: UpdateIn
 
     return {
       success: true,
-      affected_rows: data as number,
     };
   } catch (err) {
     console.error("Error updating interview rounds:", err);
