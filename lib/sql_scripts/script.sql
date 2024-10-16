@@ -1,0 +1,48 @@
+-- safe_to_date function
+CREATE OR REPLACE FUNCTION safe_to_date(p_date TEXT)
+RETURNS DATE AS $$
+BEGIN
+  RETURN p_date::DATE;
+EXCEPTION WHEN OTHERS THEN
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- update_interview_rounds function, delete all interview rounds for an application and insert new ones
+CREATE OR REPLACE FUNCTION update_interview_rounds(
+  p_user_id TEXT,
+  p_application_id UUID,
+  p_interview_rounds JSONB
+)
+RETURNS SETOF interview_experience AS $$
+BEGIN
+  -- Delete existing rounds
+  DELETE FROM interview_experience
+  WHERE application_id = p_application_id AND user_id = p_user_id;
+
+  -- Insert new rounds
+  WITH new_rounds AS (
+    SELECT
+      (ROW_NUMBER() OVER ())::INTEGER AS round_no,
+      x.description,
+      safe_to_date(x.interview_date) AS interview_date,
+      safe_to_date(x.response_date) AS response_date,
+      p_application_id AS application_id,
+      p_user_id AS user_id
+    FROM jsonb_to_recordset(p_interview_rounds) AS x(
+      description TEXT,
+      interview_date TEXT,
+      response_date TEXT
+    )
+  )
+  INSERT INTO interview_experience (round_no, description, interview_date, response_date, application_id, user_id)
+  SELECT round_no, description, interview_date, response_date, application_id, user_id FROM new_rounds;
+
+  -- Return the new data
+  RETURN QUERY
+  SELECT * FROM interview_experience
+  WHERE application_id = p_application_id AND user_id = p_user_id
+  ORDER BY round_no;
+END;
+$$ LANGUAGE plpgsql;
+

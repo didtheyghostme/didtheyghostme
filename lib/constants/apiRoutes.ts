@@ -15,3 +15,7 @@ export const API = {
     getAllByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`, // return all interviews for an application
   },
 } as const;
+
+export const DB_RPC = {
+  UPDATE_INTERVIEW_ROUNDS: "update_interview_rounds",
+} as const;
