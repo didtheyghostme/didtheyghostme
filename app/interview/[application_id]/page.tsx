@@ -15,6 +15,7 @@ import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
 import { formatDate } from "@/lib/formatDate";
 import { InterviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
+import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -28,6 +29,8 @@ export default function InterviewExperiencePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   // TODO: isEditing is for both the calendar first response date and the interview rounds form, save button should be here too instead of in the form
+
+  const { updateInterviewRounds, isUpdatingInterviewRounds } = useUpdateInterviewRounds(application_id as string);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading application details</div>;
@@ -74,8 +77,15 @@ export default function InterviewExperiencePage() {
     }
   };
 
-  const handleInterviewRoundSubmit = (data: InterviewRoundSchema[]) => {
+  const handleInterviewRoundSubmit = async (data: InterviewRoundSchema[]) => {
     console.log("interview round submitted", data);
+
+    try {
+      await updateInterviewRounds(data);
+      console.log("Interview rounds updated successfully");
+    } catch (error) {
+      console.error("Failed to update interview rounds:", error);
+    }
   };
 
   const iconClasses = "text-xl text-default-500 pointer-events-none flex-shrink-0";
