@@ -16,6 +16,7 @@ import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateAppl
 import { formatDate } from "@/lib/formatDate";
 import { InterviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
+import { InterviewRoundContainer } from "./InterviewRoundContainer";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -30,21 +31,11 @@ export default function InterviewExperiencePage() {
   const [isEditing, setIsEditing] = useState(false);
   // TODO: isEditing is for both the calendar first response date and the interview rounds form, save button should be here too instead of in the form
 
-  const { updateInterviewRounds, isUpdatingInterviewRounds } = useUpdateInterviewRounds(application_id as string);
-
-  const {
-    data: interviewRounds,
-    error: interviewRoundsError,
-    isLoading: interviewRoundsLoading,
-  } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), fetcher);
+  // TODO 17 Oct: move the interview rounds related data to InterviewRoundContainer.tsx
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading application details</div>;
   if (!applicationDetails) return <div>Application not found</div>;
-
-  if (interviewRoundsLoading) return <div>Loading interview rounds...</div>;
-  if (interviewRoundsError) return <div>Error loading interview rounds</div>;
-  if (!interviewRounds) return <div>No interview rounds found</div>;
 
   const handleBackClick = () => {
     router.back();
@@ -84,17 +75,6 @@ export default function InterviewExperiencePage() {
     } catch (error) {
       console.error("Failed to update first response date:", error);
       // Handle error (e.g., show an error message to the user)
-    }
-  };
-
-  const handleInterviewRoundSubmit = async (data: InterviewRoundSchema[]) => {
-    console.log("interview round submitted", data);
-
-    try {
-      const result = await updateInterviewRounds(data);
-      console.log("Interview rounds updated successfully", result);
-    } catch (error) {
-      console.error("Failed to update interview rounds:", error);
     }
   };
 
@@ -185,26 +165,7 @@ export default function InterviewExperiencePage() {
       </Card>
 
       {/* TODO: add a button to add a new interview round if first response date is set */}
-      <InterviewRoundForm initialData={interviewRounds} isEditing={isEditing} onSubmit={handleInterviewRoundSubmit} />
-
-      {/* TODO: interviews.map(interview) here */}
-      {/* {interviewRounds.map((round) => (
-        <Card key={round.id} className="mb-4">
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Round {round.round_no}</h3>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <span>
-              Difficulty: <Chip color={applicationDetails.status === "Applied" ? "success" : applicationDetails.status === "Interviewing" ? "warning" : "danger"}>Medium</Chip>
-            </span>
-            {round.response_date && <p>Response Date: {formatDate(round.response_date)}</p>}
-            <p>Description:{round.description}</p>
-
-            <p>Date: {new Date(applicationDetails.created_at).toLocaleDateString()}</p>
-          </CardBody>
-        </Card>
-      ))} */}
+      <InterviewRoundContainer application_id={application_id as string} isEditing={isEditing} />
 
       <Spacer y={4} />
     </div>

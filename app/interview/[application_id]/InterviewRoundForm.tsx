@@ -48,8 +48,6 @@ export function InterviewRoundForm({ isEditing, initialData, onSubmit }: Intervi
     <>
       {fields.length == 0 && <div className="mb-4 text-2xl font-semibold">There is no interviews yet</div>}
 
-      <div className="mb-4 text-2xl font-semibold">Interview Rounds</div>
-
       <form className="space-y-4" onSubmit={onFormSubmit}>
         {fields.map((field, index) => (
           <div key={field.id} className="mb-4 rounded-md border p-4">
