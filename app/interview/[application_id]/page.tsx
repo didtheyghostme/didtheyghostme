@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { Button, Spacer } from "@nextui-org/react";
 import { useState } from "react";
 import { z } from "zod";
+import { toast } from "sonner";
 
 import { ViewInterviewDetails } from "./ViewInterviewDetails";
 import { EditInterviewDetails } from "./EditInterviewDetails";
@@ -15,7 +16,6 @@ import { ArrowLeftIcon } from "@/components/icons";
 import { interviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
-import { toast } from "sonner";
 
 export const UpdateInterviewExperienceSchema = z.object({
   interviewRounds: z.array(interviewRoundSchema),
@@ -28,19 +28,23 @@ export const INTERVIEW_FORM_ID = "interview-form";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
-  const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
   const router = useRouter();
 
+  // Fetch application details
+  const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
+
+  const { updateApplicationFirstResponseDate } = useUpdateApplicationFirstResponseDate(application_id as string);
+
+  // Fetch interview rounds
   const {
     data: interviewRounds,
     error: interviewRoundsError,
     isLoading: interviewRoundsLoading,
   } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), fetcher);
 
-  const { updateApplicationFirstResponseDate } = useUpdateApplicationFirstResponseDate(application_id as string);
-
   const { updateInterviewRounds, isUpdatingInterviewRounds } = useUpdateInterviewRounds(application_id as string);
 
+  // local states
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading || interviewRoundsLoading) return <div>Loading...</div>;
@@ -54,7 +58,6 @@ export default function InterviewExperiencePage() {
 
   const handleSave = async (data: InterviewExperienceFormValues) => {
     console.log("save data...", data);
-    //TODO: install sonner toast to show success message
     try {
       await updateApplicationFirstResponseDate(data.first_response_date);
       await updateInterviewRounds(data.interviewRounds);
@@ -76,19 +79,23 @@ export default function InterviewExperiencePage() {
 
       <div className="flex justify-between">
         <h1 className="mb-4 text-3xl font-bold">Interview Experience</h1>
-        {isEditing ? (
-          <div className="space-x-2">
-            <Button color="primary" form={INTERVIEW_FORM_ID} type="submit">
-              Save
-            </Button>
-            <Button color="secondary" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <Button color="primary" onClick={() => setIsEditing(true)}>
-            Edit Interview Rounds
-          </Button>
+        {applicationDetails.isCurrentUserItem && (
+          <>
+            {isEditing ? (
+              <div className="space-x-2">
+                <Button color="primary" form={INTERVIEW_FORM_ID} type="submit">
+                  Save
+                </Button>
+                <Button color="secondary" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button color="primary" onClick={() => setIsEditing(true)}>
+                Edit Interview Rounds
+              </Button>
+            )}
+          </>
         )}
       </div>
 
