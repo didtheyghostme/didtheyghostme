@@ -18,12 +18,12 @@ import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateAppl
 
 export const UpdateInterviewExperienceSchema = z.object({
   interviewRounds: z.array(interviewRoundSchema),
-  first_response_date: z.string().nullable(),
+  first_response_date: z.string().min(1, "First response date is required"),
 });
 
 export type InterviewExperienceFormValues = z.infer<typeof UpdateInterviewExperienceSchema>;
 
-export const FORM_ID = "interview-form";
+export const INTERVIEW_FORM_ID = "interview-form";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -54,8 +54,12 @@ export default function InterviewExperiencePage() {
   const handleSave = async (data: InterviewExperienceFormValues) => {
     console.log("save data...", data);
     //TODO: install sonner toast to show success message
-    await updateApplicationFirstResponseDate(data.first_response_date as string);
-    await updateInterviewRounds(data.interviewRounds);
+    try {
+      await updateApplicationFirstResponseDate(data.first_response_date);
+      await updateInterviewRounds(data.interviewRounds);
+    } catch (error) {
+      console.error("Error updating interview experience:", error);
+    }
 
     setIsEditing(false);
   };
@@ -70,7 +74,7 @@ export default function InterviewExperiencePage() {
         <h1 className="mb-4 text-3xl font-bold">Interview Experience</h1>
         {isEditing ? (
           <div className="space-x-2">
-            <Button color="primary" form={FORM_ID} type="submit">
+            <Button color="primary" form={INTERVIEW_FORM_ID} type="submit">
               Save
             </Button>
             <Button color="secondary" onClick={() => setIsEditing(false)}>
