@@ -12,6 +12,7 @@ import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
+import TableOfAppliedApplication from "./TableOfAppliedApplication";
 
 export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name">;
@@ -77,7 +78,7 @@ export default function JobDetailsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1024px]">
+    <div className="">
       <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to {jobDetails.company.company_name}
       </Button>
@@ -131,6 +132,9 @@ export default function JobDetailsPage() {
         <Tabs aria-label="Options">
           <Tab key="photos" title="Applied">
             {/* TODO: Display table with application start date, applied on, replied on, days between, status below */}
+            {/* TODO: 18 Oct Friday*/}
+            <TableOfAppliedApplication applications={applications.data} />
+
             <Card>
               <CardBody>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
@@ -139,6 +143,7 @@ export default function JobDetailsPage() {
             </Card>
           </Tab>
           <Tab key="music" title="Online Assessment">
+            {/* TODOO: 18 Oct Friday, add the tags for interview round form so that Online Assessment tag can be captured here */}
             <Card>
               <CardBody>
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore

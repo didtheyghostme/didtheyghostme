@@ -6,7 +6,6 @@ export const APPLICATION_STATUS = {
   APPLIED: "Applied",
   INTERVIEWING: "Interviewing",
   REJECTED: "Rejected",
-  HIRED: "Hired",
   GHOSTED: "Ghosted",
-  OFFER: "Offer",
+  OFFERED: "Offered",
 } as const satisfies UppercaseToApplicationStatus;
