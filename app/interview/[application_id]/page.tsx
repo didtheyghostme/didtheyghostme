@@ -15,6 +15,7 @@ import { ArrowLeftIcon } from "@/components/icons";
 import { interviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
+import { toast } from "sonner";
 
 export const UpdateInterviewExperienceSchema = z.object({
   interviewRounds: z.array(interviewRoundSchema),
@@ -57,8 +58,11 @@ export default function InterviewExperiencePage() {
     try {
       await updateApplicationFirstResponseDate(data.first_response_date);
       await updateInterviewRounds(data.interviewRounds);
+
+      toast.success("Interview experience updated successfully");
     } catch (error) {
       console.error("Error updating interview experience:", error);
+      toast.error("Error updating interview experience");
     }
 
     setIsEditing(false);
