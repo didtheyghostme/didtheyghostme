@@ -1,0 +1,119 @@
+import { FormProvider, useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Tooltip } from "@nextui-org/react";
+import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
+
+import { FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "./page";
+
+type EditInterviewDetailsProps = {
+  applicationDetails: ProcessedApplication;
+  interviewRounds: InterviewExperienceTable[];
+  onSave: (data: InterviewExperienceFormValues) => Promise<void>;
+};
+
+export function EditInterviewDetails({ applicationDetails, interviewRounds, onSave }: EditInterviewDetailsProps) {
+  const methods = useForm<InterviewExperienceFormValues>({
+    resolver: zodResolver(UpdateInterviewExperienceSchema),
+    defaultValues: {
+      interviewRounds: interviewRounds,
+      first_response_date: applicationDetails.first_response_date,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: methods.control,
+    name: "interviewRounds",
+  });
+
+  const handleAddNewInterviewRoundClick = () => {
+    append({ description: "", interview_date: "", response_date: null });
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <form id={FORM_ID} onSubmit={methods.handleSubmit(onSave)}>
+        <Card>
+          <CardHeader>
+            <h2 className="text-2xl font-semibold">title</h2>
+            <p className="text-default-500">company_name</p>
+          </CardHeader>
+          <Divider />
+          <CardBody>
+            <div className="flex w-1/2 flex-wrap gap-4 md:flex-nowrap">
+              <Controller
+                control={methods.control}
+                name="first_response_date"
+                render={({ field }) => (
+                  <DatePicker
+                    label="First Response Date"
+                    maxValue={today(getLocalTimeZone())}
+                    value={field.value ? parseDate(field.value) : null}
+                    onChange={(date) => field.onChange(date ? date.toString() : null)}
+                  />
+                )}
+              />
+            </div>
+          </CardBody>
+        </Card>
+
+        {fields.length === 0 && <div className="mb-4 text-2xl font-semibold">There are no interviews yet</div>}
+
+        {fields.map((field, index) => (
+          <div key={field.id} className="mb-4 rounded-md border p-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold">Round {index + 1}</h4>
+              <Tooltip content="Remove this interview round">
+                <Button color="danger" size="sm" type="button" onClick={() => remove(index)}>
+                  Remove
+                </Button>
+              </Tooltip>
+            </div>
+            <Controller
+              control={methods.control}
+              name={`interviewRounds.${index}.description`}
+              render={({ field, fieldState }) => (
+                <Input
+                  {...field}
+                  isRequired
+                  className="mt-2"
+                  errorMessage={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
+                  label="Description"
+                  placeholder="Enter interview round description"
+                />
+              )}
+            />
+            <Controller
+              control={methods.control}
+              name={`interviewRounds.${index}.interview_date`}
+              render={({ field, fieldState }) => (
+                <DatePicker
+                  isRequired
+                  className="mt-2"
+                  errorMessage={fieldState.error?.message}
+                  isInvalid={!!fieldState.error}
+                  label="Interview Date"
+                  value={field.value ? parseDate(field.value) : null}
+                  onChange={(date) => field.onChange(date ? date.toString() : null)}
+                />
+              )}
+            />
+            <Controller
+              control={methods.control}
+              name={`interviewRounds.${index}.response_date`}
+              render={({ field }) => (
+                <DatePicker className="mt-2" label="Response Date" value={field.value ? parseDate(field.value) : null} onChange={(date) => field.onChange(date ? date.toString() : null)} />
+              )}
+            />
+          </div>
+        ))}
+
+        <div className="flex items-center space-x-4">
+          <Button type="button" onClick={handleAddNewInterviewRoundClick}>
+            Add New Round
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
+  );
+}
