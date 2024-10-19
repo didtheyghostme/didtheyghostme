@@ -41,6 +41,17 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
             <p>Description:{round.description}</p>
 
             <p>Date: {new Date(applicationDetails.created_at).toLocaleDateString()}</p>
+
+            {round.interview_tags && round.interview_tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span>Tags: </span>
+                {round.interview_tags.map((tag) => (
+                  <Chip key={tag} className="mr-1">
+                    {tag}
+                  </Chip>
+                ))}
+              </div>
+            )}
           </CardBody>
         </Card>
       ))}

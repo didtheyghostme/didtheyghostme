@@ -1,9 +1,11 @@
 import { FormProvider, useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Tooltip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Tooltip, Chip } from "@nextui-org/react";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
+import { useState } from "react";
 
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "./page";
+import { InterviewTagsModal } from "./InterviewTagsModal";
 
 type EditInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;
@@ -12,6 +14,8 @@ type EditInterviewDetailsProps = {
 };
 
 export function EditInterviewDetails({ applicationDetails, interviewRounds, onSave }: EditInterviewDetailsProps) {
+  const [openModalIndex, setOpenModalIndex] = useState<number | null>(null);
+
   const methods = useForm<InterviewExperienceFormValues>({
     resolver: zodResolver(UpdateInterviewExperienceSchema),
     defaultValues: {
@@ -31,7 +35,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   });
 
   const handleAddNewInterviewRoundClick = () => {
-    append({ description: "", interview_date: "", response_date: null });
+    append({ description: "", interview_date: "", response_date: null, interview_tags: null });
   };
 
   return (
@@ -119,6 +123,34 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                   name={`interviewRounds.${index}.response_date`}
                   render={({ field }) => (
                     <DatePicker className="mt-2" label="Response Date" value={field.value ? parseDate(field.value) : null} onChange={(date) => field.onChange(date ? date.toString() : null)} />
+                  )}
+                />
+
+                <Controller
+                  control={methods.control}
+                  name={`interviewRounds.${index}.interview_tags`}
+                  render={({ field }) => (
+                    <>
+                      <Button className="mt-2" color="secondary" variant="bordered" onPress={() => setOpenModalIndex(index)}>
+                        Select Interview Tags
+                      </Button>
+                      {field.value && field.value.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {field.value.map((tag) => (
+                            <Chip key={tag}>{tag}</Chip>
+                          ))}
+                        </div>
+                      )}
+                      <InterviewTagsModal
+                        isOpen={openModalIndex === index}
+                        selectedTags={field.value || []}
+                        onClose={() => setOpenModalIndex(null)}
+                        onTagsChange={(tags) => {
+                          field.onChange(tags);
+                          setOpenModalIndex(null);
+                        }}
+                      />
+                    </>
                   )}
                 />
               </div>

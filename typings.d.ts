@@ -40,6 +40,8 @@ type ApplicationTable = {
   job_posting_id: string;
 } & User;
 
+type InterviewTag = "Online Assessment" | "HR Call" | "Technical" | "Behavioral" | "Hiring Manager";
+
 type InterviewExperienceTable = {
   id: string;
   round_no: number;
@@ -47,6 +49,7 @@ type InterviewExperienceTable = {
   description: string; // ? from markdown?
   interview_date: string;
   response_date: string | null;
+  interview_tags: InterviewTag[] | null;
   created_at: string;
   application_id: string;
 } & User;

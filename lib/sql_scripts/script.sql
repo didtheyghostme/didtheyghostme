@@ -58,9 +58,18 @@ BEGIN
   WITH input_rounds AS (
     SELECT 
       ord AS round_no,
-      (x->>'description') AS description,
+      x->>'description' AS description,
       safe_to_date(x->>'interview_date') AS interview_date,
-      safe_to_date(x->>'response_date') AS response_date
+      safe_to_date(x->>'response_date') AS response_date,
+      -- Extract interview_tags as text array, handling arrays and ensuring it's not a scalar
+      CASE 
+        WHEN jsonb_typeof(x->'interview_tags') = 'array' THEN 
+          ARRAY(
+            SELECT jsonb_array_elements_text(x->'interview_tags')
+          )
+        ELSE
+          NULL
+      END AS interview_tags
     FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY AS arr(x, ord)
   )
   INSERT INTO interview_experience (
@@ -68,6 +77,7 @@ BEGIN
     description, 
     interview_date, 
     response_date, 
+    interview_tags,
     application_id, 
     user_id
   )
@@ -76,6 +86,7 @@ BEGIN
     description,
     interview_date,
     response_date,
+    interview_tags,
     p_application_id,
     p_user_id
   FROM input_rounds
@@ -83,7 +94,8 @@ BEGIN
   DO UPDATE SET
     description = EXCLUDED.description,
     interview_date = EXCLUDED.interview_date,
-    response_date = EXCLUDED.response_date;
+    response_date = EXCLUDED.response_date,
+    interview_tags = EXCLUDED.interview_tags;
 
   -- Delete any rounds that are no longer present in the input
   DELETE FROM interview_experience
