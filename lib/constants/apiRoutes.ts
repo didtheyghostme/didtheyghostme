@@ -1,19 +1,19 @@
 export const API = {
   COMPANY: {
     getAll: "/api/company",
-    getById: (id: string) => `/api/company/${id}`,
+    getById: (company_id: string) => `/api/company/${company_id}`,
   },
   JOB_POSTING: {
-    getAllByCompanyId: (companyId: string) => `/api/company/${companyId}/job`,
-    getById: (id: string) => `/api/job/${id}`,
+    getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
+    getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },
   APPLICATION: {
-    getAllByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/application`, // return all applications for a job posting
-    getByApplicationId: (applicationId: string) => `/api/application/${applicationId}`, // return one application by id
+    getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/application`, // return all applications for a job posting
+    getByApplicationId: (application_id: string) => `/api/application/${application_id}`, // return one application by id
   },
   INTERVIEW: {
-    getAllByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`, // return all interviews for an application
-    getAllByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/interview`, // return all interviews for a job posting
+    getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application
+    getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/interview`, // return all interviews for a job posting
   },
 } as const;
 
