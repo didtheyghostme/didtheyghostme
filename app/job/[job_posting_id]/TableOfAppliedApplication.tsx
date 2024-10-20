@@ -13,7 +13,6 @@ import {
   DropdownItem,
   Chip,
   Pagination,
-  SortDescriptor,
   Selection,
   ChipProps,
 } from "@nextui-org/react";
@@ -28,21 +27,16 @@ type ColumnKey = keyof ProcessedApplication | "days_between";
 
 type Column = {
   name: ColumnKey;
-  sortable: boolean;
   displayName: string;
   mobileDisplayName: string;
 };
 
 const columns: Column[] = [
-  { name: "applied_date", sortable: true, displayName: "Applied on", mobileDisplayName: "Applied on" },
-  { name: "first_response_date", sortable: true, displayName: "First response on", mobileDisplayName: "First Response" },
-  { name: "days_between", sortable: true, displayName: "No. of days", mobileDisplayName: "Days" },
-  { name: "status", sortable: true, displayName: "Status", mobileDisplayName: "Status" },
+  { name: "applied_date", displayName: "Applied on", mobileDisplayName: "Applied on" },
+  { name: "first_response_date", displayName: "First response on", mobileDisplayName: "First Response" },
+  { name: "days_between", displayName: "No. of days", mobileDisplayName: "Days" },
+  { name: "status", displayName: "Status", mobileDisplayName: "Status" },
 ];
-
-type CustomSortDescriptor = Omit<SortDescriptor, "column"> & {
-  column: ColumnKey;
-};
 
 type ChipColor = NonNullable<ChipProps["color"]>;
 
@@ -67,6 +61,26 @@ const getStatusColorPriority = (status: ApplicationStatus): StatusColorPriority 
 
 const MAX_ROWS_PER_PAGE = 10;
 
+type SortOptionDefinition = {
+  key: string;
+  label: string;
+  column: ColumnKey;
+  direction: "ascending" | "descending";
+};
+
+const sortOptions = [
+  { key: "applied_date_asc", label: "Applied on: Oldest to Newest", column: "applied_date", direction: "ascending" },
+  { key: "applied_date_desc", label: "Applied on: Newest to Oldest", column: "applied_date", direction: "descending" },
+  { key: "first_response_date_asc", label: "First response on: Oldest to Newest", column: "first_response_date", direction: "ascending" },
+  { key: "first_response_date_desc", label: "First response on: Newest to Oldest", column: "first_response_date", direction: "descending" },
+  { key: "days_between_asc", label: "No. of days: Low to High", column: "days_between", direction: "ascending" },
+  { key: "days_between_desc", label: "No. of days: High to Low", column: "days_between", direction: "descending" },
+  { key: "status_asc", label: "Status: Applied to Offered", column: "status", direction: "ascending" },
+  { key: "status_desc", label: "Status: Offered to Applied", column: "status", direction: "descending" },
+] as const satisfies SortOptionDefinition[];
+
+type SortOption = (typeof sortOptions)[number];
+
 interface TableOfAppliedApplicationProps {
   applications: ProcessedApplication[];
 }
@@ -75,17 +89,7 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   const router = useRouter();
 
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [sortDescriptor, setSortDescriptor] = React.useState<CustomSortDescriptor>({
-    column: "applied_date",
-    direction: "ascending",
-  });
-  const handleSortChange = (descriptor: SortDescriptor) => {
-    setSortDescriptor({
-      column: descriptor.column as ColumnKey,
-      direction: descriptor.direction,
-    });
-  };
-
+  const [currentSort, setCurrentSort] = React.useState<SortOption>(sortOptions[0]);
   const [page, setPage] = React.useState(1);
 
   const filteredItems = React.useMemo(() => {
@@ -105,45 +109,42 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   };
 
   const handleOnRowClick = (key: React.Key) => {
-    console.log("Row clicked, key:", key);
-    console.log("Current paginatedItems:", paginatedItems);
-
     const clickedApplication = paginatedItems.find((application) => application.id === key);
 
     if (clickedApplication) {
-      console.log("Clicked application:", clickedApplication.id);
       router.push(`/interview/${clickedApplication.id}`);
     }
   };
 
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof ProcessedApplication];
-      const second = b[sortDescriptor.column as keyof ProcessedApplication];
+      const { column, direction } = currentSort;
+      const first = a[column as keyof ProcessedApplication];
+      const second = b[column as keyof ProcessedApplication];
 
-      if (sortDescriptor.column === "status") {
+      if (column === "status") {
         const priorityA = getStatusColorPriority(a.status).priority;
         const priorityB = getStatusColorPriority(b.status).priority;
 
-        return (priorityA - priorityB) * (sortDescriptor.direction === "descending" ? -1 : 1);
+        return (priorityA - priorityB) * (direction === "descending" ? -1 : 1);
       }
 
-      if (sortDescriptor.column === "days_between") {
+      if (column === "days_between") {
         const daysA = calculateDaysBetween(a.applied_date, a.first_response_date);
         const daysB = calculateDaysBetween(b.applied_date, b.first_response_date);
 
-        return (daysA - daysB) * (sortDescriptor.direction === "descending" ? -1 : 1);
+        return (daysA - daysB) * (direction === "descending" ? -1 : 1);
       }
 
       if (first == null && second == null) return 0;
-      if (first == null) return sortDescriptor.direction === "descending" ? 1 : -1;
-      if (second == null) return sortDescriptor.direction === "descending" ? -1 : 1;
+      if (first == null) return direction === "descending" ? 1 : -1;
+      if (second == null) return direction === "descending" ? -1 : 1;
 
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, filteredItems]);
+  }, [currentSort, filteredItems]);
 
   const paginatedItems = React.useMemo(() => {
     const start = (page - 1) * MAX_ROWS_PER_PAGE;
@@ -190,24 +191,52 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
     setStatusFilter(keys);
   };
 
+  const handleSortChange = (key: SortOption["key"]) => {
+    const newSort = sortOptions.find((option) => option.key === key);
+
+    if (newSort) {
+      setCurrentSort(newSort);
+    }
+  };
+
   const topContent = React.useMemo(() => {
     return (
-      <div className="flex flex-col items-end">
-        <Dropdown>
-          <DropdownTrigger>
-            <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-              Filter status
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={statusFilter} selectionMode="multiple" onSelectionChange={handleStatusFilterChange}>
-            {statusOptions.map((status) => (
-              <DropdownItem key={status}>{status}</DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end gap-2">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                Sort by
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Sort options"
+              selectedKeys={new Set([currentSort.key])}
+              selectionMode="single"
+              onSelectionChange={(keys) => handleSortChange(Array.from(keys)[0] as SortOption["key"])}
+            >
+              {sortOptions.map((option) => (
+                <DropdownItem key={option.key}>{option.label}</DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                Filter status
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={statusFilter} selectionMode="multiple" onSelectionChange={handleStatusFilterChange}>
+              {statusOptions.map((status) => (
+                <DropdownItem key={status}>{status}</DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       </div>
     );
-  }, [statusFilter]);
+  }, [currentSort, statusFilter]);
 
   const bottomContent = React.useMemo(() => {
     return (
@@ -235,22 +264,19 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       selectionMode="single"
-      sortDescriptor={sortDescriptor}
       topContent={topContent}
       topContentPlacement="outside"
       classNames={{
         wrapper: "max-h-[500px]",
-        th: "text-center py-2 px-1 sm:px-2 sm:text-sm",
+        th: "text-center py-2 px-1 sm:px-2 sm:text-sm cursor-default",
         td: "text-center py-2 px-1 sm:px-2",
         tr: "cursor-pointer",
-        sortIcon: "ml-0",
       }}
       onRowAction={handleOnRowClick}
-      onSortChange={handleSortChange}
     >
       <TableHeader columns={columns}>
         {(column) => (
-          <TableColumn key={column.name} align="center" allowsSorting={column.sortable}>
+          <TableColumn key={column.name} align="center">
             <span className="hidden sm:inline">{column.displayName}</span>
             <span className="sm:hidden">{column.mobileDisplayName}</span>
           </TableColumn>

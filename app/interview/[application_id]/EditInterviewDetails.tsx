@@ -35,7 +35,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   });
 
   const handleAddNewInterviewRoundClick = () => {
-    append({ description: "", interview_date: "", response_date: null, interview_tags: null });
+    append({ description: "", interview_date: "", response_date: null, interview_tags: [] });
   };
 
   return (
