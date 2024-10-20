@@ -9,37 +9,32 @@ import { Key } from "react";
 import ReportLinkModal from "./ReportLinkModal";
 import TrackThisJobModal from "./TrackThisJobModal";
 import TableOfAppliedApplication from "./TableOfAppliedApplication";
+import { InterviewExperienceContent } from "./InterviewExperienceContent";
+import { OnlineAssessmentContent } from "./OnlineAssessmentContent";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
+import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 
 // Define the tab mapping
 const TABS = {
-  Applied: {
-    title: "Applied",
+  [JOB_POST_PAGE_TABS.APPLIED]: {
+    title: JOB_POST_PAGE_TABS.APPLIED,
     content: (applications: ProcessedApplication[]) => <TableOfAppliedApplication applications={applications} />,
   },
-  OnlineAssessment: {
-    title: "Online Assessment",
-    content: (job_posting_id: string) => (
-      <Card>
-        <CardBody>Online Assessment Content</CardBody>
-      </Card>
-    ),
+  [JOB_POST_PAGE_TABS.ONLINE_ASSESSMENT]: {
+    title: JOB_POST_PAGE_TABS.ONLINE_ASSESSMENT,
+    content: (job_posting_id: string) => <OnlineAssessmentContent job_posting_id={job_posting_id} />,
   },
-  InterviewExperience: {
-    title: "Interview Experience",
-    content: (job_posting_id: string) => (
-      <Card>
-        <CardBody>Interview Experience Content</CardBody>
-      </Card>
-    ),
+  [JOB_POST_PAGE_TABS.INTERVIEW_EXPERIENCE]: {
+    title: JOB_POST_PAGE_TABS.INTERVIEW_EXPERIENCE,
+    content: (job_posting_id: string) => <InterviewExperienceContent job_posting_id={job_posting_id} />,
   },
-  Questions: {
-    title: "Questions",
+  [JOB_POST_PAGE_TABS.QUESTIONS]: {
+    title: JOB_POST_PAGE_TABS.QUESTIONS,
     content: (job_posting_id: string) => (
       <Card>
         <CardBody>Questions Content</CardBody>
@@ -187,6 +182,7 @@ export default function JobDetailsPage() {
 
         {/* TODOO: 19/20 Oct Sunday, add the tags for interview round form so that Online Assessment tag can be captured here */}
         {/* done, now left design Tag: Online Assessment, HR Call, Technical, Behavioral, Hiring Manager */}
+        {/* add nuqs, get clerk user table (id, name, profile pic url) */}
       </div>
 
       {/* TODO: add application cards below */}

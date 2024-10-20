@@ -13,6 +13,7 @@ export const API = {
   },
   INTERVIEW: {
     getAllByApplicationId: (applicationId: string) => `/api/interview/${applicationId}`, // return all interviews for an application
+    getAllByJobPostingId: (jobPostingId: string) => `/api/job/${jobPostingId}/interview`, // return all interviews for a job posting
   },
 } as const;
 
