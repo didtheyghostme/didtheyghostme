@@ -3,16 +3,54 @@
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { Key } from "react";
 
 import ReportLinkModal from "./ReportLinkModal";
 import TrackThisJobModal from "./TrackThisJobModal";
+import TableOfAppliedApplication from "./TableOfAppliedApplication";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
-import TableOfAppliedApplication from "./TableOfAppliedApplication";
+
+// Define the tab mapping
+const TABS = {
+  Applied: {
+    title: "Applied",
+    content: (applications: ProcessedApplication[]) => <TableOfAppliedApplication applications={applications} />,
+  },
+  OnlineAssessment: {
+    title: "Online Assessment",
+    content: (job_posting_id: string) => (
+      <Card>
+        <CardBody>Online Assessment Content</CardBody>
+      </Card>
+    ),
+  },
+  InterviewExperience: {
+    title: "Interview Experience",
+    content: (job_posting_id: string) => (
+      <Card>
+        <CardBody>Interview Experience Content</CardBody>
+      </Card>
+    ),
+  },
+  Questions: {
+    title: "Questions",
+    content: (job_posting_id: string) => (
+      <Card>
+        <CardBody>Questions Content</CardBody>
+      </Card>
+    ),
+  },
+} as const;
+
+type TabKey = keyof typeof TABS;
+
+const tabKeys = Object.keys(TABS) as TabKey[];
 
 export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name">;
@@ -20,7 +58,10 @@ export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url
 
 export default function JobDetailsPage() {
   const { job_posting_id } = useParams();
+  const [selectedTab, setSelectedTab] = useQueryState("tab", parseAsStringLiteral(tabKeys).withDefault("Applied"));
+
   const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id as string), fetcher);
+
   console.log("jobDetails from page", jobDetails);
 
   // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
@@ -77,6 +118,10 @@ export default function JobDetailsPage() {
     router.push(`/interview/${applicationId}`);
   };
 
+  const handleTabChange = (key: Key) => {
+    setSelectedTab(key as TabKey);
+  };
+
   return (
     <div className="">
       <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
@@ -129,39 +174,19 @@ export default function JobDetailsPage() {
 
       {/* Vertical tab */}
       <div className="flex w-full flex-col">
-        <Tabs aria-label="Options">
-          <Tab key="photos" title="Applied">
-            {/* TODO: Display table with application start date, applied on, replied on, days between, status below */}
-            {/* TODO: 18 Oct Friday*/}
-            <TableOfAppliedApplication applications={applications.data} />
-
-            <Card>
-              <CardBody>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo consequat.
-              </CardBody>
-            </Card>
-          </Tab>
-          <Tab key="music" title="Online Assessment">
-            {/* TODOO: 18 Oct Friday, add the tags for interview round form so that Online Assessment tag can be captured here */}
-            <Card>
-              <CardBody>
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-                eu fugiat nulla pariatur.
-              </CardBody>
-            </Card>
-          </Tab>
-          <Tab key="videos" title="Interview Experience">
-            <Card>
-              <CardBody>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</CardBody>
-            </Card>
-          </Tab>
-          <Tab key="questions" title="Questions">
-            <Card>
-              <CardBody>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</CardBody>
-            </Card>
-          </Tab>
+        <Tabs aria-label="Options" selectedKey={selectedTab} onSelectionChange={handleTabChange}>
+          {tabKeys.map((key) => (
+            <Tab key={key} title={TABS[key].title}>
+              {key === "Applied" ? TABS[key].content(applications.data) : TABS[key].content(job_posting_id as string)}
+            </Tab>
+          ))}
         </Tabs>
+
+        {/* TODO: Display table with application start date, applied on, replied on, days between, status below */}
+        {/* TODO: 18 Oct Friday done */}
+
+        {/* TODOO: 19/20 Oct Sunday, add the tags for interview round form so that Online Assessment tag can be captured here */}
+        {/* done, now left design Tag: Online Assessment, HR Call, Technical, Behavioral, Hiring Manager */}
       </div>
 
       {/* TODO: add application cards below */}
