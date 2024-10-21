@@ -78,13 +78,13 @@ const sortOptions = [
   { key: "days_between_desc", label: "No. of days: High to Low", column: "days_between", direction: "descending" },
   { key: "status_asc", label: "Status: Applied to Offered", column: "status", direction: "ascending" },
   { key: "status_desc", label: "Status: Offered to Applied", column: "status", direction: "descending" },
-] as const satisfies SortOptionDefinition[];
+] as const satisfies readonly SortOptionDefinition[];
 
 type SortOption = (typeof sortOptions)[number];
 
 type StatusFilterOption = ApplicationStatus | "all";
 
-const statusFilterOptions = ["all", ...Object.values(APPLICATION_STATUS)] as const satisfies StatusFilterOption[];
+const statusFilterOptions = ["all", ...Object.values(APPLICATION_STATUS)] as const satisfies readonly StatusFilterOption[];
 
 interface TableOfAppliedApplicationProps {
   applications: ProcessedApplication[];
@@ -104,9 +104,12 @@ function generateMockApplication(id: number): ProcessedApplication {
     created_at: appliedDate.toISOString(),
     job_posting_id: "1",
     isCurrentUserItem: false,
+    full_name: "John Doe",
+    profile_pic_url: "https://example.com/profile.jpg",
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function generateMockApplications(count: number): ProcessedApplication[] {
   return Array.from({ length: count }, (_, index) => generateMockApplication(index + 1));
 }
@@ -190,8 +193,9 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   const renderCell = React.useCallback((application: ProcessedApplication, columnKey: ColumnKey) => {
     switch (columnKey) {
       case "applied_date":
+        return <p>{formatDate(application.applied_date)}</p>;
       case "first_response_date":
-        return <p>{application[columnKey] ? formatDate(application[columnKey]) : "N/A"}</p>;
+        return <p>{application.first_response_date ? formatDate(application.first_response_date) : "N/A"}</p>;
       case "days_between":
         const days = calculateDaysBetween(application.applied_date, application.first_response_date);
 

@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Button, Spacer } from "@nextui-org/react";
 import { useState } from "react";
-import { z } from "zod";
 import { toast } from "sonner";
 
 import { ViewInterviewDetails } from "./ViewInterviewDetails";
@@ -13,18 +12,9 @@ import { EditInterviewDetails } from "./EditInterviewDetails";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ArrowLeftIcon } from "@/components/icons";
-import { interviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
-
-export const UpdateInterviewExperienceSchema = z.object({
-  interviewRounds: z.array(interviewRoundSchema),
-  first_response_date: z.string().min(1, "First response date is required"),
-});
-
-export type InterviewExperienceFormValues = z.infer<typeof UpdateInterviewExperienceSchema>;
-
-export const INTERVIEW_FORM_ID = "interview-form";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/addInterviewRoundSchema";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();

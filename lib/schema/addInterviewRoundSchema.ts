@@ -19,3 +19,13 @@ type AssertAllInterviewTagsPresent = MissingTags extends never ? true : `Error: 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _assertAllInterviewTagsPresent: AssertAllInterviewTagsPresent = true;
+
+// for EditInterviewDetails form
+export const UpdateInterviewExperienceSchema = z.object({
+  interviewRounds: z.array(interviewRoundSchema),
+  first_response_date: z.string().min(1, "First response date is required"),
+});
+
+export type InterviewExperienceFormValues = z.infer<typeof UpdateInterviewExperienceSchema>;
+
+export const INTERVIEW_FORM_ID = "interview-form";

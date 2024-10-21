@@ -4,8 +4,9 @@ import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Tooltip
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "./page";
 import { InterviewTagsModal } from "./InterviewTagsModal";
+
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "@/lib/schema/addInterviewRoundSchema";
 
 type EditInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;

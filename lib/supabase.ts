@@ -43,6 +43,7 @@ export async function createClerkSupabaseClientSsr() {
   });
 }
 
+// You can find this in Supabase UI dashboard, go to Settings > API > Project API Keys > service_role
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function createSupabaseAdminClient() {
