@@ -42,3 +42,13 @@ export async function createClerkSupabaseClientSsr() {
     },
   });
 }
+
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+export async function createSupabaseAdminClient() {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("Supabase URL or Service Role Key is undefined.");
+  }
+
+  return createClient(supabaseUrl!, supabaseServiceRoleKey!);
+}

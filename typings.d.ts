@@ -2,10 +2,18 @@ type Note = {
   id?: number; // Optional for new entries
   title: string;
 };
-type User = {
+
+type BaseUser = {
   user_id: string;
-  // add other user fields in future, like name, profile pic, etc.
 };
+
+type ClerkUserProfileData = {
+  // add other user fields in future, like name, profile pic, etc.
+  full_name: string;
+  profile_pic_url: string;
+};
+
+type User = BaseUser & ClerkUserProfileData;
 
 // Supabase database tables
 type CompanyTable = {
@@ -26,6 +34,7 @@ type JobPostingTable = {
   created_at: string;
   company_id: string;
   // add job_status: "Verified by admin?"
+  // or job_posted_date: string | null; for admin to set date, show new on UI if set
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
 } & User;
 
@@ -62,7 +71,7 @@ type NullableKeys<T> = {
 
 type GlobalGeneratedKeys = "id" | "created_at";
 
-type ExcludeGeneratedKeys<T> = Omit<T, NullableKeys<T> | GlobalGeneratedKeys>;
+type ExcludeGeneratedKeys<T> = Omit<T, NullableKeys<T> | GlobalGeneratedKeys | keyof ClerkUserProfileData>;
 
 type InsertApplication = ExcludeGeneratedKeys<ApplicationTable>;
 
