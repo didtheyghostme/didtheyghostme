@@ -1,15 +1,21 @@
-import { Card, CardBody, CardHeader, Chip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Chip, DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
 import useSWR from "swr";
+import { useQueryState, parseAsStringLiteral } from "nuqs";
+
+import { sortAssessmentsByDateTime, sortOptions, SORT_OPTION_KEYS, SortOption } from "./OnlineAssessmentContent";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
+import { ChevronDownIcon } from "@/components/icons";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
 };
 
 export function InterviewExperienceContent({ job_posting_id }: InterviewExperienceContentProps) {
+  const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
+
   const { data: interviewExperiences, error, isLoading } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
 
   if (isLoading) return <div>Loading...</div>;
@@ -20,20 +26,46 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
 
   if (filteredExperiences.length === 0) return <div>No interview experiences have been added yet</div>;
 
+  const sortedExperiences = sortAssessmentsByDateTime(filteredExperiences, sort);
+
+  function handleSortChange(keys: Selection) {
+    const selectedKey = Array.from(keys)[0];
+
+    if (typeof selectedKey === "string" && SORT_OPTION_KEYS.includes(selectedKey as SortOption["key"])) {
+      setSort(selectedKey as SortOption["key"]);
+    }
+  }
+
   return (
-    <div className="flex flex-wrap gap-4">
-      {filteredExperiences.map((interviewExperience) => (
-        <Card key={interviewExperience.id} isPressable className="w-full sm:w-[calc(50%-0.5rem)]">
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end gap-2">
+        <Dropdown>
+          <DropdownTrigger>
+            <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+              Sort by
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu disallowEmptySelection aria-label="Sort options" selectedKeys={new Set([sort])} selectionMode="single" onSelectionChange={handleSortChange}>
+            {sortOptions.map((option) => (
+              <DropdownItem key={option.key}>{option.label}</DropdownItem>
+            ))}
+          </DropdownMenu>
+        </Dropdown>
+      </div>
+
+      {sortedExperiences.map((experience) => (
+        <Card key={experience.id} isPressable className="w-full">
           <CardHeader>
             <h2 className="text-xl font-bold">
-              Round {interviewExperience.round_no} - {new Date(interviewExperience.interview_date).toLocaleDateString()}
+              Round {experience.round_no} - {new Date(experience.interview_date).toLocaleDateString()}
             </h2>
+            {experience.created_at}
           </CardHeader>
           <CardBody>
-            <p>{interviewExperience.description}</p>
-            <p>Difficulty: {interviewExperience.difficulty}</p>
+            <p>{experience.description}</p>
+            <p>Difficulty: {experience.difficulty}</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {interviewExperience.interview_tags?.map((tag) => (
+              {experience.interview_tags?.map((tag) => (
                 <Chip key={tag} color="primary" variant="flat">
                   {tag}
                 </Chip>

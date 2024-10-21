@@ -18,6 +18,7 @@ import {
 } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { parseDate } from "@internationalized/date";
+import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
@@ -81,21 +82,52 @@ const sortOptions = [
 
 type SortOption = (typeof sortOptions)[number];
 
+type StatusFilterOption = ApplicationStatus | "all";
+
+const statusFilterOptions = ["all", ...Object.values(APPLICATION_STATUS)] as const satisfies StatusFilterOption[];
+
 interface TableOfAppliedApplicationProps {
   applications: ProcessedApplication[];
 }
 
+function generateMockApplication(id: number): ProcessedApplication {
+  const statuses = Object.values(APPLICATION_STATUS);
+  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+  const appliedDate = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
+  const firstResponseDate = Math.random() > 0.3 ? new Date(appliedDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null;
+
+  return {
+    id: id.toString(),
+    applied_date: appliedDate.toISOString().split("T")[0],
+    first_response_date: firstResponseDate ? firstResponseDate.toISOString().split("T")[0] : null,
+    status: randomStatus,
+    created_at: appliedDate.toISOString(),
+    job_posting_id: "1",
+    isCurrentUserItem: false,
+  };
+}
+
+function generateMockApplications(count: number): ProcessedApplication[] {
+  return Array.from({ length: count }, (_, index) => generateMockApplication(index + 1));
+}
+
+// const applications = generateMockApplications(100);
+
 export default function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
   const router = useRouter();
 
-  const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [currentSort, setCurrentSort] = React.useState<SortOption>(sortOptions[0]);
-  const [page, setPage] = React.useState(1);
+  const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
+    status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]).withOptions({ clearOnDefault: true }),
+    sort: parseAsStringLiteral(sortOptions.map((option) => option.key))
+      .withDefault("applied_date_asc")
+      .withOptions({ clearOnDefault: true }),
+    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
+  });
 
   const filteredItems = React.useMemo(() => {
-    if (statusFilter === "all") return applications;
+    if (statusFilter.includes("all")) return applications;
 
-    return applications.filter((application) => (statusFilter as Set<string>).has(application.status));
+    return applications.filter((application) => statusFilter.includes(application.status));
   }, [applications, statusFilter]);
 
   const pages = Math.ceil(filteredItems.length / MAX_ROWS_PER_PAGE);
@@ -117,8 +149,10 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   };
 
   const sortedItems = React.useMemo(() => {
+    const sortOption = sortOptions.find((option) => option.key === currentSort) || sortOptions[0];
+
     return [...filteredItems].sort((a, b) => {
-      const { column, direction } = currentSort;
+      const { column, direction } = sortOption;
       const first = a[column as keyof ProcessedApplication];
       const second = b[column as keyof ProcessedApplication];
 
@@ -177,26 +211,28 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
 
   const onNextPage = React.useCallback(() => {
     if (page < pages) {
-      setPage(page + 1);
+      setQueryStates({ page: page + 1 });
     }
   }, [page, pages]);
 
   const onPreviousPage = React.useCallback(() => {
     if (page > 1) {
-      setPage(page - 1);
+      setQueryStates({ page: page - 1 });
     }
-  }, [page]);
+  }, [page, pages]);
 
   const handleStatusFilterChange = (keys: Selection) => {
-    setStatusFilter(keys);
+    const selectedKeys = Array.from(keys as Set<string>) as StatusFilterOption[];
+
+    if (selectedKeys.length === 0 || selectedKeys.length === statusFilterOptions.length - 1) {
+      setQueryStates({ status: ["all"] });
+    } else {
+      setQueryStates({ status: selectedKeys });
+    }
   };
 
   const handleSortChange = (key: SortOption["key"]) => {
-    const newSort = sortOptions.find((option) => option.key === key);
-
-    if (newSort) {
-      setCurrentSort(newSort);
-    }
+    setQueryStates({ sort: key });
   };
 
   const topContent = React.useMemo(() => {
@@ -212,7 +248,7 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
             <DropdownMenu
               disallowEmptySelection
               aria-label="Sort options"
-              selectedKeys={new Set([currentSort.key])}
+              selectedKeys={new Set([currentSort])}
               selectionMode="single"
               onSelectionChange={(keys) => handleSortChange(Array.from(keys)[0] as SortOption["key"])}
             >
@@ -227,7 +263,14 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
                 Filter status
               </Button>
             </DropdownTrigger>
-            <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={statusFilter} selectionMode="multiple" onSelectionChange={handleStatusFilterChange}>
+            <DropdownMenu
+              disallowEmptySelection
+              aria-label="Table Columns"
+              closeOnSelect={false}
+              selectedKeys={new Set(statusFilter.includes("all") ? statusOptions : statusFilter)}
+              selectionMode="multiple"
+              onSelectionChange={handleStatusFilterChange}
+            >
               {statusOptions.map((status) => (
                 <DropdownItem key={status}>{status}</DropdownItem>
               ))}
@@ -243,7 +286,7 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
       <div className="flex flex-row items-center justify-between px-2 py-2">
         <span className="text-small text-default-400"> {filteredItems.length} applicants </span>
         <div className="flex flex-1 items-center justify-end sm:flex-initial sm:justify-center">
-          <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={setPage} />
+          <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={(newPage) => setQueryStates({ page: newPage })} />
         </div>
         <div className="hidden gap-2 sm:flex">
           <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
