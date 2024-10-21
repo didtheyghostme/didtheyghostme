@@ -40,7 +40,7 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
             {round.response_date && <p>Response Date: {formatDate(round.response_date)}</p>}
             <p>Description:{round.description}</p>
 
-            <p>Date: {new Date(applicationDetails.created_at).toLocaleDateString()}</p>
+            <p>Date interviewed: {formatDate(round.interview_date)}</p>
 
             {round.interview_tags && round.interview_tags.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">

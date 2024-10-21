@@ -8,7 +8,7 @@ type ErrorMessage<K> = K extends string ? `Error: '${K}' must be a const value i
  * @template T - The type representing the typing schema.
  */
 export type SelectObject<T> = {
-  [K in keyof T]: T[K] extends object ? (K extends DBTableValues ? SelectObject<T[K]> : ErrorMessage<K>) : boolean;
+  [K in keyof T]: T[K] extends object ? (K extends DBTableValues ? { __isLeftJoin?: boolean } & SelectObject<T[K]> : ErrorMessage<K>) : boolean;
 };
 
 /**
@@ -25,9 +25,13 @@ export function buildSelectString(obj: SelectObject<any>): string {
     if (value === true) {
       parts.push(key);
     } else if (typeof value === "object" && value !== null) {
-      const nested = buildSelectString(value);
+      const { __isLeftJoin, ...fields } = value as { __isLeftJoin?: boolean } & SelectObject<any>;
 
-      parts.push(`${key} (${nested})`);
+      const nested = buildSelectString(fields);
+
+      const joinSuffix = __isLeftJoin ? "" : "!inner";
+
+      parts.push(`${key}${joinSuffix}(${nested})`);
     }
   });
 

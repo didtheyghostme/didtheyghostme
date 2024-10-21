@@ -1,6 +1,8 @@
-import { Button, Card, CardBody, CardHeader, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Selection } from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Selection } from "@nextui-org/react";
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
+
+import { InterviewExperienceCard, JobPostPageInterviewData } from "./InterviewExperienceCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -16,7 +18,7 @@ export const SORT_OPTION_KEYS = sortOptions.map((option) => option.key);
 
 export type SortOption = (typeof sortOptions)[number];
 
-export function sortAssessmentsByDateTime(assessments: InterviewExperienceTable[], sortOrder: SortOption["key"]) {
+export function sortAssessmentsByDateTime(assessments: JobPostPageInterviewData[], sortOrder: SortOption["key"]) {
   return [...assessments].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
     const dateB = new Date(b.created_at).getTime();
@@ -33,7 +35,9 @@ type OnlineAssessmentContentProps = {
 export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentContentProps) {
   const [sort, setSort] = useQueryState("oaSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
 
-  const { data: interviewExperiences, error, isLoading } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+  const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+
+  console.warn("interviewExperiences", interviewExperiences);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading online assessments</div>;
@@ -70,25 +74,8 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
         </Dropdown>
       </div>
 
-      {sortedAssessments.map((assessment) => (
-        <Card key={assessment.id} isPressable className="w-full">
-          <CardHeader>
-            <h2 className="text-xl font-bold">
-              Round {assessment.round_no} - {new Date(assessment.interview_date).toLocaleDateString()}
-            </h2>
-          </CardHeader>
-          <CardBody>
-            <p>{assessment.description}</p>
-            <p>Difficulty: {assessment.difficulty}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {assessment.interview_tags?.map((tag) => (
-                <Chip key={tag} color="primary" variant="flat">
-                  {tag}
-                </Chip>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
+      {sortedAssessments.map((interviewExperience) => (
+        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} />
       ))}
     </div>
   );

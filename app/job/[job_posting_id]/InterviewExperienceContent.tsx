@@ -1,8 +1,9 @@
-import { Card, CardBody, CardHeader, Chip, DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
+import { DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 
 import { sortAssessmentsByDateTime, sortOptions, SORT_OPTION_KEYS, SortOption } from "./OnlineAssessmentContent";
+import { InterviewExperienceCard, JobPostPageInterviewData } from "./InterviewExperienceCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -16,7 +17,7 @@ type InterviewExperienceContentProps = {
 export function InterviewExperienceContent({ job_posting_id }: InterviewExperienceContentProps) {
   const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
 
-  const { data: interviewExperiences, error, isLoading } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+  const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading interview experiences</div>;
@@ -53,26 +54,8 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
         </Dropdown>
       </div>
 
-      {sortedExperiences.map((experience) => (
-        <Card key={experience.id} isPressable className="w-full">
-          <CardHeader>
-            <h2 className="text-xl font-bold">
-              Round {experience.round_no} - {new Date(experience.interview_date).toLocaleDateString()}
-            </h2>
-            {experience.created_at}
-          </CardHeader>
-          <CardBody>
-            <p>{experience.description}</p>
-            <p>Difficulty: {experience.difficulty}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {experience.interview_tags?.map((tag) => (
-                <Chip key={tag} color="primary" variant="flat">
-                  {tag}
-                </Chip>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
+      {sortedExperiences.map((interviewExperience) => (
+        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} />
       ))}
     </div>
   );

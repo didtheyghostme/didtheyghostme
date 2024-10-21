@@ -182,30 +182,7 @@ export default function JobDetailsPage() {
 
         {/* TODOO: 19/20 Oct Sunday, add the tags for interview round form so that Online Assessment tag can be captured here */}
         {/* done, now left design Tag: Online Assessment, HR Call, Technical, Behavioral, Hiring Manager */}
-        {/* add nuqs, get clerk user table (id, name, profile pic url) */}
-      </div>
-
-      {/* TODO: add application cards below */}
-      <div className="flex gap-4">
-        {applications.data.map((application) => (
-          <Card key={application.id} isPressable className="w-full" onPress={() => handleApplicationClick(application)}>
-            <CardHeader>
-              <h2 className="text-xl font-bold">
-                {application.id} - {application.created_at}
-              </h2>
-            </CardHeader>
-            <CardBody>
-              <p>3 rounds</p>
-              <p>Status: Applied and waiting for response</p>
-              <Chip color="primary" variant="flat">
-                {application.status}
-              </Chip>
-              <Chip color="danger" variant="flat">
-                Rejected
-              </Chip>
-            </CardBody>
-          </Card>
-        ))}
+        {/* done add nuqs, get clerk user table (id, name, profile pic url) */}
       </div>
 
       <ReportLinkModal isOpen={isReportModalOpen} jobId={jobDetails.id} onClose={onReportModalClose} />
