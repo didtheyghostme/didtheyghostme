@@ -47,7 +47,7 @@ export default function InterviewExperiencePage() {
     router.back();
   };
 
-  const handleSave = async (data: InterviewExperienceFormValues) => {
+  const handleSaveForm = async (data: InterviewExperienceFormValues) => {
     console.log("save data...", data);
     try {
       await updateApplicationFirstResponseDate(data.first_response_date);
@@ -74,7 +74,7 @@ export default function InterviewExperiencePage() {
           <>
             {isEditing ? (
               <div className="space-x-2">
-                <Button color="primary" form={INTERVIEW_FORM_ID} type="submit">
+                <Button color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdatingInterviewRounds} type="submit">
                   Save
                 </Button>
                 <Button color="secondary" onClick={() => setIsEditing(false)}>
@@ -91,7 +91,7 @@ export default function InterviewExperiencePage() {
       </div>
 
       {isEditing ? (
-        <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} onSave={handleSave} />
+        <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} onSave={handleSaveForm} />
       ) : (
         <ViewInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} />
       )}
