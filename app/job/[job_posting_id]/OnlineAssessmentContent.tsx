@@ -1,13 +1,15 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Selection } from "@nextui-org/react";
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
+import { useRouter } from "next/navigation";
 
-import { InterviewExperienceCard, JobPostPageInterviewData } from "./InterviewExperienceCard";
+import { InterviewExperienceCard } from "./InterviewExperienceCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { ChevronDownIcon } from "@/components/icons";
+import { InterviewExperienceCardData, JobPostPageInterviewData } from "@/lib/sharedTypes";
 
 export const sortOptions = [
   { key: "newest", label: "Date posted: Newest to Oldest" },
@@ -37,6 +39,8 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
 
   const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
 
+  const router = useRouter();
+
   console.warn("interviewExperiences", interviewExperiences);
 
   if (isLoading) return <div>Loading...</div>;
@@ -49,13 +53,17 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
 
   const sortedAssessments = sortAssessmentsByDateTime(onlineAssessments, sort);
 
-  function handleSortChange(keys: Selection) {
+  const handleSortChange = (keys: Selection) => {
     const selectedKey = Array.from(keys)[0];
 
     if (typeof selectedKey === "string" && SORT_OPTION_KEYS.includes(selectedKey as SortOption["key"])) {
       setSort(selectedKey as SortOption["key"]);
     }
-  }
+  };
+
+  const handleCardClick = (application_id: string) => {
+    router.push(`/interview/${application_id}`);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,7 +83,7 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
       </div>
 
       {sortedAssessments.map((interviewExperience) => (
-        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} />
+        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} onCardClick={() => handleCardClick(interviewExperience.application.id)} />
       ))}
     </div>
   );

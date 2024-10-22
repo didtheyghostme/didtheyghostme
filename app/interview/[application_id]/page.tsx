@@ -15,6 +15,7 @@ import { ArrowLeftIcon } from "@/components/icons";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/addInterviewRoundSchema";
+import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -30,7 +31,7 @@ export default function InterviewExperiencePage() {
     data: interviewRounds,
     error: interviewRoundsError,
     isLoading: interviewRoundsLoading,
-  } = useSWR<InterviewExperienceTable[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), fetcher);
+  } = useSWR<InterviewExperienceCardData[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), fetcher);
 
   const { updateInterviewRounds, isUpdatingInterviewRounds } = useUpdateInterviewRounds(application_id as string);
 

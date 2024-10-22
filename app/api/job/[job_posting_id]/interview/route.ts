@@ -3,12 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
-import { JobPostPageInterviewData } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
+import { JobPostPageInterviewData } from "@/lib/sharedTypes";
 
 export async function GET(request: NextRequest, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  // Define the select object with default inner joins and optional left joins
   const selectObject: SelectObject<JobPostPageInterviewData> = {
     id: true,
     round_no: true,
@@ -19,13 +18,11 @@ export async function GET(request: NextRequest, { params }: { params: { job_post
     interview_tags: true,
     created_at: true,
     [DBTable.APPLICATION]: {
-      // Inner join (default)
       id: true,
       job_posting_id: true,
       status: true,
     },
     [DBTable.USER]: {
-      __isLeftJoin: true, // Specify left join for user
       full_name: true,
       profile_pic_url: true,
     },

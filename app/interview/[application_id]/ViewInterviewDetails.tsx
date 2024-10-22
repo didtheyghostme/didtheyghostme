@@ -1,10 +1,12 @@
 import { Card, CardBody, CardHeader, Divider, Chip } from "@nextui-org/react";
 
 import { formatDate } from "@/lib/formatDate";
+import { InterviewExperienceCardData } from "@/lib/sharedTypes";
+import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;
-  interviewRounds: InterviewExperienceTable[];
+  interviewRounds: InterviewExperienceCardData[];
 };
 
 export function ViewInterviewDetails({ applicationDetails, interviewRounds }: ViewInterviewDetailsProps) {
@@ -27,34 +29,11 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
       </Card>
 
       {/* TODO: interviews.map(interview) here */}
-      {interviewRounds.map((round) => (
-        <Card key={round.id} className="mb-4">
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Round {round.round_no}</h3>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <span>
-              Difficulty: <Chip color={applicationDetails.status === "Applied" ? "success" : applicationDetails.status === "Interviewing" ? "warning" : "danger"}>Medium</Chip>
-            </span>
-            {round.response_date && <p>Response Date: {formatDate(round.response_date)}</p>}
-            <p>Description:{round.description}</p>
-
-            <p>Date interviewed: {formatDate(round.interview_date)}</p>
-
-            {round.interview_tags && round.interview_tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span>Tags: </span>
-                {round.interview_tags.map((tag) => (
-                  <Chip key={tag} className="mr-1">
-                    {tag}
-                  </Chip>
-                ))}
-              </div>
-            )}
-          </CardBody>
-        </Card>
-      ))}
+      <div className="flex flex-col gap-4">
+        {interviewRounds.map((round) => (
+          <InterviewExperienceCard key={round.id} interviewExperience={round} />
+        ))}
+      </div>
     </>
   );
 }

@@ -7,10 +7,11 @@ import { useState } from "react";
 import { InterviewTagsModal } from "./InterviewTagsModal";
 
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "@/lib/schema/addInterviewRoundSchema";
+import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 type EditInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;
-  interviewRounds: InterviewExperienceTable[];
+  interviewRounds: InterviewExperienceCardData[];
   onSave: (data: InterviewExperienceFormValues) => Promise<void>;
 };
 

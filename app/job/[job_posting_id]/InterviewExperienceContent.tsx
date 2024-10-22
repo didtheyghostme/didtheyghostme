@@ -1,14 +1,16 @@
 import { DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
+import { useRouter } from "next/navigation";
 
 import { sortAssessmentsByDateTime, sortOptions, SORT_OPTION_KEYS, SortOption } from "./OnlineAssessmentContent";
-import { InterviewExperienceCard, JobPostPageInterviewData } from "./InterviewExperienceCard";
+import { InterviewExperienceCard } from "./InterviewExperienceCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { ChevronDownIcon } from "@/components/icons";
+import { JobPostPageInterviewData } from "@/lib/sharedTypes";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
@@ -18,6 +20,8 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
   const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
 
   const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+
+  const router = useRouter();
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading interview experiences</div>;
@@ -37,6 +41,10 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
     }
   }
 
+  const handleCardClick = (application_id: string) => {
+    router.push(`/interview/${application_id}`);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end gap-2">
@@ -55,7 +63,7 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
       </div>
 
       {sortedExperiences.map((interviewExperience) => (
-        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} />
+        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} onCardClick={() => handleCardClick(interviewExperience.application.id)} />
       ))}
     </div>
   );
