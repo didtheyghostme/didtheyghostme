@@ -3,14 +3,16 @@
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 
-export type UpdateApplicationFirstResponseDateArgs = Pick<ApplicationTable, "id" | "first_response_date">;
+type ServerUpdateApplicationArgs = Pick<ApplicationTable, "id" | "applied_date" | "first_response_date" | "status">;
 
-const actionUpdateApplicationFirstResponseDate = async (key: string, { arg }: { arg: UpdateApplicationFirstResponseDateArgs }): Promise<ApplicationTable> => {
-  const { id, first_response_date } = arg;
+export type ClientUpdateApplicationArgs = Omit<ServerUpdateApplicationArgs, "id">;
+
+const actionUpdateApplicationFirstResponseDate = async (key: string, { arg }: { arg: ServerUpdateApplicationArgs }): Promise<ApplicationTable> => {
+  const { id, applied_date, first_response_date, status } = arg;
   const supabase = await createClerkSupabaseClientSsr();
 
   try {
-    const { data, error } = await supabase.from(DBTable.APPLICATION).update({ first_response_date }).match({ id }).select().single();
+    const { data, error } = await supabase.from(DBTable.APPLICATION).update({ applied_date, first_response_date, status }).match({ id }).select().single();
 
     if (error) {
       console.error("Update error:", error);

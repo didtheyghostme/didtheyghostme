@@ -1,15 +1,15 @@
 import useSWRMutation from "swr/mutation";
 
 import { API } from "@/lib/constants/apiRoutes";
-import actionUpdateApplicationFirstResponseDate from "@/app/actions/updateApplicationFirstResponseDate";
+import actionUpdateApplicationFirstResponseDate, { ClientUpdateApplicationArgs } from "@/app/actions/updateApplicationFirstResponseDate";
 
 export const useUpdateApplicationFirstResponseDate = (application_id: string) => {
   const { trigger, isMutating } = useSWRMutation(API.APPLICATION.getByApplicationId(application_id), actionUpdateApplicationFirstResponseDate);
 
   return {
-    updateApplicationFirstResponseDate: async (first_response_date: string) => {
+    updateApplicationFirstResponseDate: async (args: ClientUpdateApplicationArgs) => {
       try {
-        const result = await trigger({ id: application_id, first_response_date });
+        const result = await trigger({ id: application_id, ...args });
 
         return result;
       } catch (err) {

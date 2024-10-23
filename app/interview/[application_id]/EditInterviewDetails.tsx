@@ -1,15 +1,15 @@
-// EditInterviewDetails.tsx
 import { FormProvider, useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Chip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Chip, Select, SelectItem } from "@nextui-org/react";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { InterviewTagsModal } from "./InterviewTagsModal";
 
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceSchema } from "@/lib/schema/addInterviewRoundSchema";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/addInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
+import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
 type EditInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;
@@ -21,11 +21,14 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   const [openModalIndex, setOpenModalIndex] = useState<number | null>(null);
 
   const methods = useForm<InterviewExperienceFormValues>({
-    resolver: zodResolver(UpdateInterviewExperienceSchema),
+    resolver: zodResolver(UpdateInterviewExperienceFormSchema),
     defaultValues: {
+      applied_date: applicationDetails.applied_date,
+      first_response_date: applicationDetails.first_response_date ?? null,
+      status: applicationDetails.status,
       interviewRounds: interviewRounds,
-      first_response_date: applicationDetails.first_response_date || "",
     },
+    mode: "onChange",
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -33,31 +36,19 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
     name: "interviewRounds",
   });
 
-  const firstResponseDate = useWatch({
+  const hasFirstResponseDate = useWatch({
     control: methods.control,
     name: "first_response_date",
   });
 
-  const watchedInterviewRounds = useWatch({
-    control: methods.control,
-    name: "interviewRounds",
-  });
-
-  // Trigger validation whenever interview rounds change to update dependent errors
-  useEffect(() => {
-    if (methods.formState.isDirty) {
-      methods.trigger();
-    }
-  }, [watchedInterviewRounds, firstResponseDate, methods]);
-
   const canAddNewRound = () => {
-    if (watchedInterviewRounds.length === 0) return true;
-    const lastRound = watchedInterviewRounds[watchedInterviewRounds.length - 1];
+    if (fields.length === 0) return true;
+    const lastRound = fields[fields.length - 1];
 
     return lastRound && lastRound.response_date;
   };
 
-  const handleAddNewInterviewRoundClick = () => {
+  const handleAddNewInterviewRoundClick = async () => {
     if (canAddNewRound()) {
       append({
         description: "",
@@ -66,14 +57,15 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
         interview_tags: [],
       });
     } else {
-      const latestRoundNumber = watchedInterviewRounds.length;
+      const isFormValid = await methods.trigger();
 
-      toast.error(`Please fill the response date for the latest interview Round ${latestRoundNumber} before you can add a new one.`);
-      // const lastIndex = fields.length - 1;
-      // methods.setError(`interviewRounds.${lastIndex}.response_date`, {
-      //   type: "manual",
-      //   message: "Response date is required before adding a new round.",
-      // });
+      if (!isFormValid) {
+        toast.error("Please fix the errors in the form before adding a new one.");
+      } else {
+        const latestRoundNumber = fields.length;
+
+        toast.error(`Please fill the response date for the latest interview Round ${latestRoundNumber} before adding a new round.`);
+      }
     }
   };
 
@@ -95,6 +87,21 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
             <div className="flex w-1/2 flex-wrap gap-4 md:flex-nowrap">
               <Controller
                 control={methods.control}
+                name="applied_date"
+                render={({ field, fieldState }) => (
+                  <DatePicker
+                    isRequired
+                    errorMessage={fieldState.error?.message}
+                    isInvalid={!!fieldState.error}
+                    label="Applied Date"
+                    maxValue={today(getLocalTimeZone())}
+                    value={field.value ? parseDate(field.value) : null}
+                    onChange={(date) => field.onChange(date ? date.toString() : null)}
+                  />
+                )}
+              />
+              <Controller
+                control={methods.control}
                 name="first_response_date"
                 render={({ field, fieldState }) => (
                   <DatePicker
@@ -108,11 +115,25 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                   />
                 )}
               />
+
+              <Controller
+                control={methods.control}
+                name="status"
+                render={({ field }) => (
+                  <Select label="Application Status" placeholder="Select application status" selectedKeys={[field.value]} onChange={(e) => field.onChange(e.target.value)}>
+                    {Object.entries(APPLICATION_STATUS).map(([_, value]) => (
+                      <SelectItem key={value} value={value}>
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+              />
             </div>
           </CardBody>
         </Card>
 
-        {firstResponseDate && (
+        {hasFirstResponseDate && (
           <>
             <div className="my-4 flex justify-end">
               <Button type="button" onClick={handleAddNewInterviewRoundClick}>
@@ -214,7 +235,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
           </>
         )}
 
-        {!firstResponseDate && <div className="mb-4 text-2xl font-semibold">Please set the first response date before you can add interview rounds</div>}
+        {!hasFirstResponseDate && <div className="mb-4 text-2xl font-semibold">Please set the first response date before you can add interview rounds</div>}
       </form>
     </FormProvider>
   );

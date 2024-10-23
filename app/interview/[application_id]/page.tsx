@@ -50,8 +50,10 @@ export default function InterviewExperiencePage() {
   const handleSaveForm = async (data: InterviewExperienceFormValues) => {
     console.log("save data...", data);
     try {
-      await updateApplicationFirstResponseDate(data.first_response_date);
-      await updateInterviewRounds(data.interviewRounds);
+      const { applied_date, first_response_date, status, interviewRounds } = data;
+
+      await updateApplicationFirstResponseDate({ applied_date, first_response_date, status });
+      await updateInterviewRounds(interviewRounds);
 
       toast.success("Interview experience updated successfully");
     } catch (error) {
