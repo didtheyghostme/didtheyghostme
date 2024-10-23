@@ -1,7 +1,7 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Checkbox } from "@nextui-org/react";
 import { useState } from "react";
 
-import { INTERVIEW_TAGS } from "@/lib/schema/addInterviewRoundSchema";
+import { INTERVIEW_TAGS } from "@/lib/schema/updateInterviewRoundSchema";
 
 const INTERVIEW_TAG_MAP: Record<InterviewTag, string> = {
   "Online Assessment": "Examples: Take home assignments, HackerRank, LeetCode, HireVue, recorded video questions, etc. (usually not with a human interviewer)",

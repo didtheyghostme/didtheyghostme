@@ -13,8 +13,8 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ArrowLeftIcon } from "@/components/icons";
 import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
-import { useUpdateApplicationFirstResponseDate } from "@/lib/hooks/useUpdateApplicationFirstResponseDate";
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/addInterviewRoundSchema";
+import { useUpdateApplicationDetails } from "@/lib/hooks/useUpdateApplicationDetails";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 export default function InterviewExperiencePage() {
@@ -24,7 +24,7 @@ export default function InterviewExperiencePage() {
   // Fetch application details
   const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
 
-  const { updateApplicationFirstResponseDate } = useUpdateApplicationFirstResponseDate(application_id as string);
+  const { updateApplicationDetails } = useUpdateApplicationDetails(application_id as string);
 
   // Fetch interview rounds
   const {
@@ -52,7 +52,7 @@ export default function InterviewExperiencePage() {
     try {
       const { applied_date, first_response_date, status, interviewRounds } = data;
 
-      await updateApplicationFirstResponseDate({ applied_date, first_response_date, status });
+      await updateApplicationDetails({ applied_date, first_response_date, status });
       await updateInterviewRounds(interviewRounds);
 
       toast.success("Interview experience updated successfully");

@@ -7,7 +7,7 @@ type ServerUpdateApplicationArgs = Pick<ApplicationTable, "id" | "applied_date" 
 
 export type ClientUpdateApplicationArgs = Omit<ServerUpdateApplicationArgs, "id">;
 
-const actionUpdateApplicationFirstResponseDate = async (key: string, { arg }: { arg: ServerUpdateApplicationArgs }): Promise<ApplicationTable> => {
+const actionUpdateApplicationDetails = async (key: string, { arg }: { arg: ServerUpdateApplicationArgs }): Promise<ApplicationTable> => {
   const { id, applied_date, first_response_date, status } = arg;
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -26,4 +26,4 @@ const actionUpdateApplicationFirstResponseDate = async (key: string, { arg }: { 
   }
 };
 
-export default actionUpdateApplicationFirstResponseDate;
+export default actionUpdateApplicationDetails;

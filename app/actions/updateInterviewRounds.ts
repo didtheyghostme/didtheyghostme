@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { InterviewRoundSchema } from "@/lib/schema/addInterviewRoundSchema";
+import { InterviewRoundSchema } from "@/lib/schema/updateInterviewRoundSchema";
 import { DB_RPC } from "@/lib/constants/apiRoutes";
 
 export type UpdateInterviewRoundsArgs = Pick<InterviewExperienceTable, "application_id"> & {

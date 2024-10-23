@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { InterviewTagsModal } from "./InterviewTagsModal";
 
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/addInterviewRoundSchema";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
