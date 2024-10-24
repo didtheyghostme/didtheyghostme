@@ -1,7 +1,7 @@
-import { DateFormatter, parseDate } from "@internationalized/date";
+import { DateFormatter, getLocalTimeZone, parseDate } from "@internationalized/date";
 
-export const formatDate = (dateString: string) => {
-  const date = parseDate(dateString).toDate("UTC");
+export const formatDate = (dateString: string, timezone = getLocalTimeZone()) => {
+  const date = parseDate(dateString).toDate(timezone);
 
   const formatter = new DateFormatter("en-GB", {
     day: "numeric",
