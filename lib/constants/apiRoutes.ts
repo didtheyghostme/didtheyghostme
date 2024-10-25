@@ -4,6 +4,7 @@ export const API = {
     getById: (company_id: string) => `/api/company/${company_id}`,
   },
   JOB_POSTING: {
+    getAll: ({ page, search }: { page: number; search: string }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}`,
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },
