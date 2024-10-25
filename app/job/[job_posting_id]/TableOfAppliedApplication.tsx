@@ -120,11 +120,9 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   const router = useRouter();
 
   const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
-    status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]).withOptions({ clearOnDefault: true }),
-    sort: parseAsStringLiteral(sortOptions.map((option) => option.key))
-      .withDefault("applied_date_asc")
-      .withOptions({ clearOnDefault: true }),
-    page: parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
+    status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]),
+    sort: parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("applied_date_asc"),
+    page: parseAsInteger.withDefault(1),
   });
 
   const filteredItems = React.useMemo(() => {

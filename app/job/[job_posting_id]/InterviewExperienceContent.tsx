@@ -17,7 +17,7 @@ type InterviewExperienceContentProps = {
 };
 
 export function InterviewExperienceContent({ job_posting_id }: InterviewExperienceContentProps) {
-  const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
+  const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest"));
 
   const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
 

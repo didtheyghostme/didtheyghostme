@@ -9,7 +9,7 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { ChevronDownIcon } from "@/components/icons";
-import { InterviewExperienceCardData, JobPostPageInterviewData } from "@/lib/sharedTypes";
+import { JobPostPageInterviewData } from "@/lib/sharedTypes";
 
 export const sortOptions = [
   { key: "newest", label: "Date posted: Newest to Oldest" },
@@ -35,7 +35,7 @@ type OnlineAssessmentContentProps = {
 };
 
 export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentContentProps) {
-  const [sort, setSort] = useQueryState("oaSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest").withOptions({ clearOnDefault: true }));
+  const [sort, setSort] = useQueryState("oaSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest"));
 
   const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
 
