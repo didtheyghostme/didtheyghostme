@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { AllJobsPageData } from "@/app/jobs/page";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
+import { AllJobsPageData } from "@/app/jobs/AllJobsResult";
 
 export type AllJobsPageResponse = {
   data: AllJobsPageData[];
