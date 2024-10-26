@@ -14,7 +14,7 @@ type ClerkUserProfileData = {
 };
 
 type JoinedUser = {
-  user: ClerkUserProfileData; // user refer to the database table name user, referenced by DBTable.USER
+  user: ClerkUserProfileData; // user refer to the database table user, referenced by DBTable.USER
 };
 
 // user settings? default Singapore
@@ -112,10 +112,9 @@ type ProcessedDataArray<T extends DataRequired> = {
 };
 
 type JoinedApplication = ApplicationTable & JoinedUser;
-type JoinedApplications = ApplicationTable & JoinedUser;
 
 type ProcessedApplication = ProcessedDataObject<JoinedApplication>;
-type ProcessedApplications = ProcessedDataArray<JoinedApplications>;
+type ProcessedApplications = ProcessedDataArray<JoinedApplication>;
 
 type Company = CompanyTable;
 

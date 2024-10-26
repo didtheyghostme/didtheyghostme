@@ -71,8 +71,8 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
 
       <div className="flex items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
         <div className="flex items-center gap-2">
-          <Avatar name={interviewExperience[DBTable.USER].full_name} size="sm" src={interviewExperience[DBTable.USER].profile_pic_url} />
-          <span className="text-small text-default-500">{interviewExperience[DBTable.USER].full_name}</span>
+          <Avatar name={interviewExperience.user.full_name} size="sm" src={interviewExperience.user.profile_pic_url} />
+          <span className="text-small text-default-500">{interviewExperience.user.full_name}</span>
         </div>
       </div>
     </Card>

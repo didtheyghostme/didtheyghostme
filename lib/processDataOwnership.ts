@@ -16,7 +16,7 @@ export function processDataOwnershipArray<T extends DataRequired>(data: T[]): Pr
   };
 }
 
-export function processDataOwnershipItem<T extends DataRequired>(data: T): ProcessedDataObject<T> {
+export function processDataOwnershipObject<T extends DataRequired>(data: T): ProcessedDataObject<T> {
   const { userId } = auth();
 
   return {

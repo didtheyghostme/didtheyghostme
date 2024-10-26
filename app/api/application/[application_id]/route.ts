@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { processDataOwnershipItem } from "@/lib/processDataOwnership";
+import { processDataOwnershipObject } from "@/lib/processDataOwnership";
 
 export type GetApplicationByIdResponse = ProcessedApplication;
 
@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: { application_
     return NextResponse.json({ error: "Application of interview not found" }, { status: 404 });
   }
 
-  const processedData = processDataOwnershipItem(data);
+  const processedData = processDataOwnershipObject(data);
 
   return NextResponse.json(processedData);
 }
