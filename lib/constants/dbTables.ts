@@ -4,6 +4,7 @@ export const DBTable = {
   APPLICATION: "application",
   INTERVIEW_EXPERIENCE: "interview_experience",
   USER: "user",
+  COMMENT: "comment",
   // Add other table names here
 } as const;
 

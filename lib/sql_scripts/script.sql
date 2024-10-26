@@ -109,3 +109,36 @@ BEGIN
   -- No return statement needed
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- function to get questions with reply counts (fetch)
+CREATE OR REPLACE FUNCTION get_questions_with_reply_counts(job_posting_id UUID)
+RETURNS TABLE (
+  id UUID,
+  content TEXT,
+  entity_type TEXT,
+  entity_id UUID,
+  user_id TEXT,
+  created_at TIMESTAMPTZ,
+  reply_count BIGINT,
+  full_name TEXT,
+  profile_pic_url TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    q.id,
+    q.content,
+    q.entity_type,
+    q.entity_id,
+    q.user_id,
+    q.created_at,
+    (SELECT COUNT(*) FROM comment r WHERE r.entity_type = 'question' AND r.entity_id = q.id) AS reply_count,
+    u.full_name,
+    u.profile_pic_url
+  FROM comment q
+  JOIN "user" u ON q.user_id = u.user_id
+  WHERE q.entity_type = 'job_posting' AND q.entity_id = job_posting_id
+  ORDER BY q.created_at DESC;
+END;
+$$ LANGUAGE plpgsql;

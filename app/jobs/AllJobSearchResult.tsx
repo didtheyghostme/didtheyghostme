@@ -59,7 +59,9 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
               </Card>
             ))}
           </div>
-          <Pagination initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
+          <div className="flex justify-end">
+            <Pagination initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
+          </div>
         </>
       )}
     </>

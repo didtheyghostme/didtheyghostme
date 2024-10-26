@@ -13,6 +13,8 @@ type ClerkUserProfileData = {
   profile_pic_url: string;
 };
 
+// user settings? default Singapore
+
 type User = BaseUser & ClerkUserProfileData;
 
 // Supabase database tables
@@ -61,6 +63,17 @@ type InterviewExperienceTable = {
   interview_tags: InterviewTag[] | null;
   created_at: string;
   application_id: string;
+} & User;
+
+// Question is same table as CommentTable
+type CommentEntityType = "job_posting" | "question" | "interview_experience";
+
+type CommentTable = {
+  id: string;
+  content: string;
+  entity_type: CommentEntityType;
+  entity_id: string;
+  created_at: string;
 } & User;
 
 // Utility Types (for insert)

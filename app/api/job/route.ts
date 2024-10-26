@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
-import { AllJobsPageData } from "@/app/jobs/AllJobsResult";
+import { AllJobsPageData } from "@/app/jobs/AllJobSearchResult";
 
 export type AllJobsPageResponse = {
   data: AllJobsPageData[];

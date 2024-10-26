@@ -11,6 +11,7 @@ import TrackThisJobModal from "./TrackThisJobModal";
 import TableOfAppliedApplication from "./TableOfAppliedApplication";
 import { InterviewExperienceContent } from "./InterviewExperienceContent";
 import { OnlineAssessmentContent } from "./OnlineAssessmentContent";
+import { QuestionContent } from "./QuestionContent";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
@@ -35,11 +36,7 @@ const TABS = {
   },
   [JOB_POST_PAGE_TABS.QUESTIONS]: {
     title: JOB_POST_PAGE_TABS.QUESTIONS,
-    content: (job_posting_id: string) => (
-      <Card>
-        <CardBody>Questions Content</CardBody>
-      </Card>
-    ),
+    content: (job_posting_id: string) => <QuestionContent job_posting_id={job_posting_id} />,
   },
 } as const;
 
@@ -79,6 +76,7 @@ export default function JobDetailsPage() {
 
   const handleBackClick = () => {
     router.push(`/company/${jobDetails.company.id}`);
+    // router.back();
   };
 
   const handleReportLinkClick = () => {

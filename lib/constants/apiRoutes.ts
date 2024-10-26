@@ -16,8 +16,12 @@ export const API = {
     getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/interview`, // return all interviews for a job posting
   },
+  COMMENT: {
+    getAllByThisEntity: (entity_id: string, entity_type: CommentEntityType) => `/api/comment?entity_id=${entity_id}&entity_type=${entity_type}`, // return all comments for an entity
+  },
 } as const;
 
 export const DB_RPC = {
   UPDATE_INTERVIEW_ROUNDS: "update_interview_rounds",
+  GET_QUESTIONS_WITH_REPLY_COUNTS: "get_questions_with_reply_counts",
 } as const;
