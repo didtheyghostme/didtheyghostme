@@ -7,11 +7,9 @@ import { SelectObject, buildSelectString } from "@/lib/buildSelectString";
 
 export type QuestionWithReplyCountResponse = CommentTable & {
   reply_count: number;
-};
+} & JoinedUser;
 
-export type CommentsForThisEntityResponse = Pick<CommentTable, "id" | "content" | "created_at"> & {
-  [DBTable.USER]: ClerkUserProfileData;
-};
+export type CommentsForThisEntityResponse = Pick<CommentTable, "id" | "content" | "created_at"> & JoinedUser;
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

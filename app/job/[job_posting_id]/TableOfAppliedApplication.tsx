@@ -24,7 +24,7 @@ import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { formatDate } from "@/lib/formatDate";
 
-type ColumnKey = keyof ProcessedApplication | "days_between";
+type ColumnKey = keyof Pick<ProcessedApplication, "status" | "applied_date" | "first_response_date"> | "days_between";
 
 type Column = {
   name: ColumnKey;
@@ -104,8 +104,10 @@ function generateMockApplication(id: number): ProcessedApplication {
     created_at: appliedDate.toISOString(),
     job_posting_id: "1",
     isCurrentUserItem: false,
-    full_name: "John Doe",
-    profile_pic_url: "https://example.com/profile.jpg",
+    user: {
+      full_name: "John Doe",
+      profile_pic_url: "https://example.com/profile.jpg",
+    },
   };
 }
 
@@ -207,7 +209,10 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
           </Chip>
         );
       default:
-        return <p className="text-xs sm:text-sm">{application[columnKey as keyof ProcessedApplication]}</p>;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _exhaustiveCheck: never = columnKey;
+
+        throw new Error(`Unhandled column key: ${_exhaustiveCheck}`);
     }
   }, []);
 

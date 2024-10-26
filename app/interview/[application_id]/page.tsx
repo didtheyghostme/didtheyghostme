@@ -16,13 +16,14 @@ import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
 import { useUpdateApplicationDetails } from "@/lib/hooks/useUpdateApplicationDetails";
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
+import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
   const router = useRouter();
 
   // Fetch application details
-  const { data: applicationDetails, error, isLoading } = useSWR<ProcessedApplication>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
+  const { data: applicationDetails, error, isLoading } = useSWR<GetApplicationByIdResponse>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
 
   const { updateApplicationDetails } = useUpdateApplicationDetails(application_id as string);
 

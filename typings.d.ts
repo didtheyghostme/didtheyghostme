@@ -13,9 +13,13 @@ type ClerkUserProfileData = {
   profile_pic_url: string;
 };
 
+type JoinedUser = {
+  user: ClerkUserProfileData; // user refer to the database table name user, referenced by DBTable.USER
+};
+
 // user settings? default Singapore
 
-type User = BaseUser & ClerkUserProfileData;
+// type User = BaseUser & ClerkUserProfileData;
 
 // Supabase database tables
 type CompanyTable = {
@@ -25,7 +29,7 @@ type CompanyTable = {
   status: string | null; //todo remove this when updating the company table page
   created_at: string;
   // logo_url: string; // todo: add logo.dev API url to this?
-} & User;
+} & BaseUser;
 
 type JobPostingTable = {
   id: string;
@@ -38,7 +42,7 @@ type JobPostingTable = {
   // add job_status: "Verified by admin?"
   // or job_posted_date: string | null; for admin to set date, show new on UI if set
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
-} & User;
+} & BaseUser;
 
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Ghosted" | "Offered";
 
@@ -49,7 +53,7 @@ type ApplicationTable = {
   first_response_date: string | null;
   created_at: string;
   job_posting_id: string;
-} & User;
+} & BaseUser;
 
 type InterviewTag = "Online Assessment" | "HR Call" | "Technical" | "Behavioral" | "Hiring Manager";
 
@@ -63,7 +67,7 @@ type InterviewExperienceTable = {
   interview_tags: InterviewTag[] | null;
   created_at: string;
   application_id: string;
-} & User;
+} & BaseUser;
 
 // Question is same table as CommentTable
 type CommentEntityType = "job_posting" | "question" | "interview_experience";
@@ -74,7 +78,7 @@ type CommentTable = {
   entity_type: CommentEntityType;
   entity_id: string;
   created_at: string;
-} & User;
+} & BaseUser;
 
 // Utility Types (for insert)
 
@@ -107,8 +111,11 @@ type ProcessedDataArray<T extends DataRequired> = {
   currentUserItemId: string | null;
 };
 
-type ProcessedApplication = ProcessedDataObject<ApplicationTable>;
-type ProcessedApplications = ProcessedDataArray<ApplicationTable>;
+type JoinedApplication = ApplicationTable & JoinedUser;
+type JoinedApplications = ApplicationTable & JoinedUser;
+
+type ProcessedApplication = ProcessedDataObject<JoinedApplication>;
+type ProcessedApplications = ProcessedDataArray<JoinedApplications>;
 
 type Company = CompanyTable;
 

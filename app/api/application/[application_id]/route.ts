@@ -4,12 +4,14 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { processDataOwnershipItem } from "@/lib/processDataOwnership";
 
+export type GetApplicationByIdResponse = ProcessedApplication;
+
 export async function GET(request: Request, { params }: { params: { application_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const { data, error } = await supabase.from(DBTable.APPLICATION).select().eq("id", params.application_id).maybeSingle();
+  const { data, error } = await supabase.from(DBTable.APPLICATION).select(`*, ${DBTable.USER}(full_name, profile_pic_url)`).eq("id", params.application_id).maybeSingle();
 
-  console.warn("data in route handler application", data);
+  console.warn("data in route handler application", data, error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
