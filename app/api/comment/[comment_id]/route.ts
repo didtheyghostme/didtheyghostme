@@ -5,7 +5,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
 
 export type QuestionPageRequest = Pick<CommentTable, "id" | "content" | "created_at" | "entity_id"> & {
-  [DBTable.USER]: ClerkUserProfileData;
+  [DBTable.USER_DATA]: ClerkUserProfileData;
 };
 
 export async function GET(request: Request, { params }: { params: { comment_id: string } }) {
@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { comment_id: 
     content: true,
     created_at: true,
     entity_id: true,
-    [DBTable.USER]: {
+    [DBTable.USER_DATA]: {
       full_name: true,
       profile_pic_url: true,
     },

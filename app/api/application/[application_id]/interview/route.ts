@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: { application_
     response_date: true,
     interview_tags: true,
     created_at: true,
-    [DBTable.USER]: {
+    [DBTable.USER_DATA]: {
       full_name: true,
       profile_pic_url: true,
     },

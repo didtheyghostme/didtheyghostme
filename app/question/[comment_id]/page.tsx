@@ -64,10 +64,10 @@ export default function QuestionPage() {
       <Card className="mb-8">
         <CardBody>
           <div className="flex items-start space-x-4">
-            <Avatar name={question.user.full_name} src={question.user.profile_pic_url} />
+            <Avatar name={question.user_data.full_name} src={question.user_data.profile_pic_url} />
             <div className="flex-grow">
               <div className="mb-2 flex items-center justify-between">
-                <span className="font-semibold">{question.user.full_name}</span>
+                <span className="font-semibold">{question.user_data.full_name}</span>
                 <span className="text-sm text-gray-500">{formatDistanceToNow(new Date(question.created_at), { addSuffix: true })}</span>
               </div>
               <p className="mb-4 text-lg">{question.content}</p>
@@ -98,10 +98,10 @@ export default function QuestionPage() {
           <Card key={reply.id} className="mb-4">
             <CardBody>
               <div className="flex items-start space-x-4">
-                <Avatar name={reply.user.full_name} src={reply.user.profile_pic_url} />
+                <Avatar name={reply.user_data.full_name} src={reply.user_data.profile_pic_url} />
                 <div className="flex-grow">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="font-semibold">{reply.user.full_name}</span>
+                    <span className="font-semibold">{reply.user_data.full_name}</span>
                     <span className="text-sm text-gray-500">{formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}</span>
                   </div>
                   <p>{reply.content}</p>

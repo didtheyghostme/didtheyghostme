@@ -96,8 +96,8 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
               <div className="flex flex-col">
                 <div className="mb-2 flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    <Avatar className="flex-shrink-0" name={question.user.full_name} size="sm" src={question.user.profile_pic_url} />
-                    <span className="font-semibold">{question.user.full_name}</span>
+                    <Avatar className="flex-shrink-0" name={question.user_data.full_name} size="sm" src={question.user_data.profile_pic_url} />
+                    <span className="font-semibold">{question.user_data.full_name}</span>
                   </div>
                   <span className="whitespace-nowrap text-sm text-gray-500">{formatDistanceToNow(new Date(question.created_at), { addSuffix: true })}</span>
                 </div>

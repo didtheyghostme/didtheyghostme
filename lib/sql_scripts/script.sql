@@ -111,7 +111,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- function to get questions with reply counts (fetch)
+-- function to get questions with reply counts and user_data as an object (fetch)
 CREATE OR REPLACE FUNCTION get_questions_with_reply_counts(job_posting_id UUID)
 RETURNS TABLE (
   id UUID,
@@ -121,8 +121,7 @@ RETURNS TABLE (
   user_id TEXT,
   created_at TIMESTAMPTZ,
   reply_count BIGINT,
-  full_name TEXT,
-  profile_pic_url TEXT
+  user_data JSONB
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -134,10 +133,12 @@ BEGIN
     q.user_id,
     q.created_at,
     (SELECT COUNT(*) FROM comment r WHERE r.entity_type = 'question' AND r.entity_id = q.id) AS reply_count,
-    u.full_name,
-    u.profile_pic_url
+    jsonb_build_object(
+      'full_name', ud.full_name,
+      'profile_pic_url', ud.profile_pic_url
+    ) AS user_data
   FROM comment q
-  JOIN "user" u ON q.user_id = u.user_id
+  JOIN user_data ud ON q.user_id = ud.user_id
   WHERE q.entity_type = 'job_posting' AND q.entity_id = job_posting_id
   ORDER BY q.created_at DESC;
 END;

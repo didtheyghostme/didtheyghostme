@@ -104,7 +104,7 @@ function generateMockApplication(id: number): ProcessedApplication {
     created_at: appliedDate.toISOString(),
     job_posting_id: "1",
     isCurrentUserItem: false,
-    user: {
+    user_data: {
       full_name: "John Doe",
       profile_pic_url: "https://example.com/profile.jpg",
     },

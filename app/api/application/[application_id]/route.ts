@@ -9,7 +9,7 @@ export type GetApplicationByIdResponse = ProcessedApplication;
 export async function GET(request: Request, { params }: { params: { application_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const { data, error } = await supabase.from(DBTable.APPLICATION).select(`*, ${DBTable.USER}(full_name, profile_pic_url)`).eq("id", params.application_id).maybeSingle();
+  const { data, error } = await supabase.from(DBTable.APPLICATION).select(`*, ${DBTable.USER_DATA}(full_name, profile_pic_url)`).eq("id", params.application_id).maybeSingle();
 
   console.warn("data in route handler application", data, error);
 

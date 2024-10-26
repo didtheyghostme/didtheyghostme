@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: { job_post
       job_posting_id: true,
       status: true,
     },
-    [DBTable.USER]: {
+    [DBTable.USER_DATA]: {
       full_name: true,
       profile_pic_url: true,
     },

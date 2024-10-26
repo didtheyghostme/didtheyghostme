@@ -3,7 +3,7 @@ export const DBTable = {
   JOB_POSTING: "job_posting",
   APPLICATION: "application",
   INTERVIEW_EXPERIENCE: "interview_experience",
-  USER: "user",
+  USER_DATA: "user_data",
   COMMENT: "comment",
   // Add other table names here
 } as const;

@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     console.log("user.updated userId:", evt.data.id);
 
     // Upsert user data into Supabase
-    const { error } = await supabase.from(DBTable.USER).upsert(
+    const { error } = await supabase.from(DBTable.USER_DATA).upsert(
       {
         user_id: evt.data.id,
         full_name: `${evt.data.first_name} ${evt.data.last_name}`,

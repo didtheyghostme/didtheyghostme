@@ -14,7 +14,7 @@ type ClerkUserProfileData = {
 };
 
 type JoinedUser = {
-  user: ClerkUserProfileData; // user refer to the database table user, referenced by DBTable.USER
+  user_data: ClerkUserProfileData; // user refer to the database table user, referenced by DBTable.USER_DATA
 };
 
 // user settings? default Singapore

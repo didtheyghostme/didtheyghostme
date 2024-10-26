@@ -18,7 +18,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     created_at: true,
     job_posting_id: true,
     user_id: true,
-    [DBTable.USER]: {
+    [DBTable.USER_DATA]: {
       full_name: true,
       profile_pic_url: true,
     },

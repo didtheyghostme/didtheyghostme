@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       id: true,
       content: true,
       created_at: true,
-      [DBTable.USER]: {
+      [DBTable.USER_DATA]: {
         full_name: true,
         profile_pic_url: true,
       },
