@@ -18,6 +18,7 @@ export const API = {
   },
   COMMENT: {
     getAllByThisEntity: (entity_id: string, entity_type: CommentEntityType) => `/api/comment?entity_id=${entity_id}&entity_type=${entity_type}`, // return all comments for an entity
+    getById: (comment_id: string) => `/api/comment/${comment_id}`, // return one comment by id
   },
 } as const;
 
