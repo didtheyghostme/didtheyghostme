@@ -2,7 +2,6 @@ import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/r
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 
-import { DBTable } from "@/lib/constants/dbTables";
 import { formatDate } from "@/lib/formatDate";
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
@@ -71,7 +70,7 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
 
       <div className="flex items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
         <div className="flex items-center gap-2">
-          <Avatar name={interviewExperience.user_data.full_name} size="sm" src={interviewExperience.user_data.profile_pic_url} />
+          <Avatar className="flex-shrink-0" name={interviewExperience.user_data.full_name} size="sm" src={interviewExperience.user_data.profile_pic_url} />
           <span className="text-small text-default-500">{interviewExperience.user_data.full_name}</span>
         </div>
       </div>

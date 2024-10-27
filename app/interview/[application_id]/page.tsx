@@ -17,6 +17,7 @@ import { useUpdateApplicationDetails } from "@/lib/hooks/useUpdateApplicationDet
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
+import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -99,7 +100,9 @@ export default function InterviewExperiencePage() {
         <ViewInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} />
       )}
 
-      <Spacer y={4} />
+      <Spacer y={8} />
+
+      <CommentSection entity_id={application_id as string} entity_type="interview_experience" />
     </div>
   );
 }

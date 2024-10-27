@@ -12,7 +12,6 @@ import { formatDistanceToNow } from "date-fns";
 import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
-import { DBTable } from "@/lib/constants/dbTables";
 import { addQuestionSchema, AddQuestionFormValues } from "@/lib/schema/addQuestionSchema";
 import { QuestionWithReplyCountResponse } from "@/app/api/comment/route";
 
@@ -31,7 +30,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
     },
   });
 
-  const { data: questions = [], error, isLoading } = useSWR<QuestionWithReplyCountResponse[]>(API.COMMENT.getAllByThisEntity(job_posting_id, DBTable.JOB_POSTING), fetcher);
+  const { data: questions = [], error, isLoading } = useSWR<QuestionWithReplyCountResponse[]>(API.COMMENT.getAllByThisEntity(job_posting_id, "job_posting"), fetcher);
 
   const { createComment, isCreating } = useCreateComment({
     entity_type: "job_posting",
@@ -104,7 +103,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
                 <p className="p-1">{question.content}</p>
                 <div className="flex justify-end text-sm text-gray-500">
                   <span>
-                    {question.reply_count} {question.reply_count === 1 ? "reply" : "replies"}
+                    {question.reply_count} {question.reply_count === 1 ? "comment" : "comments"}
                   </span>
                 </div>
               </div>
