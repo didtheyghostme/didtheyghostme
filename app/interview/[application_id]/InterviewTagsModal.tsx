@@ -5,10 +5,11 @@ import { INTERVIEW_TAGS } from "@/lib/schema/updateInterviewRoundSchema";
 
 const INTERVIEW_TAG_MAP: Record<InterviewTag, string> = {
   "Online Assessment": "Examples: Take home assignments, HackerRank, LeetCode, HireVue, recorded video questions, etc. (usually not with a human interviewer)",
-  "HR Call": "A call with HR/Recruiter",
+  "HR/Recruiter": "A call with HR/Recruiter, usually conducted via phone or video",
   Technical: "In-depth assessment of technical skills",
   Behavioral: "Evaluation of soft skills and past experiences",
   "Hiring Manager": "Interview conducted by the hiring manager",
+  "Final Round": "",
 };
 
 type InterviewTagsModalProps = {

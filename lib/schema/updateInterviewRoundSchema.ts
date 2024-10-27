@@ -3,7 +3,7 @@ import { parseDate } from "@internationalized/date";
 
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
-export const INTERVIEW_TAGS = ["Online Assessment", "HR Call", "Technical", "Behavioral", "Hiring Manager"] as const;
+export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const;
 
 // Single interview round schema
 export const interviewRoundSchema = z.object({

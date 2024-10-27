@@ -55,7 +55,7 @@ type ApplicationTable = {
   job_posting_id: string;
 } & BaseUser;
 
-type InterviewTag = "Online Assessment" | "HR Call" | "Technical" | "Behavioral" | "Hiring Manager";
+type InterviewTag = "Online Assessment" | "HR/Recruiter" | "Technical" | "Behavioral" | "Hiring Manager" | "Final Round";
 
 type InterviewExperienceTable = {
   id: string;
