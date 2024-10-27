@@ -12,12 +12,11 @@ import { EditInterviewDetails } from "./EditInterviewDetails";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ArrowLeftIcon } from "@/components/icons";
-import { useUpdateInterviewRounds } from "@/lib/hooks/useUpdateInterviewRounds";
-import { useUpdateApplicationDetails } from "@/lib/hooks/useUpdateApplicationDetails";
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
+import { useUpdateApplicationAndInterviewRounds } from "@/lib/hooks/useUpdateApplicationAndInterviewRounds";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -26,8 +25,6 @@ export default function InterviewExperiencePage() {
   // Fetch application details
   const { data: applicationDetails, error, isLoading } = useSWR<GetApplicationByIdResponse>(API.APPLICATION.getByApplicationId(application_id as string), fetcher);
 
-  const { updateApplicationDetails } = useUpdateApplicationDetails(application_id as string);
-
   // Fetch interview rounds
   const {
     data: interviewRounds,
@@ -35,7 +32,8 @@ export default function InterviewExperiencePage() {
     isLoading: interviewRoundsLoading,
   } = useSWR<InterviewExperienceCardData[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), fetcher);
 
-  const { updateInterviewRounds, isUpdatingInterviewRounds } = useUpdateInterviewRounds(application_id as string);
+  // Update application and interview rounds
+  const { updateApplicationAndInterviewRounds, isUpdating } = useUpdateApplicationAndInterviewRounds(application_id as string);
 
   // local states
   const [isEditing, setIsEditing] = useState(false);
@@ -52,10 +50,7 @@ export default function InterviewExperiencePage() {
   const handleSaveForm = async (data: InterviewExperienceFormValues) => {
     console.log("save data...", data);
     try {
-      const { applied_date, first_response_date, status, interviewRounds } = data;
-
-      await updateApplicationDetails({ applied_date, first_response_date, status });
-      await updateInterviewRounds(interviewRounds);
+      await updateApplicationAndInterviewRounds(data);
 
       toast.success("Interview experience updated successfully");
     } catch (error) {
@@ -78,7 +73,7 @@ export default function InterviewExperiencePage() {
           <>
             {isEditing ? (
               <div className="space-x-2">
-                <Button color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdatingInterviewRounds} type="submit">
+                <Button color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdating} type="submit">
                   Save
                 </Button>
                 <Button color="secondary" onClick={() => setIsEditing(false)}>

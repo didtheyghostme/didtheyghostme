@@ -8,53 +8,25 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$ LANGUAGE plpgsql;
 
--- update_interview_rounds function, delete all interview rounds for an application and insert new ones
-CREATE OR REPLACE FUNCTION update_interview_rounds(
+-- update application_and_interview_rounds function, update application and upsert interview rounds
+CREATE OR REPLACE FUNCTION update_application_and_interview_rounds(
   p_user_id TEXT,
   p_application_id UUID,
-  p_interview_rounds JSONB
-)
-RETURNS SETOF interview_experience AS $$
-BEGIN
-  -- Delete existing rounds
-  DELETE FROM interview_experience
-  WHERE application_id = p_application_id AND user_id = p_user_id;
-
-  -- Insert new rounds
-  WITH new_rounds AS (
-    SELECT
-      (ROW_NUMBER() OVER ())::INTEGER AS round_no,
-      x.description,
-      safe_to_date(x.interview_date) AS interview_date,
-      safe_to_date(x.response_date) AS response_date,
-      p_application_id AS application_id,
-      p_user_id AS user_id
-    FROM jsonb_to_recordset(p_interview_rounds) AS x(
-      description TEXT,
-      interview_date TEXT,
-      response_date TEXT
-    )
-  )
-  INSERT INTO interview_experience (round_no, description, interview_date, response_date, application_id, user_id)
-  SELECT round_no, description, interview_date, response_date, application_id, user_id FROM new_rounds;
-
-  -- Return the new data
-  RETURN QUERY
-  SELECT * FROM interview_experience
-  WHERE application_id = p_application_id AND user_id = p_user_id
-  ORDER BY round_no;
-END;
-$$ LANGUAGE plpgsql;
-
--- update_interview_rounds function with upserting (current version)
-CREATE OR REPLACE FUNCTION update_interview_rounds(
-  p_user_id TEXT,
-  p_application_id UUID,
+  p_applied_date DATE,
+  p_first_response_date DATE,
+  p_status TEXT,
   p_interview_rounds JSONB
 )
 RETURNS VOID AS $$
 BEGIN
-  -- Upsert new or updated rounds directly from JSONB with ordinality to preserve order
+  -- Update application details
+  UPDATE application
+  SET applied_date = p_applied_date,
+      first_response_date = p_first_response_date,
+      status = p_status
+  WHERE id = p_application_id AND user_id = p_user_id;
+
+  -- Upsert new or updated interview rounds directly from JSONB with ordinality to preserve order
   WITH input_rounds AS (
     SELECT 
       ord AS round_no,
