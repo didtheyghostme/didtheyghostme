@@ -42,25 +42,27 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   });
 
   const canAddNewRound = () => {
-    if (fields.length === 0) return true;
-    const lastRound = fields[fields.length - 1];
+    const currentInterviewRounds = methods.getValues("interviewRounds");
 
-    return lastRound && lastRound.response_date;
+    if (currentInterviewRounds.length === 0) return true;
+    const lastRound = currentInterviewRounds[currentInterviewRounds.length - 1];
+
+    return lastRound && lastRound.response_date !== null;
   };
 
   const handleAddNewInterviewRoundClick = async () => {
-    if (canAddNewRound()) {
-      append({
-        description: "",
-        interview_date: today(getLocalTimeZone()).toString(),
-        response_date: null,
-        interview_tags: [],
-      });
-    } else {
-      const isFormValid = await methods.trigger();
+    const isFormValid = await methods.trigger();
 
-      if (!isFormValid) {
-        toast.error("Please fix the errors in the form before adding a new one.");
+    if (!isFormValid) {
+      toast.error("Please fix the errors in the form before adding a new one.");
+    } else {
+      if (canAddNewRound()) {
+        append({
+          description: "",
+          interview_date: today(getLocalTimeZone()).toString(),
+          response_date: null,
+          interview_tags: [],
+        });
       } else {
         const latestRoundNumber = fields.length;
 
