@@ -10,7 +10,7 @@ export const siteConfig = {
     },
     {
       label: "Companies",
-      href: "/company",
+      href: "/companies",
     },
     {
       label: "Jobs",
