@@ -23,6 +23,7 @@ export const API = {
 } as const;
 
 export const DB_RPC = {
+  UPDATE_INTERVIEW_ROUNDS: "update_interview_rounds",
   UPDATE_APPLICATION_AND_INTERVIEW_ROUNDS: "update_application_and_interview_rounds",
   GET_QUESTIONS_WITH_REPLY_COUNTS: "get_questions_with_reply_counts",
 } as const;

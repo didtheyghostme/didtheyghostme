@@ -80,6 +80,19 @@ type CommentTable = {
   created_at: string;
 } & BaseUser;
 
+type ReportAdminTable = {
+  id: string;
+  entity_type: CommentEntityType;
+  entity_id: string;
+  report_type: "Link Expired" | "Other";
+  report_message: string | null;
+  status: "Pending" | "Rejected" | "Resolved"; // default Pending in DB
+  created_at: string;
+  resolution_notes: string | null;
+  handled_by: string | null;
+  handled_at: string | null;
+} & BaseUser;
+
 // Utility Types (for insert)
 
 type NullableKeys<T> = {

@@ -1,4 +1,7 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
+import { toast } from "sonner";
+
+import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 
 type ReportLinkModalProps = {
   isOpen: boolean;
@@ -7,12 +10,22 @@ type ReportLinkModalProps = {
 };
 
 export default function ReportLinkModal({ isOpen, onClose, jobId }: ReportLinkModalProps) {
+  const { createReportAdmin, isCreating } = useCreateReportAdmin();
+
   const handleReportClick = async () => {
-    // Implement the logic to report the link
-    // This could be an API call to your backend
-    console.log(`Reporting expired link for job ID: ${jobId}`);
-    // After successful report, close the modal
-    // TODO: update the job posting closed_at date with today's date (manually?), sent to report link expired database table
+    try {
+      await createReportAdmin({
+        entity_type: "job_posting",
+        entity_id: jobId,
+        report_type: "Link Expired",
+        report_message: "http://localhost:3000/job/" + jobId,
+      });
+      toast.success("Report submitted successfully");
+    } catch (error) {
+      console.error("Error reporting expired link:", error);
+      toast.error("Error reporting expired link");
+    }
+
     onClose();
   };
 
@@ -25,7 +38,7 @@ export default function ReportLinkModal({ isOpen, onClose, jobId }: ReportLinkMo
           <Button color="danger" variant="light" onPress={onClose}>
             Cancel
           </Button>
-          <Button color="primary" onPress={handleReportClick}>
+          <Button color="primary" isLoading={isCreating} onPress={handleReportClick}>
             Report
           </Button>
         </ModalFooter>
