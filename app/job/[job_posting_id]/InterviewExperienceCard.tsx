@@ -1,8 +1,7 @@
 import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/react";
 import { motion } from "framer-motion";
-import { formatDistanceToNow } from "date-fns";
 
-import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
+import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
@@ -30,9 +29,7 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
               </Chip>
             </div>
 
-            <Tooltip content={`Added ${formatDistanceToNow(new Date(interviewExperience.created_at), { addSuffix: true })}`}>
-              <span className="whitespace-nowrap text-tiny text-default-400">{formatDistanceToNow(new Date(interviewExperience.created_at), { addSuffix: true })}</span>
-            </Tooltip>
+            <span className="whitespace-nowrap text-tiny text-default-400">{formatHowLongAgo(interviewExperience.created_at)}</span>
           </div>
 
           {/* second row */}
@@ -48,14 +45,14 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
           <div className="flex flex-col text-small text-default-400">
             <div className="flex items-center gap-1">
               <CalendarIcon />
-              <Tooltip content={formatDistanceToNow(new Date(interviewExperience.interview_date), { addSuffix: true })}>
+              <Tooltip content={formatHowLongAgo(interviewExperience.interview_date)}>
                 <span className="w-fit">Interviewed: {formatDateDayMonthYear(interviewExperience.interview_date)}</span>
               </Tooltip>
             </div>
             {interviewExperience.response_date && (
               <div className="flex items-center gap-1">
                 <CalendarIcon />
-                <Tooltip content={formatDistanceToNow(new Date(interviewExperience.response_date), { addSuffix: true })}>
+                <Tooltip content={formatHowLongAgo(interviewExperience.response_date)}>
                   <span className="w-fit">Receive response: {formatDateDayMonthYear(interviewExperience.response_date)}</span>
                 </Tooltip>
               </div>

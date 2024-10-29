@@ -1,5 +1,4 @@
 import { Card, CardBody, Avatar, Button, Textarea } from "@nextui-org/react";
-import { formatDistanceToNow } from "date-fns";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,6 +9,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { AddCommentFormValues, addCommentSchema } from "@/lib/schema/addCommentSchema";
 import { CommentsForThisEntityResponse } from "@/app/api/comment/route";
+import { formatHowLongAgo } from "@/lib/formatDateUtils";
 
 type CommentSectionProps = Pick<CommentTable, "entity_type" | "entity_id">;
 
@@ -72,7 +72,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
                 <div className="flex-grow">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="font-semibold">{comment.user_data.full_name}</span>
-                    <span className="text-sm text-gray-500">{formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}</span>
+                    <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
                   </div>
                   <p>{comment.content}</p>
                 </div>

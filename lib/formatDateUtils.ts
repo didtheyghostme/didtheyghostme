@@ -1,4 +1,5 @@
 import { DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { formatDistanceToNowStrict } from "date-fns";
 
 export const formatDateDayMonthYear = (dateString: string, timezone = getLocalTimeZone()) => {
   const date = parseDate(dateString).toDate(timezone);
@@ -21,4 +22,10 @@ export function isRecentDate(dateString: string, days = 7): boolean {
 
   // Check if the date is between pastDate (inclusive) and today
   return date.compare(pastDate) >= 0;
+}
+
+export function formatHowLongAgo(date: Date | string | number) {
+  return formatDistanceToNowStrict(new Date(date), {
+    addSuffix: true,
+  });
 }

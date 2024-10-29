@@ -3,15 +3,13 @@
 import React from "react";
 import useSWR from "swr";
 import { Pagination, Card, CardBody, CardHeader, Chip, Link } from "@nextui-org/react";
-import { formatDistanceToNow } from "date-fns";
 
-import { AllJobsPageResponse } from "../api/job/route";
-
+import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
-import { isRecentDate } from "@/lib/formatDateUtils";
+import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "created_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name">;
@@ -58,7 +56,7 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
                           New
                         </Chip>
                       )}
-                      <span className="whitespace-nowrap text-small text-default-500">{formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}</span>
+                      <span className="whitespace-nowrap text-small text-default-500">{formatHowLongAgo(job.created_at)}</span>
                     </div>
                   </div>
                   {/* second row */}

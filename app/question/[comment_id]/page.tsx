@@ -3,13 +3,13 @@
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
-import { formatDistanceToNow } from "date-fns";
 
 import { CommentSection } from "./CommentSection";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
 import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
+import { formatHowLongAgo } from "@/lib/formatDateUtils";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -38,7 +38,7 @@ export default function QuestionPage() {
             <div className="flex-grow">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-semibold">{question.user_data.full_name}</span>
-                <span className="text-sm text-gray-500">{formatDistanceToNow(new Date(question.created_at), { addSuffix: true })}</span>
+                <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
               </div>
               <p className="mb-4 text-lg">{question.content}</p>
             </div>

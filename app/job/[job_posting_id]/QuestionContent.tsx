@@ -7,13 +7,13 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
 
 import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { addQuestionSchema, AddQuestionFormValues } from "@/lib/schema/addQuestionSchema";
 import { QuestionWithReplyCountResponse } from "@/app/api/comment/route";
+import { formatHowLongAgo } from "@/lib/formatDateUtils";
 
 type QuestionContentProps = {
   job_posting_id: string;
@@ -98,7 +98,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
                     <Avatar className="flex-shrink-0" name={question.user_data.full_name} size="sm" src={question.user_data.profile_pic_url} />
                     <span className="font-semibold">{question.user_data.full_name}</span>
                   </div>
-                  <span className="whitespace-nowrap text-sm text-gray-500">{formatDistanceToNow(new Date(question.created_at), { addSuffix: true })}</span>
+                  <span className="whitespace-nowrap text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
                 </div>
                 <p className="p-1">{question.content}</p>
                 <div className="flex justify-end text-sm text-gray-500">
