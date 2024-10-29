@@ -1,8 +1,8 @@
 import { Card, CardBody, CardHeader, Divider, Chip } from "@nextui-org/react";
 
-import { formatDate } from "@/lib/formatDate";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
+import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: ProcessedApplication;
@@ -23,7 +23,7 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
           <div>
             <span>Status:</span> <Chip color="primary">{applicationDetails.status}</Chip>
           </div>
-          {applicationDetails.first_response_date && <p>First response date: {formatDate(applicationDetails.first_response_date)}</p>}
+          {applicationDetails.first_response_date && <p>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</p>}
           {!applicationDetails.first_response_date && <p>No first response date set</p>}
         </CardBody>
       </Card>

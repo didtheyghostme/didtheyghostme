@@ -1,6 +1,6 @@
 import { DateFormatter, getLocalTimeZone, parseDate } from "@internationalized/date";
 
-export const formatDate = (dateString: string, timezone = getLocalTimeZone()) => {
+export const formatDateDayMonthYear = (dateString: string, timezone = getLocalTimeZone()) => {
   const date = parseDate(dateString).toDate(timezone);
 
   const formatter = new DateFormatter("en-GB", {

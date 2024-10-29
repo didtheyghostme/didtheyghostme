@@ -22,7 +22,7 @@ import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } 
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
-import { formatDate } from "@/lib/formatDate";
+import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 
 type ColumnKey = keyof Pick<ProcessedApplication, "status" | "applied_date" | "first_response_date"> | "days_between";
 
@@ -193,9 +193,9 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   const renderCell = React.useCallback((application: ProcessedApplication, columnKey: ColumnKey) => {
     switch (columnKey) {
       case "applied_date":
-        return <p>{formatDate(application.applied_date)}</p>;
+        return <p>{formatDateDayMonthYear(application.applied_date)}</p>;
       case "first_response_date":
-        return <p>{application.first_response_date ? formatDate(application.first_response_date) : "N/A"}</p>;
+        return <p>{application.first_response_date ? formatDateDayMonthYear(application.first_response_date) : "N/A"}</p>;
       case "days_between":
         const days = calculateDaysBetween(application.applied_date, application.first_response_date);
 

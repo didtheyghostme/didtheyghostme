@@ -2,7 +2,7 @@ import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/r
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 
-import { formatDate } from "@/lib/formatDate";
+import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
@@ -49,14 +49,14 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
             <div className="flex items-center gap-1">
               <CalendarIcon />
               <Tooltip content={formatDistanceToNow(new Date(interviewExperience.interview_date), { addSuffix: true })}>
-                <span className="w-fit">Interviewed: {formatDate(interviewExperience.interview_date)}</span>
+                <span className="w-fit">Interviewed: {formatDateDayMonthYear(interviewExperience.interview_date)}</span>
               </Tooltip>
             </div>
             {interviewExperience.response_date && (
               <div className="flex items-center gap-1">
                 <CalendarIcon />
                 <Tooltip content={formatDistanceToNow(new Date(interviewExperience.response_date), { addSuffix: true })}>
-                  <span className="w-fit">Receive response: {formatDate(interviewExperience.response_date)}</span>
+                  <span className="w-fit">Receive response: {formatDateDayMonthYear(interviewExperience.response_date)}</span>
                 </Tooltip>
               </div>
             )}
