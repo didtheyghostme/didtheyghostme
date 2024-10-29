@@ -1,4 +1,4 @@
-import { DateFormatter, getLocalTimeZone, parseDate } from "@internationalized/date";
+import { DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
 
 export const formatDateDayMonthYear = (dateString: string, timezone = getLocalTimeZone()) => {
   const date = parseDate(dateString).toDate(timezone);
@@ -11,3 +11,14 @@ export const formatDateDayMonthYear = (dateString: string, timezone = getLocalTi
 
   return formatter.format(date);
 };
+
+export function isRecentDate(dateString: string, days = 7): boolean {
+  const date = parseDate(dateString);
+
+  const todayDate = today("UTC"); // use UTC to avoid timezone issues
+
+  const pastDate = todayDate.subtract({ days });
+
+  // Check if the date is between pastDate (inclusive) and today
+  return date.compare(pastDate) >= 0;
+}

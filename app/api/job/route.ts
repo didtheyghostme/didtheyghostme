@@ -23,10 +23,13 @@ export async function GET(request: NextRequest) {
     id: true,
     title: true,
     country: true,
+    created_at: true,
+    job_posted_date: true,
     [DBTable.COMPANY]: {
       company_name: true,
     },
   };
+
   const selectString = buildSelectString(selectObject);
 
   let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" });

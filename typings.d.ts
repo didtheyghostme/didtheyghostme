@@ -40,7 +40,7 @@ type JobPostingTable = {
   created_at: string;
   company_id: string;
   // add job_status: "Verified by admin?"
-  // or job_posted_date: string | null; for admin to set date, show new on UI if set
+  job_posted_date: string | null; // for admin to set date, show new on UI if set
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
 } & BaseUser;
 
