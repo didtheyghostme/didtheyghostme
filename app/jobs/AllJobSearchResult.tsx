@@ -66,7 +66,7 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
                   <p className="text-small text-default-500">{job.company.company_name}</p>
                 </CardHeader>
                 <CardBody>
-                  <ImageWithFallback className="h-12 w-12" companyName="Mongo DB" src={job.company.logo_url} />
+                  <ImageWithFallback className="h-12 w-12" companyName={job.company.company_name} src={job.company.logo_url} />
 
                   <p>{job.country}</p>
                 </CardBody>

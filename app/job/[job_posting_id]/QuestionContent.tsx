@@ -5,8 +5,9 @@ import useSWR from "swr";
 import { Card, CardBody, Button, Spacer, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Avatar } from "@nextui-org/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { fetcher } from "@/lib/fetcher";
@@ -20,7 +21,9 @@ type QuestionContentProps = {
 };
 
 export function QuestionContent({ job_posting_id }: QuestionContentProps) {
+  const pathname = usePathname();
   const router = useRouter();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<AddQuestionFormValues>({
@@ -59,31 +62,42 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onPress={() => setIsModalOpen(true)}>Ask a Question</Button>
+        <SignedIn>
+          <Button onPress={() => setIsModalOpen(true)}>Ask a Question</Button>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+            <Button>Ask a Question</Button>
+          </SignInButton>
+        </SignedOut>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ModalContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalHeader>Ask a Question</ModalHeader>
-            <ModalBody>
-              <Controller
-                control={control}
-                name="content"
-                render={({ field, fieldState }) => <Textarea {...field} isRequired errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} placeholder="Type your question here..." />}
-              />
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={() => setIsModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button color="primary" isLoading={isCreating} type="submit">
-                Submit Question
-              </Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+      <SignedIn>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <ModalContent>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <ModalHeader>Ask a Question</ModalHeader>
+              <ModalBody>
+                <Controller
+                  control={control}
+                  name="content"
+                  render={({ field, fieldState }) => (
+                    <Textarea {...field} isRequired errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} placeholder="Type your question here..." />
+                  )}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button color="primary" isLoading={isCreating} type="submit">
+                  Submit Question
+                </Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </SignedIn>
 
       <Spacer y={4} />
       {questions.length === 0 && <div>No questions yet</div>}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, Link, Chip, Button, Spacer, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 import { fetcher } from "@/lib/fetcher";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
@@ -14,6 +15,8 @@ import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
 
 export default function CompanyDetailsPage() {
+  const pathname = usePathname();
+
   const { company_id } = useParams();
 
   const { data: company, error, isLoading } = useSWR<Company>(API.COMPANY.getById(company_id as string), fetcher);
@@ -134,68 +137,83 @@ export default function CompanyDetailsPage() {
       {/* Open Positions with modal */}
       <div className="mb-4 flex justify-between">
         <h2 className="text-2xl font-semibold">Open Positions</h2>
-        <Button className="rounded-full border-2 border-green-700 px-4 py-2 text-green-700 transition-colors duration-300 hover:bg-green-700 hover:text-white" variant="flat" onPress={handleOpenModal}>
-          Add a new job
-        </Button>
+        <SignedIn>
+          <Button
+            className="rounded-full border-2 border-green-700 px-4 py-2 text-green-700 transition-colors duration-300 hover:bg-green-700 hover:text-white"
+            variant="flat"
+            onPress={handleOpenModal}
+          >
+            Add a new job
+          </Button>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+            <Button className="rounded-full border-2 border-green-700 px-4 py-2 text-green-700 transition-colors duration-300 hover:bg-green-700 hover:text-white" variant="flat">
+              Add a new job
+            </Button>
+          </SignInButton>
+        </SignedOut>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <ModalContent>
-          <form onSubmit={handleAddThisJob}>
-            <ModalHeader className="flex flex-col gap-1">Add New Job</ModalHeader>
-            <ModalBody>
-              <Controller
-                control={control}
-                name="title"
-                render={({ field }) => (
-                  <Input {...field} isRequired errorMessage={errors.title?.message} isInvalid={!!errors.title} label="Job Title" placeholder="Enter job title" variant="bordered" />
-                )}
-              />
-              <Controller
-                control={control}
-                name="url"
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    errorMessage={errors.url?.message}
-                    isInvalid={!!errors.url && field.value !== null}
-                    label="Job URL (optional)"
-                    placeholder="Enter job application URL from the company"
-                    value={field.value ?? ""}
-                    variant="bordered"
-                    onChange={(e) => {
-                      const value = e.target.value.trim();
+      <SignedIn>
+        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+          <ModalContent>
+            <form onSubmit={handleAddThisJob}>
+              <ModalHeader className="flex flex-col gap-1">Add New Job</ModalHeader>
+              <ModalBody>
+                <Controller
+                  control={control}
+                  name="title"
+                  render={({ field }) => (
+                    <Input {...field} isRequired errorMessage={errors.title?.message} isInvalid={!!errors.title} label="Job Title" placeholder="Enter job title" variant="bordered" />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="url"
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      errorMessage={errors.url?.message}
+                      isInvalid={!!errors.url && field.value !== null}
+                      label="Job URL (optional)"
+                      placeholder="Enter job application URL from the company"
+                      value={field.value ?? ""}
+                      variant="bordered"
+                      onChange={(e) => {
+                        const value = e.target.value.trim();
 
-                      field.onChange(value === "" ? null : value);
-                    }}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="country"
-                render={({ field }) => (
-                  <Select {...field} defaultSelectedKeys={[field.value]} errorMessage={errors.country?.message} label="Country" placeholder="Select a country">
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                )}
-              />
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={handleCloseModal}>
-                Cancel
-              </Button>
-              <Button color="primary" type="submit">
-                Add Job
-              </Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+                        field.onChange(value === "" ? null : value);
+                      }}
+                    />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="country"
+                  render={({ field }) => (
+                    <Select {...field} defaultSelectedKeys={[field.value]} errorMessage={errors.country?.message} label="Country" placeholder="Select a country">
+                      {COUNTRIES.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={handleCloseModal}>
+                  Cancel
+                </Button>
+                <Button color="primary" type="submit">
+                  Add Job
+                </Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+      </SignedIn>
 
       {/* Job Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

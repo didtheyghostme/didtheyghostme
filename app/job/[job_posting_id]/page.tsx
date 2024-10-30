@@ -1,10 +1,11 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key } from "react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 import ReportLinkModal from "./ReportLinkModal";
 import TrackThisJobModal from "./TrackThisJobModal";
@@ -50,6 +51,8 @@ export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url
 };
 
 export default function JobDetailsPage() {
+  const pathname = usePathname(); // Get current path
+
   const { job_posting_id } = useParams();
   const [selectedTab, setSelectedTab] = useQueryState("tab", parseAsStringLiteral(tabKeys).withDefault("Applied"));
 
@@ -138,38 +141,59 @@ export default function JobDetailsPage() {
                 <LinkIcon />
                 Job portal
               </Link>
-              <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat" onPress={handleReportLinkClick}>
-                Report Link
-              </Button>
+              <SignedIn>
+                <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat" onPress={handleReportLinkClick}>
+                  Report Link
+                </Button>
+              </SignedIn>
+              <SignedOut>
+                <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                  <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat">
+                    Report Link
+                  </Button>
+                </SignInButton>
+              </SignedOut>
             </div>
           )}
         </CardHeader>
         <Divider />
+
         <CardBody>
           <p className="text-lg">Location: {jobDetails.country}</p>
           <Spacer y={2} />
           <Chip color="primary" variant="flat">
             Closed
           </Chip>
-          {applications.currentUserItemId ? (
-            <Button
-              className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
-              color="success"
-              variant="flat"
-              onPress={() => handleViewMyApplicationClick(applications.currentUserItemId!)}
-            >
-              View my application
-            </Button>
-          ) : (
-            <Button
-              className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
-              color="primary"
-              variant="bordered"
-              onPress={handleTrackThisJobClick}
-            >
-              Track this job
-            </Button>
-          )}
+
+          <SignedIn>
+            {applications.currentUserItemId ? (
+              <Button
+                className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
+                color="success"
+                variant="flat"
+                onPress={() => handleViewMyApplicationClick(applications.currentUserItemId!)}
+              >
+                View my application
+              </Button>
+            ) : (
+              <Button
+                className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
+                color="primary"
+                variant="bordered"
+                onPress={handleTrackThisJobClick}
+              >
+                Track this job
+              </Button>
+            )}
+          </SignedIn>
+
+          <SignedOut>
+            <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+              <Button className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground" color="primary" variant="bordered">
+                Sign in to track this job
+              </Button>
+            </SignInButton>
+          </SignedOut>
         </CardBody>
       </Card>
 

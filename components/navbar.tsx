@@ -10,8 +10,11 @@ import { ClerkUserButton } from "./ClerkUserButton";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { TwitterIcon, GithubIcon, DiscordIcon, HeartFilledIcon, SearchIcon, Logo } from "@/components/icons";
+import { usePathname } from "next/navigation";
 
 export const Navbar = () => {
+  const pathname = usePathname();
+
   const searchInput = (
     <Input
       aria-label="Search"
@@ -77,7 +80,7 @@ export const Navbar = () => {
             Sponsor
           </Button> */}
           <SignedOut>
-            <SignInButton>
+            <SignInButton fallbackRedirectUrl={pathname} mode="modal">
               <Button className="bg-default-100 text-sm font-normal text-default-600" variant="flat">
                 Login
               </Button>
@@ -89,6 +92,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
+      {/* mobile view */}
       <NavbarContent className="basis-1 pl-4 sm:hidden" justify="end">
         <Link isExternal aria-label="Github" href={siteConfig.links.github}>
           <GithubIcon className="text-default-500" />
@@ -96,7 +100,7 @@ export const Navbar = () => {
         <ThemeSwitch />
 
         <SignedOut>
-          <SignInButton>
+          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
             <Button className="bg-default-100 text-sm font-normal text-default-600" startContent={<HeartFilledIcon className="text-danger" />} variant="flat">
               Login
             </Button>
