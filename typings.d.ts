@@ -27,8 +27,8 @@ type CompanyTable = {
   company_name: string; // todo: rename to name
   company_url: string;
   status: string | null; //todo remove this when updating the company table page
+  logo_url: string | null;
   created_at: string;
-  // logo_url: string; // todo: add logo.dev API url to this?
 } & BaseUser;
 
 type JobPostingTable = {
@@ -42,6 +42,7 @@ type JobPostingTable = {
   // add job_status: "Verified by admin?"
   job_posted_date: string | null; // for admin to set date, show new on UI if set
   // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
+  // updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
 } & BaseUser;
 
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Ghosted" | "Offered";

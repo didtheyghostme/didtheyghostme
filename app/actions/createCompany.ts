@@ -14,7 +14,12 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
     // Server-side validation
     const validatedData = companySchema.parse(newCompany);
 
-    const { data, error } = await supabase.from(DBTable.COMPANY).insert(validatedData).select();
+    const dataToInsert = {
+      ...validatedData,
+      logo_url: validatedData.company_url,
+    };
+
+    const { data, error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select();
 
     if (error) {
       console.error("Insert error fail:", error.message);

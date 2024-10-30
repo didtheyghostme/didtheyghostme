@@ -10,9 +10,10 @@ import { API } from "@/lib/constants/apiRoutes";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "created_at" | "job_posted_date"> & {
-  [DBTable.COMPANY]: Pick<CompanyTable, "company_name">;
+  [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
 };
 
 type AllJobSearchResultProps = {
@@ -39,6 +40,8 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
 
   return (
     <>
+      <ImageWithFallback className="h-12 w-12" companyName="Seagate" src={"https://sg.linkedin.com/jobs/software-engineering-intern-jobs/"} />
+
       {jobs.length === 0 && <div>No jobs found</div>}
 
       {jobs.length > 0 && (
@@ -63,6 +66,8 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
                   <p className="text-small text-default-500">{job.company.company_name}</p>
                 </CardHeader>
                 <CardBody>
+                  <ImageWithFallback className="h-12 w-12" companyName="Mongo DB" src={job.company.logo_url} />
+
                   <p>{job.country}</p>
                 </CardBody>
               </Card>
@@ -70,6 +75,12 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
           </div>
           <div className="flex justify-end">
             <Pagination initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
+          </div>
+
+          <div className="mt-2">
+            <a className="text-xs" href="https://logo.dev" rel="noreferrer" target="_blank">
+              Logos provided by Logo.dev
+            </a>
           </div>
         </>
       )}

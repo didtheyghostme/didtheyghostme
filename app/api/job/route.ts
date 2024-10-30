@@ -27,12 +27,13 @@ export async function GET(request: NextRequest) {
     job_posted_date: true,
     [DBTable.COMPANY]: {
       company_name: true,
+      logo_url: true,
     },
   };
 
   const selectString = buildSelectString(selectObject);
-
-  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" });
+  // query filter closed_date jobs and url is not null, TODO: add job_status and use that to filter not "CLOSED"
+  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" }).is("closed_date", null).not("url", "is", null);
 
   if (search) {
     query = query.ilike("title", `%${search}%`);
