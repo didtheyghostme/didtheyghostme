@@ -11,7 +11,6 @@ export const API = {
   APPLICATION: {
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/application`, // return all applications for a job posting
     getByApplicationId: (application_id: string) => `/api/application/${application_id}`, // return one application by id
-    getByCurrentUser: () => `/api/my-applications`, // return all applications for the current user
   },
   INTERVIEW: {
     getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application
@@ -20,6 +19,9 @@ export const API = {
   COMMENT: {
     getAllByThisEntity: (entity_id: string, entity_type: CommentEntityType) => `/api/comment?entity_id=${entity_id}&entity_type=${entity_type}`, // return all comments for an entity
     getById: (comment_id: string) => `/api/comment/${comment_id}`, // return one comment by id
+  },
+  PROTECTED: {
+    getByCurrentUser: () => `/api/applications`, // return all applications for the current user
   },
 } as const;
 

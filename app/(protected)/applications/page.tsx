@@ -18,7 +18,7 @@ export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "ap
 
 export default function MyApplicationsPage() {
   const router = useRouter();
-  const { data: applications, error, isLoading } = useSWR<MyApplicationResponse[]>(API.APPLICATION.getByCurrentUser(), fetcher);
+  const { data: applications, error, isLoading } = useSWR<MyApplicationResponse[]>(API.PROTECTED.getByCurrentUser, fetcher);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading applications</div>;

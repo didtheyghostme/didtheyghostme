@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
-import { MyApplicationResponse } from "@/app/my-applications/page";
+import { MyApplicationResponse } from "@/app/(protected)/applications/page";
 
 export async function GET() {
   const { userId } = auth();
