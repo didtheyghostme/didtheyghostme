@@ -27,7 +27,7 @@ type CompanyTable = {
   company_name: string; // todo: rename to name
   company_url: string;
   status: string | null; //todo remove this when updating the company table page
-  logo_url: string | null;
+  logo_url: string;
   created_at: string;
 } & BaseUser;
 

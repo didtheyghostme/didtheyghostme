@@ -11,6 +11,7 @@ export const API = {
   APPLICATION: {
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/application`, // return all applications for a job posting
     getByApplicationId: (application_id: string) => `/api/application/${application_id}`, // return one application by id
+    getByCurrentUser: () => `/api/my-applications`, // return all applications for the current user
   },
   INTERVIEW: {
     getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application

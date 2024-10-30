@@ -14,7 +14,7 @@ export const ClerkUserButton = () => {
   return (
     <UserButton>
       <UserButton.MenuItems>
-        <UserButton.Link href="/create-organization" label="Create organization" labelIcon={<HeartFilledIcon className="pb-2 pr-2" />} />
+        <UserButton.Link href="/my-applications" label="View my job applications" labelIcon={<HeartFilledIcon className="pb-2 pr-2" />} />
         <UserButton.Action label="manageAccount" />
         <UserButton.Action label="signOut" />
       </UserButton.MenuItems>
