@@ -33,8 +33,6 @@ type CompanyTable = {
 
 type JobStatus = "Pending" | "Verified" | "Closed" | "Rejected" | "No URL"; // default start with "No URL" or "Pending"
 
-// open when admin verified that url is valid (!!!), closed when closed_date is set, rejected when invalid link or other reasons
-// if i can't find a url link, remain as Pending?
 type JobPostingTable = {
   id: string;
   title: string;
@@ -90,7 +88,7 @@ type ReportAdminTable = {
   entity_id: string;
   report_type: "Link Expired" | "Other";
   report_message: string | null;
-  status: "Pending" | "Rejected" | "Resolved"; // default Pending in DB
+  report_status: "Pending" | "Rejected" | "Resolved"; // default Pending in DB
   created_at: string;
   resolution_notes: string | null;
   handled_by: string | null;

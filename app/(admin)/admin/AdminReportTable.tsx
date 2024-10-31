@@ -9,7 +9,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { AdminReportResponse } from "@/app/api/(admin)/admin/route";
 
-type ColumnKey = keyof Pick<AdminReportResponse, "entity_type" | "report_type" | "report_message" | "status" | "created_at" | "resolution_notes" | "reporter" | "handler">;
+type ColumnKey = keyof Pick<AdminReportResponse, "entity_type" | "report_type" | "report_message" | "report_status" | "created_at" | "resolution_notes" | "reporter" | "handler">;
 
 export default function AdminReportTable() {
   const { data: reports, error } = useSWR<AdminReportResponse[]>(API.ADMIN.getAllReports, fetcher);
@@ -18,7 +18,7 @@ export default function AdminReportTable() {
     // Type assertion here is safe because we control the column keys in TableHeader
     const key = columnKey as ColumnKey;
 
-    switch (columnKey) {
+    switch (key) {
       case "reporter":
         return (
           <User
@@ -28,8 +28,8 @@ export default function AdminReportTable() {
             }}
           />
         );
-      case "status":
-        return <Chip color={report.status === "Pending" ? "warning" : report.status === "Resolved" ? "success" : "danger"}>{report.status}</Chip>;
+      case "report_status":
+        return <Chip color={report.report_status === "Pending" ? "warning" : report.report_status === "Resolved" ? "success" : "danger"}>{report.report_status}</Chip>;
       case "created_at":
         return formatDateDayMonthYear(report.created_at);
       case "handler":
@@ -59,7 +59,7 @@ export default function AdminReportTable() {
         <TableColumn key="entity_type">TYPE</TableColumn>
         <TableColumn key="report_type">REPORT TYPE</TableColumn>
         <TableColumn key="report_message">MESSAGE</TableColumn>
-        <TableColumn key="status">STATUS</TableColumn>
+        <TableColumn key="report_status">STATUS</TableColumn>
         <TableColumn key="created_at">CREATED</TableColumn>
         <TableColumn key="handler">HANDLED BY</TableColumn>
         <TableColumn key="resolution_notes">RESOLUTION NOTES</TableColumn>

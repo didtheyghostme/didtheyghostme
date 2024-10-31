@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     id: true,
     title: true,
     country: true,
-    created_at: true,
+    updated_at: true,
     job_posted_date: true,
     [DBTable.COMPANY]: {
       company_name: true,
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     query = query.ilike("title", `%${search}%`);
   }
 
-  const { data, error, count } = await query.range((page - 1) * LIMIT_PER_PAGE, page * LIMIT_PER_PAGE - 1).order("created_at", { ascending: false });
+  const { data, error, count } = await query.range((page - 1) * LIMIT_PER_PAGE, page * LIMIT_PER_PAGE - 1).order("updated_at", { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

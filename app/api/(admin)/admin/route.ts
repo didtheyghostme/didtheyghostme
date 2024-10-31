@@ -4,7 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
 
-export type AdminPickedKeys = Pick<ReportAdminTable, "id" | "entity_type" | "entity_id" | "report_type" | "report_message" | "status" | "created_at" | "resolution_notes">;
+export type AdminPickedKeys = Pick<ReportAdminTable, "id" | "entity_type" | "entity_id" | "report_type" | "report_message" | "report_status" | "created_at" | "resolution_notes">;
 
 export type AdminReportResponse = AdminPickedKeys & {
   reporter: ClerkUserProfileData;
@@ -20,7 +20,7 @@ export async function GET() {
     entity_id: true,
     report_type: true,
     report_message: true,
-    status: true,
+    report_status: true,
     created_at: true,
     resolution_notes: true,
   };
