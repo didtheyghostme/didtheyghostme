@@ -12,7 +12,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 
-export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "created_at" | "job_posted_date"> & {
+export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
 };
 
@@ -59,7 +59,7 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
                           New
                         </Chip>
                       )}
-                      <span className="whitespace-nowrap text-small text-default-500">{formatHowLongAgo(job.created_at)}</span>
+                      <span className="whitespace-nowrap text-small text-default-500">{formatHowLongAgo(job.updated_at)}</span>
                     </div>
                   </div>
                   {/* second row */}

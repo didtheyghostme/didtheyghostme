@@ -4,6 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
 import { AllJobsPageData } from "@/app/jobs/AllJobSearchResult";
+import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 
 export type AllJobsPageResponse = {
   data: AllJobsPageData[];
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   const selectString = buildSelectString(selectObject);
   // query filter closed_date jobs and url is not null, TODO: add job_status and use that to filter not "CLOSED"
-  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" }).is("closed_date", null).not("url", "is", null);
+  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" }).in("job_status", [JOB_STATUS.Pending, JOB_STATUS.Verified]);
 
   if (search) {
     query = query.ilike("title", `%${search}%`);

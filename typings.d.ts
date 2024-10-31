@@ -31,18 +31,21 @@ type CompanyTable = {
   created_at: string;
 } & BaseUser;
 
+type JobStatus = "Pending" | "Verified" | "Closed" | "Rejected" | "No URL"; // default start with "No URL" or "Pending"
+
+// open when admin verified that url is valid (!!!), closed when closed_date is set, rejected when invalid link or other reasons
+// if i can't find a url link, remain as Pending?
 type JobPostingTable = {
   id: string;
   title: string;
   country: string;
   url: string | null;
   closed_date: string | null;
-  created_at: string;
   company_id: string;
-  // add job_status: "Verified by admin?"
+  job_status: JobStatus;
   job_posted_date: string | null; // for admin to set date, show new on UI if set
-  // or another table flagged job status with toggle default to Open: "Open" | "Closed" | "Flagged";
-  // updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
+  created_at: string;
+  updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
 } & BaseUser;
 
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Ghosted" | "Offered";

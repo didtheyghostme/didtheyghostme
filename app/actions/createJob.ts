@@ -11,19 +11,27 @@ export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
   newJob: AddJobFormData;
 };
 
+type InsertedJobData = AddJobFormData & Pick<JobPostingTable, "company_id" | "user_id" | "job_status">;
+
 const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Promise<JobPostingTable> => {
   const supabase = await createClerkSupabaseClientSsr();
   const { userId: user_id } = auth();
   const { company_id, newJob } = arg;
 
+  if (!user_id) throw new Error("User not authenticated");
+
   try {
     // Server-side validation
     const validatedData = addJobSchema.parse(newJob);
 
-    const { data, error } = await supabase
-      .from(DBTable.JOB_POSTING)
-      .insert({ ...validatedData, company_id, user_id })
-      .select();
+    const insertedData: InsertedJobData = {
+      ...validatedData,
+      company_id,
+      user_id,
+      job_status: validatedData.url === null ? "No URL" : "Pending",
+    };
+
+    const { data, error } = await supabase.from(DBTable.JOB_POSTING).insert(insertedData).select();
 
     if (error) {
       console.error("Insert error fail:", error.message);
