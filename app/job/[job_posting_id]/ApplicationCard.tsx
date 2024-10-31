@@ -4,6 +4,22 @@ import { motion } from "framer-motion";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
 
+export function getStatusColor(status: ApplicationStatus): "primary" | "danger" | "warning" | "success" {
+  switch (status) {
+    case "Applied":
+    case "Interviewing":
+      return "primary";
+    case "Rejected":
+      return "danger";
+    case "Ghosted":
+      return "warning";
+    case "Offered":
+      return "success";
+    default:
+      return "primary"; // fallback color
+  }
+}
+
 type ApplicationCardProps = {
   application: JobPostPageInterviewData;
   onCardClick: () => void;
@@ -20,7 +36,7 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           <div className="flex items-center justify-between">
             <div className="flex gap-3">
               <p className="text-base font-semibold"> Interview status: </p>
-              <Chip color="danger" size="sm" variant="flat">
+              <Chip color={getStatusColor(application.status)} size="sm" variant="flat">
                 {application.status}
               </Chip>
             </div>

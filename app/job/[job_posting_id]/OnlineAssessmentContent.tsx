@@ -80,7 +80,7 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
       </div>
 
       {sortedOnlineAssessments.map((onlineAssessment) => (
-        <OnlineAssessmentCard key={onlineAssessment.id} application={onlineAssessment} onCardClick={() => handleCardClick(onlineAssessment.id)} />
+        <OnlineAssessmentCard key={onlineAssessment.id} application={onlineAssessment} onCardClick={() => handleCardClick(onlineAssessment.application.id)} />
       ))}
     </div>
   );
