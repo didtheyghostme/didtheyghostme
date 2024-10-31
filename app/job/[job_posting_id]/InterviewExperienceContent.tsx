@@ -3,14 +3,14 @@ import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import { useRouter } from "next/navigation";
 
-import { sortAssessmentsByDateTime, sortOptions, SORT_OPTION_KEYS, SortOption } from "./OnlineAssessmentContent";
-import { InterviewExperienceCard } from "./InterviewExperienceCard";
+import { sortOptions, SORT_OPTION_KEYS, SortOption, sortApplicationsByDateTime } from "./OnlineAssessmentContent";
+import { ApplicationCard } from "./ApplicationCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { ChevronDownIcon } from "@/components/icons";
-import { JobPostPageInterviewData } from "@/lib/sharedTypes";
+import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
@@ -19,19 +19,21 @@ type InterviewExperienceContentProps = {
 export function InterviewExperienceContent({ job_posting_id }: InterviewExperienceContentProps) {
   const [sort, setSort] = useQueryState("expSort", parseAsStringLiteral(SORT_OPTION_KEYS).withDefault("newest"));
 
-  const { data: interviewExperiences, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+  const { data: applicationsWithCounts, error, isLoading } = useSWR<JobPostPageInterviewData[]>(API.INTERVIEW.getAllByJobPostingId(job_posting_id), fetcher);
+
+  console.log("applications@@@@@@@ for interview experiences", applicationsWithCounts);
 
   const router = useRouter();
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading interview experiences</div>;
-  if (!interviewExperiences || interviewExperiences.length === 0) return <div>No interview experiences found</div>;
+  if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <div>No interview experiences found</div>;
 
-  const filteredExperiences = interviewExperiences.filter((exp) => !exp.interview_tags?.includes(JOB_POST_PAGE_TABS.ONLINE_ASSESSMENT));
+  const filteredApplications = applicationsWithCounts.filter((application) => !application.interview_tags?.includes(JOB_POST_PAGE_TABS.ONLINE_ASSESSMENT));
 
-  if (filteredExperiences.length === 0) return <div>No interview experiences have been added yet</div>;
+  if (filteredApplications.length === 0) return <div>No interview experiences have been added yet</div>;
 
-  const sortedExperiences = sortAssessmentsByDateTime(filteredExperiences, sort);
+  const sortedApplications = sortApplicationsByDateTime(filteredApplications, sort);
 
   function handleSortChange(keys: Selection) {
     const selectedKey = Array.from(keys)[0];
@@ -62,8 +64,8 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
         </Dropdown>
       </div>
 
-      {sortedExperiences.map((interviewExperience) => (
-        <InterviewExperienceCard key={interviewExperience.id} interviewExperience={interviewExperience} onCardClick={() => handleCardClick(interviewExperience.application.id)} />
+      {sortedApplications.map((application) => (
+        <ApplicationCard key={application.id} application={application} onCardClick={() => handleCardClick(application.id)} />
       ))}
     </div>
   );

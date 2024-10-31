@@ -115,3 +115,49 @@ BEGIN
   ORDER BY q.created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+create or replace function get_applications_with_interview_stats(job_posting_id_param uuid)
+returns table (
+  id uuid,
+  status text,
+  applied_date DATE,
+  first_response_date DATE,
+  created_at timestamp with time zone,
+  full_name text,
+  profile_pic_url text,
+  number_of_rounds bigint,
+  number_of_comments bigint,
+  interview_tags text[]
+) as $$
+begin
+  return query
+  SELECT 
+    a.id,
+    a.status,
+    a.applied_date,
+    a.first_response_date,
+    a.created_at,
+    u.full_name,
+    u.profile_pic_url,
+    COUNT(DISTINCT ie.id) as number_of_rounds,
+    COUNT(DISTINCT c.id) as number_of_comments,
+    array_agg(DISTINCT t.tag) FILTER (WHERE t.tag IS NOT NULL) as interview_tags
+  FROM application a
+  LEFT JOIN user_data u ON a.user_id = u.user_id
+  INNER JOIN interview_experience ie ON a.id = ie.application_id
+  LEFT JOIN LATERAL unnest(ie.interview_tags) as t(tag) ON true
+  LEFT JOIN comment c ON c.entity_type = 'interview_experience' 
+    AND c.entity_id = ie.id
+  WHERE a.job_posting_id = job_posting_id_param
+  GROUP BY 
+    a.id,
+    a.status,
+    a.applied_date,
+    a.first_response_date,
+    a.created_at,
+    u.full_name,
+    u.profile_pic_url;
+end;
+$$ language plpgsql;

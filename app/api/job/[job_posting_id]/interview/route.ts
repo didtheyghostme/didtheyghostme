@@ -1,42 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { DBTable } from "@/lib/constants/dbTables";
-import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
-import { JobPostPageInterviewData } from "@/lib/sharedTypes";
+import { DB_RPC } from "@/lib/constants/apiRoutes";
+
+export type JobPostPageInterviewData = Pick<ApplicationTable, "id" | "applied_date" | "first_response_date" | "created_at" | "status"> &
+  ClerkUserProfileData & {
+    number_of_rounds: number;
+    number_of_comments: number;
+    interview_tags: InterviewTag[] | null;
+  };
 
 export async function GET(request: NextRequest, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const selectObject: SelectObject<JobPostPageInterviewData> = {
-    id: true,
-    round_no: true,
-    difficulty: true,
-    description: true,
-    interview_date: true,
-    response_date: true,
-    interview_tags: true,
-    created_at: true,
-    [DBTable.APPLICATION]: {
-      id: true,
-      job_posting_id: true,
-      status: true,
-    },
-    [DBTable.USER_DATA]: {
-      full_name: true,
-      profile_pic_url: true,
-    },
-  };
+  // Call the RPC function instead of direct select
+  const { data, error } = await supabase.rpc(DB_RPC.GET_APPLICATIONS_WITH_INTERVIEW_STATS, {
+    job_posting_id_param: params.job_posting_id,
+  });
 
-  const selectString = buildSelectString(selectObject);
-
-  console.log("select query of this interview experience", selectString);
-
-  let query = supabase.from(DBTable.INTERVIEW_EXPERIENCE).select(selectString).eq(`${DBTable.APPLICATION}.job_posting_id`, params.job_posting_id);
-
-  const { data, error } = await query;
-
-  console.log("data of all interview experience", data, error);
+  console.log("data RPC@@@@@@@", data, error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
