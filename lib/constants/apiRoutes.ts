@@ -15,6 +15,7 @@ export const API = {
   INTERVIEW: {
     getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/interview`, // return all interviews for a job posting
+    getOnlineAssessmentsByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/interview/online`, // return all online assessments for a job posting
   },
   COMMENT: {
     getAllByThisEntity: (entity_id: string, entity_type: CommentEntityType) => `/api/comment?entity_id=${entity_id}&entity_type=${entity_type}`, // return all comments for an entity
