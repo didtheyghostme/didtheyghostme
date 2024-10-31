@@ -6,11 +6,12 @@ const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // First check: Protects API routes (requires authentication)
   if (isProtectedRoute(req)) {
-    auth().protect();
+    await auth().protect();
   }
 
-  // Protect all routes starting with `/admin`
+  // Second check: Protects admin routes (requires admin role)
   if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== "admin") {
     const url = new URL("/", req.url);
 

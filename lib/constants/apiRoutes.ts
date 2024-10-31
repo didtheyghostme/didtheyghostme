@@ -23,6 +23,9 @@ export const API = {
   PROTECTED: {
     getByCurrentUser: () => `/api/applications`, // return all applications for the current user
   },
+  ADMIN: {
+    getAllReports: () => `/api/admin`, // return all reports
+  },
 } as const;
 
 export const DB_RPC = {

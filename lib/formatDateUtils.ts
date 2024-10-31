@@ -1,8 +1,14 @@
 import { DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
-import { formatDistanceToNowStrict } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
+
+const formatToYYYYMMDD = (dateString: string) => {
+  return format(new Date(dateString), "yyyy-MM-dd");
+};
 
 export const formatDateDayMonthYear = (dateString: string, timezone = getLocalTimeZone()) => {
-  const date = parseDate(dateString).toDate(timezone);
+  const formattedDate = dateString.includes("T") ? formatToYYYYMMDD(dateString) : dateString;
+
+  const date = parseDate(formattedDate).toDate(timezone);
 
   const formatter = new DateFormatter("en-GB", {
     day: "numeric",
