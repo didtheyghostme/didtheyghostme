@@ -8,7 +8,6 @@ import { ApplicationCard } from "./ApplicationCard";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
-import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { ChevronDownIcon } from "@/components/icons";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
 
@@ -29,11 +28,7 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
   if (error) return <div>Error loading interview experiences</div>;
   if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <div>No interview experiences found</div>;
 
-  const filteredApplications = applicationsWithCounts.filter((application) => !application.interview_tags?.includes(JOB_POST_PAGE_TABS.ONLINE_ASSESSMENT));
-
-  if (filteredApplications.length === 0) return <div>No interview experiences have been added yet</div>;
-
-  const sortedApplications = sortApplicationsByDateTime(filteredApplications, sort);
+  const sortedApplications = sortApplicationsByDateTime(applicationsWithCounts, sort);
 
   function handleSortChange(keys: Selection) {
     const selectedKey = Array.from(keys)[0];

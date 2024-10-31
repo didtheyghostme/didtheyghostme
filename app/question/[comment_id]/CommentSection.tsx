@@ -90,7 +90,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
                 <Avatar className="flex-shrink-0" name={comment.user_data.full_name} src={comment.user_data.profile_pic_url} />
                 <div className="flex-grow">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="font-semibold">{comment.user_data.full_name}</span>
+                    <span className="text-sm text-default-500">{comment.user_data.full_name}</span>
                     <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
                   </div>
                   <p>{comment.content}</p>

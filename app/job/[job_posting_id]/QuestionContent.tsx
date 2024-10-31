@@ -105,17 +105,19 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
       {questions.length > 0 &&
         questions.map((question) => (
           <Card key={question.id} isPressable className="w-full" onPress={() => handleQuestionClick(question.id)}>
+            <div className="flex w-full items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
+              <div className="flex items-center gap-2">
+                <Avatar className="flex-shrink-0" name={question.user_data.full_name} size="sm" src={question.user_data.profile_pic_url} />
+                <span className="text-sm text-default-500">{question.user_data.full_name}</span>
+              </div>
+
+              <span className="whitespace-nowrap text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
+            </div>
+
             <CardBody>
               <div className="flex flex-col">
-                <div className="mb-2 flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="flex-shrink-0" name={question.user_data.full_name} size="sm" src={question.user_data.profile_pic_url} />
-                    <span className="font-semibold">{question.user_data.full_name}</span>
-                  </div>
-                  <span className="whitespace-nowrap text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
-                </div>
                 <p className="p-1">{question.content}</p>
-                <div className="flex justify-end text-sm text-gray-500">
+                <div className="flex justify-end text-small text-gray-500">
                   <span>
                     {question.reply_count} {question.reply_count === 1 ? "comment" : "comments"}
                   </span>

@@ -1,13 +1,12 @@
-import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, Chip, Avatar } from "@nextui-org/react";
 import { motion } from "framer-motion";
 
-import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
-import { CalendarIcon } from "@/components/icons";
+import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
 
 type ApplicationCardProps = {
   application: JobPostPageInterviewData;
-  onCardClick?: () => void;
+  onCardClick: () => void;
 };
 
 export function ApplicationCard({ application, onCardClick }: ApplicationCardProps) {
@@ -20,7 +19,7 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           {/* first row */}
           <div className="flex items-center justify-between">
             <div className="flex gap-3">
-              <p className="text-base font-semibold">Round {application.number_of_rounds} </p>
+              <p className="text-base font-semibold"> Interview status: </p>
               <Chip color="danger" size="sm" variant="flat">
                 {application.status}
               </Chip>
@@ -30,55 +29,39 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           </div>
 
           {/* second row */}
-          <div className="flex flex-wrap gap-2">
-            {application.interview_tags?.map((tag) => (
-              <Chip key={tag} color="secondary" size="sm" variant="flat">
-                {tag}
-              </Chip>
-            ))}
-          </div>
-
-          {/* third row */}
-          <div className="flex flex-col text-small text-default-400">
-            <div className="flex items-center gap-1">
-              <CalendarIcon />
-              <Tooltip content={formatHowLongAgo(application.applied_date)}>
-                <span className="w-fit">Applied: {formatDateDayMonthYear(application.applied_date)}</span>
-              </Tooltip>
+          {application.interview_tags && (
+            <div className="flex flex-wrap gap-2">
+              {application.interview_tags?.map((tag) => (
+                <Chip key={tag} color="secondary" size="sm" variant="flat">
+                  {tag}
+                </Chip>
+              ))}
             </div>
-            {application.first_response_date && (
-              <div className="flex items-center gap-1">
-                <CalendarIcon />
-                <Tooltip content={formatHowLongAgo(application.first_response_date)}>
-                  <span className="w-fit">Receive response: {formatDateDayMonthYear(application.first_response_date)}</span>
-                </Tooltip>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </CardHeader>
 
-      <CardBody className="gap-2 p-4">
-        <p className="text-default-600">{application.number_of_rounds} rounds</p>
-        <p className="text-default-600">{application.number_of_comments} comments</p>
-      </CardBody>
-
-      <div className="flex items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
+      <div className="flex w-full items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
         <div className="flex items-center gap-2">
           <Avatar className="flex-shrink-0" name={application.full_name} size="sm" src={application.profile_pic_url} />
           <span className="text-small text-default-500">{application.full_name}</span>
+        </div>
+
+        <div className="flex flex-col items-end text-sm text-gray-500">
+          <span className="font-semibold text-success-600">
+            {application.number_of_rounds} {application.number_of_rounds === 1 ? "round" : "rounds"}
+          </span>
+          <span>
+            {application.number_of_comments} {application.number_of_comments === 1 ? "comment" : "comments"}
+          </span>
         </div>
       </div>
     </Card>
   );
 
-  if (onCardClick) {
-    return (
-      <motion.div transition={{ type: "spring", stiffness: 300 }} whileHover={{ scale: 1.02 }}>
-        {CardContent}
-      </motion.div>
-    );
-  }
-
-  return CardContent;
+  return (
+    <motion.div transition={{ type: "spring", stiffness: 300 }} whileHover={{ scale: 1.02 }}>
+      {CardContent}
+    </motion.div>
+  );
 }

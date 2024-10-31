@@ -62,7 +62,7 @@ export default function InterviewExperiencePage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1024px]">
+    <div className="">
       <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to job
       </Button>

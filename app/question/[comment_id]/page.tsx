@@ -37,7 +37,7 @@ export default function QuestionPage() {
             <Avatar className="flex-shrink-0" name={question.user_data.full_name} src={question.user_data.profile_pic_url} />
             <div className="flex-grow">
               <div className="mb-2 flex items-center justify-between">
-                <span className="font-semibold">{question.user_data.full_name}</span>
+                <span className="text-sm text-default-500">{question.user_data.full_name}</span>
                 <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
               </div>
               <p className="mb-4 text-lg">{question.content}</p>

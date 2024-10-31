@@ -1,5 +1,4 @@
 import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/react";
-import { motion } from "framer-motion";
 
 import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
@@ -7,17 +6,15 @@ import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 type InterviewExperienceCardProps = {
   interviewExperience: InterviewExperienceCardData;
-  onCardClick?: () => void;
 };
 
-export function InterviewExperienceCard({ interviewExperience, onCardClick }: InterviewExperienceCardProps) {
+export function InterviewExperienceCard({ interviewExperience }: InterviewExperienceCardProps) {
   console.log("this interview experience", interviewExperience);
 
-  //TODO: 22 Oct Tuesday, move this function to parent component
   // add difficulty selection into the EditInterviewDetails form, change color of the chip based on difficulty green for easy, yellow for medium, red for hard
 
-  const CardContent = (
-    <Card className="dark:bg-content1-dark w-full border border-gray-200 bg-content1 dark:border-gray-700" isPressable={!!onCardClick} {...(onCardClick && { onPress: onCardClick })}>
+  return (
+    <Card className="dark:bg-content1-dark w-full border border-gray-200 bg-content1 dark:border-gray-700">
       <CardHeader className="flex items-start justify-between p-4">
         <div className="flex w-full flex-col gap-2">
           {/* first row */}
@@ -73,14 +70,4 @@ export function InterviewExperienceCard({ interviewExperience, onCardClick }: In
       </div>
     </Card>
   );
-
-  if (onCardClick) {
-    return (
-      <motion.div transition={{ type: "spring", stiffness: 300 }} whileHover={{ scale: 1.02 }}>
-        {CardContent}
-      </motion.div>
-    );
-  }
-
-  return CardContent;
 }

@@ -7,7 +7,7 @@ import { GetOnlineAssessmentsByJobPostingIdResponse } from "@/app/api/job/[job_p
 
 type OnlineAssessmentCardProps = {
   application: GetOnlineAssessmentsByJobPostingIdResponse;
-  onCardClick?: () => void;
+  onCardClick: () => void;
 };
 
 export function OnlineAssessmentCard({ application, onCardClick }: OnlineAssessmentCardProps) {
@@ -59,13 +59,9 @@ export function OnlineAssessmentCard({ application, onCardClick }: OnlineAssessm
     </Card>
   );
 
-  if (onCardClick) {
-    return (
-      <motion.div transition={{ type: "spring", stiffness: 300 }} whileHover={{ scale: 1.02 }}>
-        {CardContent}
-      </motion.div>
-    );
-  }
-
-  return CardContent;
+  return (
+    <motion.div transition={{ type: "spring", stiffness: 300 }} whileHover={{ scale: 1.02 }}>
+      {CardContent}
+    </motion.div>
+  );
 }
