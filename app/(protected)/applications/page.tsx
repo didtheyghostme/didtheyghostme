@@ -81,7 +81,7 @@ export default function MyApplicationsPage() {
       </div>
 
       <div className="mt-16 text-end">
-        <a className="text-xs" href="https://logo.dev" rel="noreferrer" target="_blank">
+        <a className="text-xs text-default-400" href="https://logo.dev" rel="noreferrer" target="_blank">
           Logos provided by Logo.dev
         </a>
       </div>

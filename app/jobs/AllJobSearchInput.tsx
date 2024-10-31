@@ -13,5 +13,5 @@ export default function AllJobSearchInput({ search, onSearchChange }: AllJobSear
     onSearchChange(e.target.value);
   };
 
-  return <Input className="mb-4" placeholder="Search jobs..." value={search} onChange={handleSearchChange} />;
+  return <Input className="mb-4" placeholder="Search jobs by title..." value={search} onChange={handleSearchChange} />;
 }

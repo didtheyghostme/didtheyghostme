@@ -2,7 +2,7 @@
 
 import React from "react";
 import useSWR from "swr";
-import { Pagination, Card, CardBody, CardHeader, Chip, Link } from "@nextui-org/react";
+import { Pagination, Card, CardBody, Chip, Link } from "@nextui-org/react";
 
 import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
@@ -39,51 +39,68 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <>
-      <ImageWithFallback className="h-12 w-12" companyName="Seagate" src={"https://sg.linkedin.com/jobs/software-engineering-intern-jobs/"} />
-
-      {jobs.length === 0 && <div>No jobs found</div>}
+    <div className="flex flex-col gap-4">
+      {jobs.length === 0 && (
+        <Card className="p-4">
+          <p className="text-default-500">No jobs found matching your search criteria</p>
+        </Card>
+      )}
 
       {jobs.length > 0 && (
         <>
-          <div className="mb-4 flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {jobs.map((job) => (
-              <Card key={job.id} isPressable as={Link} className="w-full" href={`/job/${job.id}`} onPress={() => handleJobClick(job.id)}>
-                <CardHeader className="flex flex-col items-start gap-1">
-                  {/* first row */}
-                  <div className="flex w-full items-start justify-between">
-                    <p className="text-start text-base font-semibold sm:text-lg">{job.title}</p>
-                    <div className="flex items-center gap-2">
-                      {job.job_posted_date && isRecentDate(job.job_posted_date) && (
-                        <Chip color="success" size="sm" variant="flat">
-                          New
-                        </Chip>
-                      )}
-                      <span className="whitespace-nowrap text-small text-default-500">{formatHowLongAgo(job.updated_at)}</span>
+              <Card key={job.id} isPressable as={Link} className="bg-background/60 hover:bg-default-100 dark:bg-default-100/50" href={`/job/${job.id}`} onPress={() => handleJobClick(job.id)}>
+                <CardBody className="p-4">
+                  <div className="flex gap-4">
+                    {/* Company Logo */}
+                    <div className="flex-shrink-0">
+                      <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={job.company.company_name} src={job.company.logo_url} />
+                    </div>
+
+                    {/* Job Details */}
+                    <div className="flex flex-1 flex-col gap-2">
+                      {/* Title Row with New Badge and Time */}
+                      <div className="flex items-start justify-between gap-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-base font-semibold text-default-800">{job.title}</p>
+                          {job.job_posted_date && isRecentDate(job.job_posted_date) && (
+                            <Chip color="success" size="sm" variant="flat">
+                              New
+                            </Chip>
+                          )}
+                        </div>
+                        {/* Posting Time */}
+                        <div className="flex items-center gap-1 whitespace-nowrap text-small text-default-500">
+                          {/* <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                          </svg> */}
+                          <span>{formatHowLongAgo(job.updated_at)}</span>
+                        </div>
+                      </div>
+
+                      {/* Company Name */}
+                      <p className="text-medium font-normal text-default-500">{job.company.company_name}</p>
                     </div>
                   </div>
-                  {/* second row */}
-                  <p className="text-small text-default-500">{job.company.company_name}</p>
-                </CardHeader>
-                <CardBody>
-                  <ImageWithFallback className="h-12 w-12" companyName={job.company.company_name} src={job.company.logo_url} />
-
-                  <p>{job.country}</p>
                 </CardBody>
               </Card>
             ))}
           </div>
-          <div className="flex justify-end">
-            <Pagination initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
+
+          {/* Pagination */}
+          <div className="mt-4 flex justify-center">
+            <Pagination showControls initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
           </div>
 
-          <div className="mt-2">
-            <a className="text-xs" href="https://logo.dev" rel="noreferrer" target="_blank">
+          {/* Attribution */}
+          <div className="mt-6 text-center">
+            <a className="text-xs text-default-400" href="https://logo.dev" rel="noreferrer" target="_blank">
               Logos provided by Logo.dev
             </a>
           </div>
         </>
       )}
-    </>
+    </div>
   );
 }
