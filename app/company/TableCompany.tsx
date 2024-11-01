@@ -1,217 +1,97 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
-  Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Chip,
-  Pagination,
-  SortDescriptor,
-  Selection,
-  ChipProps,
-} from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import useSWR from "swr";
 import { usePathname, useRouter } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
+import { useQueryState, parseAsStringLiteral } from "nuqs";
 
-import { columns } from "./data";
 import { CreateCompanyModal } from "./CreateCompanyModal";
 
-import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
+import { PlusIcon, SearchIcon, ChevronDownIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 
-type ColumnKey = keyof Company | "actions";
+type ColumnKey = keyof Pick<CompanyTable, "company_name" | "company_url">;
 
-type CustomSortDescriptor = Omit<SortDescriptor, "column"> & {
-  column: ColumnKey;
+type Column = {
+  name: ColumnKey;
+  displayName: string;
 };
 
-type ChipColor = NonNullable<ChipProps["color"]>;
+const columns: Column[] = [
+  { name: "company_name", displayName: "Company Name" },
+  { name: "company_url", displayName: "Company URL" },
+];
 
-type StatusColorPriority = {
-  color: ChipColor;
-  priority: number;
-};
+const sortOptions = [
+  { key: "name_asc", label: "Company Name: A to Z", column: "company_name", direction: "ascending" },
+  { key: "name_desc", label: "Company Name: Z to A", column: "company_name", direction: "descending" },
+] as const;
 
-const STATUS_MAP = {
-  Active: { color: "success", priority: 1 },
-  Vacation: { color: "warning", priority: 2 },
-  Paused: { color: "danger", priority: 3 },
-  default: { color: "default", priority: Number.MAX_SAFE_INTEGER },
-} as const;
-
-const statusOptions = Object.keys(STATUS_MAP).filter((key): key is Exclude<keyof typeof STATUS_MAP, "default"> => key !== "default");
-
-const getStatusColorPriority = (status: string | null): StatusColorPriority => {
-  if (status && status in STATUS_MAP) {
-    return STATUS_MAP[status as keyof typeof STATUS_MAP];
-  }
-
-  return STATUS_MAP.default;
-};
-
-const INITIAL_VISIBLE_COLUMNS = ["company_name", "company_url", "status", "actions"] as const;
-
-const MAX_ROWS_PER_PAGE = 10;
-
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+type SortOption = (typeof sortOptions)[number];
 
 export default function TableCompany() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
-
-  const { data: companies = [], isLoading } = useSWR<Company[]>(API.COMPANY.getAll, fetcher);
+  const { data: companies = [], isLoading } = useSWR<CompanyTable[]>(API.COMPANY.getAll, fetcher);
   const router = useRouter();
 
+  const [currentSort, setCurrentSort] = useQueryState("sort", parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("name_asc"));
+
   const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = React.useState(MAX_ROWS_PER_PAGE);
-  const [sortDescriptor, setSortDescriptor] = React.useState<CustomSortDescriptor>({
-    column: "company_name",
-    direction: "ascending",
-  });
-  const handleSortChange = (descriptor: SortDescriptor) => {
-    setSortDescriptor({
-      column: descriptor.column as ColumnKey,
-      direction: descriptor.direction,
-    });
-  };
   const [page, setPage] = React.useState(1);
+  const ROWS_PER_PAGE = 10;
 
   const hasSearchFilter = Boolean(filterValue);
 
-  const headerColumns = React.useMemo(() => {
-    if (visibleColumns === "all" || (visibleColumns instanceof Set && visibleColumns.has("all"))) return columns;
-
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.name));
-  }, [visibleColumns]);
-
-  const filteredItems = React.useMemo(() => {
+  const sortedAndFilteredItems = React.useMemo(() => {
     let filteredCompanies = [...companies];
 
     if (hasSearchFilter) {
       filteredCompanies = filteredCompanies.filter((company) => company.company_name.toLowerCase().includes(filterValue.toLowerCase()));
     }
-    if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-      filteredCompanies = filteredCompanies.filter((company) => Array.from(statusFilter).includes(company.status as string));
-    }
 
-    return filteredCompanies;
-  }, [companies, filterValue, statusFilter]);
+    // Add sorting
+    const sortOption = sortOptions.find((option) => option.key === currentSort) || sortOptions[0];
 
-  const pages = Math.ceil(filteredItems.length / rowsPerPage);
+    return [...filteredCompanies].sort((a, b) => {
+      const first = a[sortOption.column];
+      const second = b[sortOption.column];
 
-  const items = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+      const cmp = first.toLowerCase() < second.toLowerCase() ? -1 : first.toLowerCase() > second.toLowerCase() ? 1 : 0;
 
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
-
-  const sortedItems = React.useMemo(() => {
-    return [...filteredItems].sort((a, b) => {
-      const first = a[sortDescriptor.column as keyof Company];
-      const second = b[sortDescriptor.column as keyof Company];
-
-      if (sortDescriptor.column === "status") {
-        const priorityA = getStatusColorPriority(a.status).priority;
-        const priorityB = getStatusColorPriority(b.status).priority;
-
-        return (priorityA - priorityB) * (sortDescriptor.direction === "descending" ? -1 : 1);
-      }
-
-      if (first == null && second == null) return 0;
-      if (first == null) return sortDescriptor.direction === "descending" ? 1 : -1;
-      if (second == null) return sortDescriptor.direction === "descending" ? -1 : 1;
-
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      return sortOption.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, filteredItems]);
+  }, [companies, filterValue, currentSort]);
+
+  const pages = Math.ceil(sortedAndFilteredItems.length / ROWS_PER_PAGE);
 
   const paginatedItems = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+    const start = (page - 1) * ROWS_PER_PAGE;
+    const end = start + ROWS_PER_PAGE;
 
-    return sortedItems.slice(start, end);
-  }, [page, rowsPerPage, sortedItems]);
+    return sortedAndFilteredItems.slice(start, end);
+  }, [page, sortedAndFilteredItems]);
 
-  const renderCell = React.useCallback((company: Company, columnKey: ColumnKey) => {
-    const cellValue = company[columnKey as keyof Company];
+  const renderCell = React.useCallback((company: CompanyTable, columnKey: ColumnKey) => {
+    const cellValue = company[columnKey];
 
     switch (columnKey) {
       case "company_name":
-        return <p className="text-bold text-tiny capitalize">{company.company_name}</p>;
+        return <p className="text-bold text-small capitalize">{company.company_name}</p>;
       case "company_url":
         return (
           <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-400">{company.company_url}</p>
-          </div>
-        );
-      case "status":
-        const statusInfo = getStatusColorPriority(company.status);
-
-        return (
-          <Chip className="capitalize" color={statusInfo.color} size="sm" variant="flat">
-            {cellValue ?? "Unknown"}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex items-center justify-end gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-300" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem>View</DropdownItem>
-                <DropdownItem>Edit</DropdownItem>
-                <DropdownItem>Delete</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <p className="text-bold text-small text-default-400">{company.company_url}</p>
           </div>
         );
       default:
         return cellValue;
     }
-  }, []);
-
-  const onNextPage = React.useCallback(() => {
-    if (page < pages) {
-      setPage(page + 1);
-    }
-  }, [page, pages]);
-
-  const onPreviousPage = React.useCallback(() => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  }, [page]);
-
-  const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
   }, []);
 
   const onSearchChange = React.useCallback((value: string) => {
@@ -228,14 +108,14 @@ export default function TableCompany() {
     setPage(1);
   }, []);
 
-  const handleOnRowClick = (key: React.Key) => {
-    console.log("Row clicked, key:", key);
-    console.log("Current paginatedItems:", paginatedItems);
+  const handleSortChange = (key: SortOption["key"]) => {
+    setCurrentSort(key);
+  };
 
+  const handleOnRowClick = (key: React.Key) => {
     const clickedCompany = paginatedItems.find((company) => company.id === key);
 
     if (clickedCompany) {
-      console.log("Clicked company:", clickedCompany.company_name);
       router.push(`/company/${clickedCompany.id}`);
     }
   };
@@ -259,30 +139,20 @@ export default function TableCompany() {
           />
           <div className="flex gap-3">
             <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
+              <DropdownTrigger>
                 <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  Status
+                  Sort by
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={statusFilter} selectionMode="multiple" onSelectionChange={setStatusFilter}>
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status} className="capitalize">
-                    {capitalize(status)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu disallowEmptySelection aria-label="Table Columns" closeOnSelect={false} selectedKeys={visibleColumns} selectionMode="multiple" onSelectionChange={setVisibleColumns}>
-                {columns.map((column) => (
-                  <DropdownItem key={column.name} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Sort options"
+                selectedKeys={new Set([currentSort])}
+                selectionMode="single"
+                onSelectionChange={(keys) => handleSortChange(Array.from(keys)[0] as SortOption["key"])}
+              >
+                {sortOptions.map((option) => (
+                  <DropdownItem key={option.key}>{option.label}</DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
@@ -302,67 +172,47 @@ export default function TableCompany() {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-small text-default-400">Total {companies.length} companies</span>
-          <label className="flex items-center text-small text-default-400">
-            Rows per page:
-            <select className="bg-transparent text-small text-default-400 outline-none" onChange={onRowsPerPageChange}>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-          </label>
         </div>
       </div>
     );
-  }, [filterValue, statusFilter, visibleColumns, onRowsPerPageChange, companies.length, onSearchChange, hasSearchFilter]);
+  }, [filterValue, companies.length, onSearchChange, currentSort]);
 
   const bottomContent = React.useMemo(() => {
     return (
-      <div className="flex items-center justify-between px-2 py-2">
-        <span className="w-[30%] text-small text-default-400">{selectedKeys === "all" ? "All items selected" : `${selectedKeys.size} of ${filteredItems.length} selected`}</span>
+      <div className="flex items-center justify-center px-2 py-2">
         <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={setPage} />
-        <div className="hidden w-[30%] justify-end gap-2 sm:flex">
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
-            Previous
-          </Button>
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
-            Next
-          </Button>
-        </div>
       </div>
     );
-  }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+  }, [page, pages]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or a skeleton/loading component
+    return <div>Loading...</div>;
   }
 
   return (
     <>
       <Table
         isHeaderSticky
-        aria-label="Example table with custom cells, pagination and sorting"
+        aria-label="Companies table"
         bottomContent={bottomContent}
         bottomContentPlacement="outside"
-        selectedKeys={selectedKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
+        selectionMode="single"
         topContent={topContent}
         topContentPlacement="outside"
         classNames={{
           wrapper: "max-h-[500px]",
+          tr: "cursor-pointer",
         }}
         onRowAction={handleOnRowClick}
-        onSelectionChange={setSelectedKeys}
-        onSortChange={handleSortChange}
       >
-        <TableHeader columns={headerColumns}>
+        <TableHeader columns={columns}>
           {(column) => (
-            <TableColumn key={column.name} align={column.name === "actions" ? "center" : "start"} allowsSorting={column.sortable} className="uppercase">
-              {column.name}
+            <TableColumn key={column.name} align="start">
+              {column.displayName}
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={"No users found"} items={paginatedItems}>
+        <TableBody emptyContent={"No companies found"} items={paginatedItems}>
           {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
         </TableBody>
       </Table>
