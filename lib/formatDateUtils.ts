@@ -1,4 +1,4 @@
-import { DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { format, formatDistanceToNowStrict } from "date-fns";
 
 const formatToYYYYMMDD = (dateString: string) => {
@@ -31,6 +31,21 @@ export function isRecentDate(dateString: string, days = 7): boolean {
 }
 
 export function formatHowLongAgo(date: Date | string | number) {
+  // Check if it's a string in YYYY-MM-DD format
+  if (
+    typeof date === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(date) // matches YYYY-MM-DD exactly
+  ) {
+    const todayDate = today(getLocalTimeZone());
+    // Create CalendarDate directly from the YYYY-MM-DD string
+    const [year, month, day] = date.split("-").map(Number);
+    const compareDate = new CalendarDate(year, month, day);
+
+    if (compareDate.compare(todayDate) === 0) {
+      return "today";
+    }
+  }
+
   return formatDistanceToNowStrict(new Date(date), {
     addSuffix: true,
   });
