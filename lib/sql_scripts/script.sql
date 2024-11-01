@@ -222,3 +222,63 @@ BEGIN
   ORDER BY ie.round_no ASC;
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- 6) function to get online assessments by job posting id
+CREATE OR REPLACE FUNCTION get_online_assessments_by_job_posting_id(p_job_posting_id UUID)
+RETURNS TABLE (
+  id UUID,
+  round_no INT2,
+  difficulty TEXT,
+  description TEXT,
+  interview_date DATE,
+  response_date DATE,
+  created_at TIMESTAMPTZ,
+  interview_tags TEXT[],
+  user_data JSONB,
+  application_id UUID
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    ie.id,
+    ie.round_no,
+    ie.difficulty,
+    ie.description,
+    ie.interview_date,
+    ie.response_date,
+    ie.created_at,
+    ARRAY_AGG(it.tag_name) FILTER (WHERE it.tag_name IS NOT NULL) AS interview_tags,
+    jsonb_build_object(
+      'full_name', ud.full_name,
+      'profile_pic_url', ud.profile_pic_url
+    ) AS user_data,
+    ie.application_id
+  FROM interview_experience ie
+  JOIN application a ON ie.application_id = a.id
+  LEFT JOIN interview_tag_mapping itm ON ie.id = itm.interview_experience_id
+  LEFT JOIN interview_tag it ON itm.interview_tag_id = it.id
+  JOIN user_data ud ON ie.user_id = ud.user_id
+  WHERE 
+    a.job_posting_id = p_job_posting_id
+    AND EXISTS (
+      SELECT 1 
+      FROM interview_tag_mapping itm2
+      JOIN interview_tag it2 ON itm2.interview_tag_id = it2.id
+      WHERE itm2.interview_experience_id = ie.id 
+      AND it2.tag_name = 'Online Assessment'
+    )
+  GROUP BY 
+    ie.id,
+    ie.round_no,
+    ie.difficulty,
+    ie.description,
+    ie.interview_date,
+    ie.response_date,
+    ie.created_at,
+    ud.full_name,
+    ud.profile_pic_url,
+    ie.application_id
+  ORDER BY ie.created_at DESC;
+END;
+$$ LANGUAGE plpgsql;

@@ -35,4 +35,5 @@ export const DB_RPC = {
   GET_QUESTIONS_WITH_REPLY_COUNTS: "get_questions_with_reply_counts",
   GET_APPLICATIONS_WITH_INTERVIEW_STATS: "get_applications_with_interview_stats",
   GET_INTERVIEW_ROUNDS_WITH_TAG_NAMES: "get_interview_rounds_with_tag_names",
+  GET_ONLINE_ASSESSMENTS_BY_JOB_POSTING_ID: "get_online_assessments_by_job_posting_id",
 } as const;
