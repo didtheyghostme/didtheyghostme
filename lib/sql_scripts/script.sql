@@ -1,4 +1,4 @@
--- safe_to_date function
+-- 1) safe_to_date function
 CREATE OR REPLACE FUNCTION safe_to_date(p_date TEXT)
 RETURNS DATE AS $$
 BEGIN
@@ -8,7 +8,8 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$ LANGUAGE plpgsql;
 
--- update application_and_interview_rounds function, update application and upsert interview rounds
+
+-- 2) update application_and_interview_rounds function, update application and upsert interview rounds, delete/insert interview_tag_mapping
 CREATE OR REPLACE FUNCTION update_application_and_interview_rounds(
   p_user_id TEXT,
   p_application_id UUID,
@@ -16,74 +17,83 @@ CREATE OR REPLACE FUNCTION update_application_and_interview_rounds(
   p_first_response_date DATE,
   p_status TEXT,
   p_interview_rounds JSONB
-)
-RETURNS VOID AS $$
+) RETURNS VOID AS $$
+DECLARE
+  v_interview_experience_id UUID;
+  v_round JSONB;
+  v_round_no INT;
 BEGIN
-  -- Update application details
-  UPDATE application
-  SET applied_date = p_applied_date,
+  BEGIN
+    -- Update application
+    UPDATE application
+    SET 
+      applied_date = p_applied_date,
       first_response_date = p_first_response_date,
       status = p_status
-  WHERE id = p_application_id AND user_id = p_user_id;
+    WHERE id = p_application_id AND user_id = p_user_id;
 
-  -- Upsert new or updated interview rounds directly from JSONB with ordinality to preserve order
-  WITH input_rounds AS (
-    SELECT 
-      ord AS round_no,
-      x->>'description' AS description,
-      safe_to_date(x->>'interview_date') AS interview_date,
-      safe_to_date(x->>'response_date') AS response_date,
-      -- Extract interview_tags as text array, handling arrays and ensuring it's not a scalar
-      CASE 
-        WHEN jsonb_typeof(x->'interview_tags') = 'array' THEN 
-          ARRAY(
-            SELECT jsonb_array_elements_text(x->'interview_tags')
-          )
-        ELSE
-          NULL
-      END AS interview_tags
-    FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY AS arr(x, ord)
-  )
-  INSERT INTO interview_experience (
-    round_no, 
-    description, 
-    interview_date, 
-    response_date, 
-    interview_tags,
-    application_id, 
-    user_id
-  )
-  SELECT 
-    round_no,
-    description,
-    interview_date,
-    response_date,
-    interview_tags,
-    p_application_id,
-    p_user_id
-  FROM input_rounds
-  ON CONFLICT (application_id, user_id, round_no)
-  DO UPDATE SET
-    description = EXCLUDED.description,
-    interview_date = EXCLUDED.interview_date,
-    response_date = EXCLUDED.response_date,
-    interview_tags = EXCLUDED.interview_tags;
-
-  -- Delete any rounds that are no longer present in the input
-  DELETE FROM interview_experience
-  WHERE application_id = p_application_id 
-    AND user_id = p_user_id
-    AND round_no > (
-      SELECT COUNT(*) 
-      FROM jsonb_array_elements(p_interview_rounds)
+    -- Delete related tag mappings
+    DELETE FROM interview_tag_mapping
+    WHERE interview_experience_id IN (
+      SELECT id FROM interview_experience
+      WHERE application_id = p_application_id AND user_id = p_user_id
     );
 
-  -- No return statement needed
+    -- Delete existing interview rounds
+    DELETE FROM interview_experience
+    WHERE application_id = p_application_id AND user_id = p_user_id;
+    
+    -- Loop through each interview round with its index
+    FOR v_round, v_round_no IN 
+      SELECT value, ordinality 
+      FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY
+    LOOP
+      -- Insert interview experience and get its ID
+      INSERT INTO interview_experience (
+        round_no,
+        description,
+        interview_date,
+        response_date,
+        application_id,
+        user_id
+      ) VALUES (
+        v_round_no, -- Using the array index + 1
+        v_round->>'description',
+        (v_round->>'interview_date')::DATE,
+        (v_round->>'response_date')::DATE,
+        p_application_id,
+        p_user_id
+      ) RETURNING id INTO v_interview_experience_id;
+
+      -- Insert tag mappings for this interview experience, use SELECT DISTINCT if there could be duplicate
+      IF v_round ? 'interview_tags' AND (v_round->>'interview_tags') IS NOT NULL THEN
+        INSERT INTO interview_tag_mapping (
+          interview_experience_id,
+          interview_tag_id,
+          user_id
+        )
+        SELECT
+          v_interview_experience_id,
+          it.id,
+          p_user_id
+        FROM 
+          jsonb_array_elements_text(v_round->'interview_tags') as selected_tags
+          INNER JOIN interview_tag it ON it.tag_name = selected_tags;
+      END IF;
+
+    END LOOP;
+
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Error: %', SQLERRM;
+    RAISE;
+  END;
 END;
 $$ LANGUAGE plpgsql;
 
 
--- function to get questions with reply counts and user_data as an object (fetch)
+
+
+-- 3) function to get questions with reply counts and user_data as an object (fetch)
 CREATE OR REPLACE FUNCTION get_questions_with_reply_counts(job_posting_id UUID)
 RETURNS TABLE (
   id UUID,
@@ -118,6 +128,7 @@ $$ LANGUAGE plpgsql;
 
 
 
+-- 4) function to get applications with interview stats
 create or replace function get_applications_with_interview_stats(job_posting_id_param uuid)
 returns table (
   id uuid,
@@ -161,3 +172,53 @@ begin
     u.profile_pic_url;
 end;
 $$ language plpgsql;
+
+
+
+
+-- 5) function to get interview rounds with tag names
+CREATE OR REPLACE FUNCTION get_interview_rounds_with_tag_names(p_application_id UUID)
+RETURNS TABLE (
+  id UUID,
+  round_no INT2,
+  difficulty TEXT,
+  description TEXT,
+  interview_date DATE,
+  response_date DATE,
+  created_at TIMESTAMPTZ,
+  interview_tags TEXT[],
+  user_data JSONB
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    ie.id,
+    ie.round_no,
+    ie.difficulty,
+    ie.description,
+    ie.interview_date,
+    ie.response_date,
+    ie.created_at,
+    ARRAY_AGG(it.tag_name) FILTER (WHERE it.tag_name IS NOT NULL) AS interview_tags,
+    jsonb_build_object(
+      'full_name', ud.full_name,
+      'profile_pic_url', ud.profile_pic_url
+    ) AS user_data
+  FROM interview_experience ie
+  LEFT JOIN interview_tag_mapping itm ON ie.id = itm.interview_experience_id
+  LEFT JOIN interview_tag it ON itm.interview_tag_id = it.id
+  JOIN user_data ud ON ie.user_id = ud.user_id
+  WHERE ie.application_id = p_application_id
+  GROUP BY 
+    ie.id,
+    ie.round_no,
+    ie.difficulty,
+    ie.description,
+    ie.interview_date,
+    ie.response_date,
+    ie.created_at,
+    ud.full_name,
+    ud.profile_pic_url
+  ORDER BY ie.round_no ASC;
+END;
+$$ LANGUAGE plpgsql;

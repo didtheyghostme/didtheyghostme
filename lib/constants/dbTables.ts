@@ -6,6 +6,8 @@ export const DBTable = {
   USER_DATA: "user_data",
   COMMENT: "comment",
   REPORT_ADMIN: "report_admin",
+  INTERVIEW_TAG: "interview_tag",
+  INTERVIEW_TAG_MAPPING: "interview_tag_mapping",
   // Add other table names here
 } as const;
 

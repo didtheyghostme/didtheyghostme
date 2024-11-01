@@ -59,6 +59,19 @@ type ApplicationTable = {
 
 type InterviewTag = "Online Assessment" | "HR/Recruiter" | "Technical" | "Behavioral" | "Hiring Manager" | "Final Round";
 
+type InterviewTagTable = {
+  id: string;
+  tag_name: InterviewTag;
+  created_at: string;
+};
+
+type InterviewTagMappingTable = {
+  id: string;
+  interview_experience_id: string;
+  interview_tag_id: string;
+  created_at: string;
+} & BaseUser;
+
 type InterviewExperienceTable = {
   id: string;
   round_no: number;
@@ -66,7 +79,6 @@ type InterviewExperienceTable = {
   description: string; // ? from markdown?
   interview_date: string;
   response_date: string | null;
-  interview_tags: InterviewTag[] | null;
   created_at: string;
   application_id: string;
 } & BaseUser;

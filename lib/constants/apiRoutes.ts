@@ -34,4 +34,5 @@ export const DB_RPC = {
   UPDATE_APPLICATION_AND_INTERVIEW_ROUNDS: "update_application_and_interview_rounds",
   GET_QUESTIONS_WITH_REPLY_COUNTS: "get_questions_with_reply_counts",
   GET_APPLICATIONS_WITH_INTERVIEW_STATS: "get_applications_with_interview_stats",
+  GET_INTERVIEW_ROUNDS_WITH_TAG_NAMES: "get_interview_rounds_with_tag_names",
 } as const;
