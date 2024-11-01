@@ -1,6 +1,6 @@
 import { FormProvider, useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardBody, CardHeader, Divider, DatePicker, Input, Button, Chip, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Button, Chip, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -160,7 +160,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     control={methods.control}
                     name={`interviewRounds.${index}.description`}
                     render={({ field, fieldState }) => (
-                      <Input
+                      <Textarea
                         {...field}
                         isRequired
                         className="mt-2"

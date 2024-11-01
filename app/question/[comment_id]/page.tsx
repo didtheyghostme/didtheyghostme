@@ -40,7 +40,7 @@ export default function QuestionPage() {
                 <span className="text-sm text-default-500">{question.user_data.full_name}</span>
                 <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
               </div>
-              <p className="mb-4 text-lg">{question.content}</p>
+              <p className="mb-4 whitespace-pre-wrap text-lg">{question.content}</p>
             </div>
           </div>
         </CardBody>

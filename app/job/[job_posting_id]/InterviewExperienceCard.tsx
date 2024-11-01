@@ -62,7 +62,7 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
       </CardHeader>
 
       <CardBody className="gap-2 p-4">
-        <p className="text-default-600">{interviewExperience.description}</p>
+        <p className="whitespace-pre-wrap text-default-600">{interviewExperience.description}</p>
       </CardBody>
 
       <div className="flex items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">

@@ -116,7 +116,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
 
             <CardBody>
               <div className="flex flex-col">
-                <p className="p-1">{question.content}</p>
+                <p className="whitespace-pre-wrap p-1">{question.content}</p>
                 <div className="flex justify-end text-small text-gray-500">
                   <span>
                     {question.reply_count} {question.reply_count === 1 ? "comment" : "comments"}

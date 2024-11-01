@@ -93,7 +93,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
                     <span className="text-sm text-default-500">{comment.user_data.full_name}</span>
                     <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
                   </div>
-                  <p>{comment.content}</p>
+                  <p className="whitespace-pre-wrap">{comment.content}</p>
                 </div>
               </div>
             </CardBody>
