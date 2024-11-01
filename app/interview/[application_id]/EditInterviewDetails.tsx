@@ -5,7 +5,7 @@ import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { InterviewTagsModal } from "./InterviewTagsModal";
+import { InterviewTagsModal, sortInterviewTags } from "./InterviewTagsModal";
 
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
@@ -214,7 +214,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                         </Button>
                         {field.value && field.value.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
-                            {field.value.map((tag) => (
+                            {sortInterviewTags(field.value).map((tag) => (
                               <Chip key={tag}>{tag}</Chip>
                             ))}
                           </div>

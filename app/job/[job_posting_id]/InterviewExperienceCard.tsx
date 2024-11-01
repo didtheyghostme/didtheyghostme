@@ -3,6 +3,7 @@ import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/r
 import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
+import { sortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
 
 type InterviewExperienceCardProps = {
   interviewExperience: InterviewExperienceCardData;
@@ -30,13 +31,15 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
           </div>
 
           {/* second row */}
-          <div className="flex flex-wrap gap-2">
-            {interviewExperience.interview_tags?.map((tag) => (
-              <Chip key={tag} color="secondary" size="sm" variant="flat">
-                {tag}
-              </Chip>
-            ))}
-          </div>
+          {interviewExperience.interview_tags && (
+            <div className="flex flex-wrap gap-2">
+              {sortInterviewTags(interviewExperience.interview_tags).map((tag) => (
+                <Chip key={tag} color="secondary" size="sm" variant="flat">
+                  {tag}
+                </Chip>
+              ))}
+            </div>
+          )}
 
           {/* third row */}
           <div className="flex flex-col text-small text-default-400">

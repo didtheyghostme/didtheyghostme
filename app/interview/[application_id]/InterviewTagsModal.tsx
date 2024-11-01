@@ -3,6 +3,10 @@ import { useState } from "react";
 
 import { INTERVIEW_TAGS } from "@/lib/schema/updateInterviewRoundSchema";
 
+export function sortInterviewTags(tags: InterviewTag[]) {
+  return INTERVIEW_TAGS.filter((tag) => tags.includes(tag));
+}
+
 const INTERVIEW_TAG_MAP: Record<InterviewTag, string> = {
   "Online Assessment": "Examples: Take home assignments, HackerRank, LeetCode, HireVue, recorded video questions, etc. (usually not with a human interviewer)",
   "HR/Recruiter": "A call with HR/Recruiter, usually conducted via phone or video",
@@ -27,7 +31,7 @@ export function InterviewTagsModal({ isOpen, onClose, selectedTags, onTagsChange
   };
 
   const handleSave = () => {
-    const sortedTags = INTERVIEW_TAGS.filter((tag) => localSelectedTags.includes(tag));
+    const sortedTags = sortInterviewTags(localSelectedTags);
 
     onTagsChange(sortedTags);
     onClose();

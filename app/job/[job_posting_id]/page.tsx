@@ -159,12 +159,6 @@ export default function JobDetailsPage() {
         <Divider />
 
         <CardBody>
-          <p className="text-lg">Location: {jobDetails.country}</p>
-          <Spacer y={2} />
-          <Chip color="primary" variant="flat">
-            Closed
-          </Chip>
-
           <SignedIn>
             {applications.currentUserItemId ? (
               <Button

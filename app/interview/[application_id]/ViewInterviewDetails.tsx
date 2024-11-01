@@ -20,14 +20,16 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
         </CardHeader>
         <Divider />
         <CardBody>
-          <p>Applied on: {applicationDetails.applied_date}</p>
           <div>
             <span>Status:</span>
             <Chip color={getStatusColor(applicationDetails.status)} variant="flat">
               {applicationDetails.status}
             </Chip>
           </div>
+          <p>Applied on: {applicationDetails.applied_date}</p>
+
           {applicationDetails.first_response_date && <p>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</p>}
+
           {!applicationDetails.first_response_date && <p>No first response date set</p>}
         </CardBody>
       </Card>

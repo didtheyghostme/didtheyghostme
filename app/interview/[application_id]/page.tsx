@@ -72,7 +72,7 @@ export default function InterviewExperiencePage() {
         {applicationDetails.isCurrentUserItem && (
           <>
             {isEditing ? (
-              <div className="space-x-2">
+              <div className="flex gap-2">
                 <Button color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdating} type="submit">
                   Save
                 </Button>

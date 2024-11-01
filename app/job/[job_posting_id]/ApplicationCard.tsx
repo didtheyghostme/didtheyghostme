@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
+import { sortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
 
 export function getStatusColor(status: ApplicationStatus): "primary" | "danger" | "warning" | "success" {
   switch (status) {
@@ -47,7 +48,7 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           {/* second row */}
           {application.interview_tags && (
             <div className="flex flex-wrap gap-2">
-              {application.interview_tags?.map((tag) => (
+              {sortInterviewTags(application.interview_tags).map((tag) => (
                 <Chip key={tag} color="secondary" size="sm" variant="flat">
                   {tag}
                 </Chip>
