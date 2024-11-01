@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
   Table,
   TableHeader,
@@ -19,9 +21,13 @@ import {
   ChipProps,
 } from "@nextui-org/react";
 import useSWR from "swr";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { SignInButton } from "@clerk/nextjs";
+import { SignedOut } from "@clerk/nextjs";
+import { SignedIn } from "@clerk/nextjs";
 
 import { columns } from "./data";
+import { CreateCompanyModal } from "./CreateCompanyModal";
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
@@ -66,6 +72,9 @@ function capitalize(str: string) {
 }
 
 export default function TableCompany() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const pathname = usePathname();
+
   const { data: companies = [], isLoading } = useSWR<Company[]>(API.COMPANY.getAll, fetcher);
   const router = useRouter();
 
@@ -277,9 +286,18 @@ export default function TableCompany() {
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Button color="primary" endContent={<PlusIcon />}>
-              Add New
-            </Button>
+            <SignedIn>
+              <Button color="primary" endContent={<PlusIcon />} onPress={() => setIsModalOpen(true)}>
+                Add New
+              </Button>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                <Button color="primary" endContent={<PlusIcon />}>
+                  Add New
+                </Button>
+              </SignInButton>
+            </SignedOut>
           </div>
         </div>
         <div className="flex items-center justify-between">
@@ -319,33 +337,37 @@ export default function TableCompany() {
   }
 
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Example table with custom cells, pagination and sorting"
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      selectedKeys={selectedKeys}
-      selectionMode="multiple"
-      sortDescriptor={sortDescriptor}
-      topContent={topContent}
-      topContentPlacement="outside"
-      classNames={{
-        wrapper: "max-h-[500px]",
-      }}
-      onRowAction={handleOnRowClick}
-      onSelectionChange={setSelectedKeys}
-      onSortChange={handleSortChange}
-    >
-      <TableHeader columns={headerColumns}>
-        {(column) => (
-          <TableColumn key={column.name} align={column.name === "actions" ? "center" : "start"} allowsSorting={column.sortable} className="uppercase">
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody emptyContent={"No users found"} items={paginatedItems}>
-        {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
-      </TableBody>
-    </Table>
+    <>
+      <Table
+        isHeaderSticky
+        aria-label="Example table with custom cells, pagination and sorting"
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[500px]",
+        }}
+        onRowAction={handleOnRowClick}
+        onSelectionChange={setSelectedKeys}
+        onSortChange={handleSortChange}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn key={column.name} align={column.name === "actions" ? "center" : "start"} allowsSorting={column.sortable} className="uppercase">
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody emptyContent={"No users found"} items={paginatedItems}>
+          {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
+        </TableBody>
+      </Table>
+
+      <CreateCompanyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
@@ -10,6 +11,12 @@ import { DBTable } from "@/lib/constants/dbTables";
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyTable> => {
   const supabase = await createClerkSupabaseClientSsr();
 
+  const { userId: user_id } = auth();
+
+  if (!user_id) {
+    throw new Error("User not authenticated");
+  }
+
   try {
     // Server-side validation
     const validatedData = companySchema.parse(newCompany);
@@ -17,7 +24,10 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
     const dataToInsert = {
       ...validatedData,
       logo_url: validatedData.company_url,
+      user_id,
     };
+
+    console.log("dataToInsert", dataToInsert);
 
     const { data, error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select();
 

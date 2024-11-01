@@ -95,7 +95,7 @@ export default function CompanyDetailsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1024px] p-4">
+    <div className="">
       {/* Company Name and URL */}
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-4xl font-bold">{company.company_name}</h1>
