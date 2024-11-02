@@ -76,7 +76,6 @@ type InterviewTagMappingTable = {
 type InterviewExperienceTable = {
   id: string;
   round_no: number;
-  difficulty: "Easy" | "Medium" | "Hard";
   description: string; // ? from markdown?
   interview_date: string;
   response_date: string | null;

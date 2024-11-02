@@ -22,9 +22,6 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
           <div className="flex items-center justify-between">
             <div className="flex gap-3">
               <p className="text-base font-semibold">Round {interviewExperience.round_no} </p>
-              <Chip color="danger" size="sm" variant="flat">
-                {interviewExperience.difficulty} Medium
-              </Chip>
             </div>
 
             <span className="whitespace-nowrap text-tiny text-default-400">{formatHowLongAgo(interviewExperience.created_at)}</span>

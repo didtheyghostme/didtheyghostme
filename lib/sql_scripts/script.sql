@@ -275,7 +275,6 @@ CREATE OR REPLACE FUNCTION get_interview_rounds_with_tag_names(p_application_id 
 RETURNS TABLE (
   id UUID,
   round_no INT2,
-  difficulty TEXT,
   description TEXT,
   interview_date DATE,
   response_date DATE,
@@ -289,7 +288,6 @@ BEGIN
   SELECT 
     ie.id,
     ie.round_no,
-    ie.difficulty,
     ie.description,
     ie.interview_date,
     ie.response_date,
@@ -322,7 +320,6 @@ BEGIN
   GROUP BY 
     ie.id,
     ie.round_no,
-    ie.difficulty,
     ie.description,
     ie.interview_date,
     ie.response_date,
@@ -338,7 +335,6 @@ CREATE OR REPLACE FUNCTION get_online_assessments_by_job_posting_id(p_job_postin
 RETURNS TABLE (
   id UUID,
   round_no INT2,
-  difficulty TEXT,
   description TEXT,
   interview_date DATE,
   response_date DATE,
@@ -352,7 +348,6 @@ BEGIN
   SELECT 
     ie.id,
     ie.round_no,
-    ie.difficulty,
     ie.description,
     ie.interview_date,
     ie.response_date,
@@ -380,7 +375,6 @@ BEGIN
   GROUP BY 
     ie.id,
     ie.round_no,
-    ie.difficulty,
     ie.description,
     ie.interview_date,
     ie.response_date,
