@@ -37,7 +37,7 @@ BEGIN
 
     -- 2. Get round numbers
     -- COALESCE: Returns first non-null value. Here, returns empty array if array_agg is null
-    SELECT COALESCE(array_agg(ordinality), ARRAY[]::int[]) INTO v_round_nos 
+    SELECT COALESCE(array_agg(ordinality), ARRAY[]::int[]) INTO v_round_nos
     FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY AS elem(value, ordinality);
 
     -- 3. Delete removed interview rounds
@@ -54,7 +54,7 @@ BEGIN
     LOOP
       -- Upsert interview experience
       INSERT INTO interview_experience (
-        round_no,  -- Using the array index + 1
+        round_no, -- Using the array index + 1
         description,
         interview_date,
         response_date,
@@ -107,6 +107,74 @@ BEGIN
         DELETE FROM interview_tag_mapping
         WHERE interview_experience_id = v_interview_experience_id;
       END IF;
+
+
+      -- Handle leetcode questions for this round
+      IF v_round ? 'leetcode_questions' AND (v_round->>'leetcode_questions') IS NOT NULL THEN
+          -- First delete mappings that are no longer needed
+          DELETE FROM interview_experience_leetcode_question
+          WHERE interview_experience_id = v_interview_experience_id
+          AND interview_experience_round_no = v_round_no
+          AND leetcode_question_number NOT IN (
+              SELECT (q->>'question_number')::INT
+              FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
+          );
+
+          -- Then delete questions that are no longer needed
+          DELETE FROM leetcode_question
+          WHERE interview_experience_id = v_interview_experience_id
+          AND interview_experience_round_no = v_round_no
+          AND question_number NOT IN (
+              SELECT (q->>'question_number')::INT
+              FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
+          );
+
+          -- Insert/Update leetcode questions
+          INSERT INTO leetcode_question (
+              interview_experience_id,
+              interview_experience_round_no,  -- Add round_no
+              question_number,
+              difficulty,
+              user_id
+          )
+          SELECT 
+              v_interview_experience_id,
+              v_round_no,                    -- Add round_no
+              (q->>'question_number')::INT,
+              q->>'difficulty',
+              p_user_id
+          FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
+          ON CONFLICT (interview_experience_id, interview_experience_round_no, question_number) 
+          DO UPDATE SET
+              difficulty = EXCLUDED.difficulty;
+
+          -- Insert/Update mappings
+          INSERT INTO interview_experience_leetcode_question (
+              interview_experience_id,
+              interview_experience_round_no,  -- Add round_no
+              leetcode_question_number,
+              user_id
+          )
+          SELECT
+              v_interview_experience_id,
+              v_round_no,                    -- Add round_no
+              (q->>'question_number')::INT,
+              p_user_id
+          FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
+          ON CONFLICT (interview_experience_id, interview_experience_round_no, leetcode_question_number)
+          DO NOTHING;
+      ELSE
+          -- If no leetcode questions, delete from both tables
+          DELETE FROM interview_experience_leetcode_question
+          WHERE interview_experience_id = v_interview_experience_id
+          AND interview_experience_round_no = v_round_no;
+          
+          DELETE FROM leetcode_question
+          WHERE interview_experience_id = v_interview_experience_id
+          AND interview_experience_round_no = v_round_no;
+      END IF;
+
+
     END LOOP;
 
   EXCEPTION WHEN OTHERS THEN
@@ -213,6 +281,7 @@ RETURNS TABLE (
   response_date DATE,
   created_at TIMESTAMPTZ,
   interview_tags TEXT[],
+  leetcode_questions JSONB[],
   user_data JSONB
 ) AS $$
 BEGIN
@@ -226,6 +295,21 @@ BEGIN
     ie.response_date,
     ie.created_at,
     ARRAY_AGG(it.tag_name) FILTER (WHERE it.tag_name IS NOT NULL) AS interview_tags,
+    (
+      SELECT ARRAY_AGG(
+        jsonb_build_object(
+          'question_number', ielq.leetcode_question_number,
+          'difficulty', lq.difficulty
+        )
+      )
+      FROM interview_experience_leetcode_question ielq
+      LEFT JOIN leetcode_question lq ON 
+        ielq.interview_experience_id = lq.interview_experience_id AND
+        ielq.interview_experience_round_no = lq.interview_experience_round_no AND
+        ielq.leetcode_question_number = lq.question_number
+      WHERE ielq.interview_experience_id = ie.id
+        AND ielq.interview_experience_round_no = ie.round_no
+    ) AS leetcode_questions,
     jsonb_build_object(
       'full_name', ud.full_name,
       'profile_pic_url', ud.profile_pic_url
@@ -248,7 +332,6 @@ BEGIN
   ORDER BY ie.round_no ASC;
 END;
 $$ LANGUAGE plpgsql;
-
 
 -- 6) function to get online assessments by job posting id
 CREATE OR REPLACE FUNCTION get_online_assessments_by_job_posting_id(p_job_posting_id UUID)

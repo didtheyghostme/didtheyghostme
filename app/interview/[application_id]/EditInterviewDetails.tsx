@@ -1,6 +1,6 @@
 import { FormProvider, useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardBody, CardHeader, Divider, DatePicker, Button, Chip, Select, SelectItem, Textarea } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Button, Chip, Select, SelectItem, Textarea, Input } from "@nextui-org/react";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -62,6 +62,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
           interview_date: today(getLocalTimeZone()).toString(),
           response_date: null,
           interview_tags: [],
+          leetcode_questions: [],
         });
       } else {
         const latestRoundNumber = fields.length;
@@ -229,6 +230,93 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                           }}
                         />
                       </>
+                    )}
+                  />
+
+                  {/* leetcode questions */}
+
+                  <Controller
+                    control={methods.control}
+                    name={`interviewRounds.${index}.leetcode_questions`}
+                    render={({ field }) => (
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-md font-semibold">LeetCode Questions</p>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              field.onChange([
+                                ...(field.value || []),
+                                {
+                                  question_number: 1,
+                                  difficulty: "Medium",
+                                },
+                              ]);
+                            }}
+                          >
+                            Add LeetCode Question
+                          </Button>
+                        </div>
+
+                        {field.value &&
+                          field.value.map((question, qIndex) => (
+                            <div key={qIndex} className="mt-2 flex items-center gap-4">
+                              <Input
+                                isRequired
+                                errorMessage={methods.formState.errors?.interviewRounds?.[index]?.leetcode_questions?.[qIndex]?.question_number?.message}
+                                isInvalid={!!methods.formState.errors?.interviewRounds?.[index]?.leetcode_questions?.[qIndex]?.question_number}
+                                label="Question Number"
+                                placeholder="Enter LeetCode question number"
+                                type="number"
+                                value={question.question_number > 0 ? question.question_number.toString() : ""} // Show empty string for invalid values
+                                onChange={(e) => {
+                                  const newQuestions = [...(field.value || [])];
+                                  const value = parseInt(e.target.value);
+
+                                  newQuestions[qIndex] = {
+                                    ...newQuestions[qIndex],
+                                    question_number: value,
+                                  };
+                                  field.onChange(newQuestions);
+                                }}
+                                onKeyDown={(e) => {
+                                  // Prevent minus sign and decimal point
+                                  if (e.key === "-" || e.key === ".") {
+                                    e.preventDefault();
+                                  }
+                                }}
+                              />
+                              <Select
+                                label="Difficulty"
+                                selectedKeys={[question.difficulty]}
+                                onChange={(e) => {
+                                  const newQuestions = [...(field.value || [])];
+
+                                  newQuestions[qIndex] = {
+                                    ...newQuestions[qIndex],
+                                    difficulty: e.target.value as "Easy" | "Medium" | "Hard",
+                                  };
+                                  field.onChange(newQuestions);
+                                }}
+                              >
+                                <SelectItem key="Easy">Easy</SelectItem>
+                                <SelectItem key="Medium">Medium</SelectItem>
+                                <SelectItem key="Hard">Hard</SelectItem>
+                              </Select>
+                              <Button
+                                color="danger"
+                                size="sm"
+                                onClick={() => {
+                                  const newQuestions = field.value?.filter((_, i) => i !== qIndex);
+
+                                  field.onChange(newQuestions?.length ? newQuestions : null);
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
                     )}
                   />
                 </div>

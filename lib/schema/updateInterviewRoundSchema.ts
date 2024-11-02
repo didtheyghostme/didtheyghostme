@@ -5,12 +5,53 @@ import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
 export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const;
 
+export const LEETCODE_DIFFICULTY = ["Easy", "Medium", "Hard"] as const;
+
+// Add new LeetCode question schema
+const leetCodeQuestionSchema = z.object({
+  question_number: z
+    .number({
+      required_error: "Question number is required",
+      invalid_type_error: "Please enter a valid question number", // This shows when input is not a number
+    })
+    .int("Question number must be a whole number")
+    .positive("Question number must be positive")
+    .min(1, "Question number must be at least 1")
+    .max(9999, "Question number must be less than 10000"),
+  difficulty: z.enum(LEETCODE_DIFFICULTY),
+});
+
 // Single interview round schema
 export const interviewRoundSchema = z.object({
   description: z.string().min(1, "Description is required"),
   interview_date: z.string().min(1, "Interview date is required"),
   response_date: z.string().nullable(),
-  interview_tags: z.array(z.enum(INTERVIEW_TAGS)).nullable(),
+  interview_tags: z.array(z.enum(INTERVIEW_TAGS)).nullable().default([]),
+  leetcode_questions: z
+    .array(leetCodeQuestionSchema)
+    .nullable()
+    .default([])
+    .superRefine((questions, ctx) => {
+      if (!questions) return true;
+
+      // Track seen numbers and their indices
+      const seen = new Map<number, number>();
+
+      questions.forEach((question, index) => {
+        const num = question.question_number;
+
+        if (seen.has(num)) {
+          // Add error to the duplicate question
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Question number ${num} is already used in this round`,
+            path: [index, "question_number"], // This will target the specific input, use [] for whole array
+          });
+        } else {
+          seen.set(num, index);
+        }
+      });
+    }),
 });
 
 export type InterviewRoundSchema = z.infer<typeof interviewRoundSchema>;

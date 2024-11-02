@@ -85,6 +85,24 @@ type InterviewExperienceTable = {
   application_id: string;
 } & BaseUser;
 
+type LeetcodeQuestion = {
+  id: string;
+  question_number: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+  interview_experience_id: string;
+  interview_experience_round_no: number;
+  // title: string;
+  // url: string;
+} & BaseUser;
+
+type InterviewExperienceLeetCodeQuestion = {
+  id: string;
+  interview_experience_id: string;
+  leetcode_question_number: number;
+  interview_experience_round_no: number;
+  created_at: string;
+} & BaseUser;
+
 // Question is same table as CommentTable
 type CommentEntityType = "job_posting" | "question" | "interview_experience";
 

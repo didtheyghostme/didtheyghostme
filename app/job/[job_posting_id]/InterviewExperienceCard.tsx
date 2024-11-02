@@ -30,7 +30,7 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
             <span className="whitespace-nowrap text-tiny text-default-400">{formatHowLongAgo(interviewExperience.created_at)}</span>
           </div>
 
-          {/* second row */}
+          {/* second row - interview tags */}
           {interviewExperience.interview_tags && (
             <div className="flex flex-wrap gap-2">
               {sortInterviewTags(interviewExperience.interview_tags).map((tag) => (
@@ -58,6 +58,26 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
               </div>
             )}
           </div>
+
+          {/* third row - leetcode questions */}
+          {interviewExperience.leetcode_questions && interviewExperience.leetcode_questions.length > 0 && (
+            <div className="mt-2">
+              <p className="mb-2 text-sm font-semibold">LeetCode Questions:</p>
+              <div className="flex flex-wrap gap-2">
+                {interviewExperience.leetcode_questions.map((question, index) => (
+                  <Chip
+                    key={index}
+                    // Color based on difficulty
+                    color={question.difficulty === "Easy" ? "success" : question.difficulty === "Medium" ? "warning" : "danger"}
+                    size="sm"
+                    variant="flat"
+                  >
+                    LC-{question.question_number} ({question.difficulty})
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </CardHeader>
 
