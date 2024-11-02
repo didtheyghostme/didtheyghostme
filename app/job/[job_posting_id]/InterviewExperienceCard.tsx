@@ -4,6 +4,7 @@ import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils"
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { sortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
+import { LEETCODE_DIFFICULTY } from "@/lib/schema/updateInterviewRoundSchema";
 
 type InterviewExperienceCardProps = {
   interviewExperience: InterviewExperienceCardData;
@@ -11,8 +12,6 @@ type InterviewExperienceCardProps = {
 
 export function InterviewExperienceCard({ interviewExperience }: InterviewExperienceCardProps) {
   console.log("this interview experience", interviewExperience);
-
-  // add difficulty selection into the EditInterviewDetails form, change color of the chip based on difficulty green for easy, yellow for medium, red for hard
 
   return (
     <Card className="dark:bg-content1-dark w-full border border-gray-200 bg-content1 dark:border-gray-700">
@@ -65,7 +64,7 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
                   <Chip
                     key={index}
                     // Color based on difficulty
-                    color={question.difficulty === "Easy" ? "success" : question.difficulty === "Medium" ? "warning" : "danger"}
+                    color={question.difficulty === LEETCODE_DIFFICULTY.Easy ? "success" : question.difficulty === LEETCODE_DIFFICULTY.Medium ? "warning" : "danger"}
                     size="sm"
                     variant="flat"
                   >

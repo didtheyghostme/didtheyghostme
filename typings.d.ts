@@ -76,7 +76,7 @@ type InterviewTagMappingTable = {
 type InterviewExperienceTable = {
   id: string;
   round_no: number;
-  description: string; // ? from markdown?
+  description: string;
   interview_date: string;
   response_date: string | null;
   created_at: string;
@@ -84,10 +84,12 @@ type InterviewExperienceTable = {
   application_id: string;
 } & BaseUser;
 
+type LeetcodeDifficulty = "Easy" | "Medium" | "Hard";
+
 type LeetcodeQuestion = {
   id: string;
   question_number: number;
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: LeetcodeDifficulty;
   interview_experience_id: string;
   interview_experience_round_no: number;
   // title: string;

@@ -3,9 +3,13 @@ import { parseDate } from "@internationalized/date";
 
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
-export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const;
+export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const satisfies readonly InterviewTag[];
 
-export const LEETCODE_DIFFICULTY = ["Easy", "Medium", "Hard"] as const;
+export const LEETCODE_DIFFICULTY = {
+  Easy: "Easy",
+  Medium: "Medium",
+  Hard: "Hard",
+} as const satisfies Record<LeetcodeDifficulty, LeetcodeDifficulty>;
 
 // Add new LeetCode question schema
 const leetCodeQuestionSchema = z.object({
@@ -18,7 +22,7 @@ const leetCodeQuestionSchema = z.object({
     .positive("Question number must be positive")
     .min(1, "Question number must be at least 1")
     .max(9999, "Question number must be less than 10000"),
-  difficulty: z.enum(LEETCODE_DIFFICULTY),
+  difficulty: z.nativeEnum(LEETCODE_DIFFICULTY),
 });
 
 // Single interview round schema

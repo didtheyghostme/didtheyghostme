@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { InterviewTagsModal, sortInterviewTags } from "./InterviewTagsModal";
 
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, LEETCODE_DIFFICULTY, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
@@ -124,7 +124,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                 name="status"
                 render={({ field }) => (
                   <Select label="Application Status" placeholder="Select application status" selectedKeys={[field.value]} onChange={(e) => field.onChange(e.target.value)}>
-                    {Object.entries(APPLICATION_STATUS).map(([_, value]) => (
+                    {Object.values(APPLICATION_STATUS).map((value) => (
                       <SelectItem key={value} value={value}>
                         {value}
                       </SelectItem>
@@ -249,7 +249,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 ...(field.value || []),
                                 {
                                   question_number: 1,
-                                  difficulty: "Medium",
+                                  difficulty: LEETCODE_DIFFICULTY.Medium,
                                 },
                               ]);
                             }}
@@ -294,14 +294,14 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
 
                                   newQuestions[qIndex] = {
                                     ...newQuestions[qIndex],
-                                    difficulty: e.target.value as "Easy" | "Medium" | "Hard",
+                                    difficulty: e.target.value as LeetcodeDifficulty,
                                   };
                                   field.onChange(newQuestions);
                                 }}
                               >
-                                <SelectItem key="Easy">Easy</SelectItem>
-                                <SelectItem key="Medium">Medium</SelectItem>
-                                <SelectItem key="Hard">Hard</SelectItem>
+                                {Object.values(LEETCODE_DIFFICULTY).map((difficulty) => (
+                                  <SelectItem key={difficulty}>{difficulty}</SelectItem>
+                                ))}
                               </Select>
                               <Button
                                 color="danger"
