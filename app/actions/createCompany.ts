@@ -27,8 +27,6 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
       user_id,
     };
 
-    console.log("dataToInsert", dataToInsert);
-
     const { data, error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select();
 
     if (error) {

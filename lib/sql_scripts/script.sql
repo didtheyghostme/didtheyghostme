@@ -22,51 +22,73 @@ DECLARE
   v_interview_experience_id UUID;
   v_round JSONB;
   v_round_no INT;
+  v_updated_at TIMESTAMPTZ := NOW();
+  v_round_nos INT[];
 BEGIN
   BEGIN
-    -- Update application
+    -- 1. Update application
     UPDATE application
     SET 
       applied_date = p_applied_date,
       first_response_date = p_first_response_date,
-      status = p_status
+      status = p_status,
+      updated_at = v_updated_at
     WHERE id = p_application_id AND user_id = p_user_id;
 
-    -- Delete related tag mappings
-    DELETE FROM interview_tag_mapping
-    WHERE interview_experience_id IN (
-      SELECT id FROM interview_experience
-      WHERE application_id = p_application_id AND user_id = p_user_id
-    );
+    -- 2. Get round numbers
+    -- COALESCE: Returns first non-null value. Here, returns empty array if array_agg is null
+    SELECT COALESCE(array_agg(ordinality), ARRAY[]::int[]) INTO v_round_nos 
+    FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY AS elem(value, ordinality);
 
-    -- Delete existing interview rounds
+    -- 3. Delete removed interview rounds
+    -- unnest: Expands array into rows, making it usable in NOT IN clause
     DELETE FROM interview_experience
-    WHERE application_id = p_application_id AND user_id = p_user_id;
-    
-    -- Loop through each interview round with its index
+    WHERE application_id = p_application_id
+      AND user_id = p_user_id
+      AND round_no NOT IN (SELECT unnest(v_round_nos));
+
+    -- 4. Process each round
     FOR v_round, v_round_no IN 
       SELECT value, ordinality 
       FROM jsonb_array_elements(p_interview_rounds) WITH ORDINALITY
     LOOP
-      -- Insert interview experience and get its ID
+      -- Upsert interview experience
       INSERT INTO interview_experience (
-        round_no,
+        round_no,  -- Using the array index + 1
         description,
         interview_date,
         response_date,
         application_id,
-        user_id
+        user_id,
+        updated_at
       ) VALUES (
-        v_round_no, -- Using the array index + 1
+        v_round_no,
         v_round->>'description',
         (v_round->>'interview_date')::DATE,
         (v_round->>'response_date')::DATE,
         p_application_id,
-        p_user_id
-      ) RETURNING id INTO v_interview_experience_id;
+        p_user_id,
+        v_updated_at
+      )
+      ON CONFLICT (application_id, round_no, user_id) DO UPDATE SET
+        description = EXCLUDED.description,
+        interview_date = EXCLUDED.interview_date,
+        response_date = EXCLUDED.response_date,
+        updated_at = EXCLUDED.updated_at
+      RETURNING id INTO v_interview_experience_id;
 
-      -- Insert tag mappings for this interview experience, use SELECT DISTINCT if there could be duplicate
+      -- Handle tags for this round
       IF v_round ? 'interview_tags' AND (v_round->>'interview_tags') IS NOT NULL THEN
+        -- Delete removed tags
+        DELETE FROM interview_tag_mapping
+        WHERE interview_experience_id = v_interview_experience_id
+        AND interview_tag_id NOT IN (
+          SELECT it.id
+          FROM jsonb_array_elements_text(v_round->'interview_tags') AS selected_tags
+          INNER JOIN interview_tag it ON it.tag_name = selected_tags
+        );
+
+        -- Insert new tags
         INSERT INTO interview_tag_mapping (
           interview_experience_id,
           interview_tag_id,
@@ -77,10 +99,14 @@ BEGIN
           it.id,
           p_user_id
         FROM 
-          jsonb_array_elements_text(v_round->'interview_tags') as selected_tags
-          INNER JOIN interview_tag it ON it.tag_name = selected_tags;
+          jsonb_array_elements_text(v_round->'interview_tags') AS selected_tags
+          INNER JOIN interview_tag it ON it.tag_name = selected_tags
+        ON CONFLICT (interview_experience_id, interview_tag_id) DO NOTHING;
+      ELSE
+        -- If no tags array or null, delete all tags for this round
+        DELETE FROM interview_tag_mapping
+        WHERE interview_experience_id = v_interview_experience_id;
       END IF;
-
     END LOOP;
 
   EXCEPTION WHEN OTHERS THEN

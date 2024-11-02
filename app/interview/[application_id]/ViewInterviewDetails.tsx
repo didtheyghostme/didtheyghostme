@@ -34,12 +34,15 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
         </CardBody>
       </Card>
 
-      {/* TODO: interviews.map(interview) here */}
-      <div className="flex flex-col gap-4">
-        {interviewRounds.map((round) => (
-          <InterviewExperienceCard key={round.id} interviewExperience={round} />
-        ))}
-      </div>
+      {interviewRounds.length === 0 && <p className="text-center text-default-500">There are no interviews yet</p>}
+
+      {interviewRounds.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {interviewRounds.map((round) => (
+            <InterviewExperienceCard key={round.id} interviewExperience={round} />
+          ))}
+        </div>
+      )}
     </>
   );
 }

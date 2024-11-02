@@ -54,6 +54,7 @@ type ApplicationTable = {
   applied_date: string;
   first_response_date: string | null;
   created_at: string;
+  updated_at: string;
   job_posting_id: string;
 } & BaseUser;
 
@@ -80,6 +81,7 @@ type InterviewExperienceTable = {
   interview_date: string;
   response_date: string | null;
   created_at: string;
+  updated_at: string;
   application_id: string;
 } & BaseUser;
 
