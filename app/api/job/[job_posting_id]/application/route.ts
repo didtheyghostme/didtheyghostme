@@ -16,6 +16,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     applied_date: true,
     first_response_date: true,
     created_at: true,
+    updated_at: false,
     job_posting_id: true,
     user_id: true,
     [DBTable.USER_DATA]: {

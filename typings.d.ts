@@ -133,7 +133,7 @@ type NullableKeys<T> = {
   [K in keyof T]: null extends T[K] ? K : never;
 }[keyof T];
 
-type GlobalGeneratedKeys = "id" | "created_at";
+type GlobalGeneratedKeys = "id" | "created_at" | "updated_at";
 
 type ExcludeGeneratedKeys<T> = Omit<T, NullableKeys<T> | GlobalGeneratedKeys | keyof ClerkUserProfileData>;
 

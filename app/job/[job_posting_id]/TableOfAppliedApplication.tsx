@@ -102,6 +102,7 @@ function generateMockApplication(id: number): ProcessedApplication {
     first_response_date: firstResponseDate ? firstResponseDate.toISOString().split("T")[0] : null,
     status: randomStatus,
     created_at: appliedDate.toISOString(),
+    updated_at: appliedDate.toISOString(),
     job_posting_id: "1",
     isCurrentUserItem: false,
     user_data: {
