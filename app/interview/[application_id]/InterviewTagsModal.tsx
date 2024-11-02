@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { INTERVIEW_TAGS } from "@/lib/schema/updateInterviewRoundSchema";
 
-export function sortInterviewTags(tags: InterviewTag[]) {
+export function utilSortInterviewTags(tags: InterviewTag[]) {
   return INTERVIEW_TAGS.filter((tag) => tags.includes(tag));
 }
 
@@ -31,7 +31,7 @@ export function InterviewTagsModal({ isOpen, onClose, selectedTags, onTagsChange
   };
 
   const handleSave = () => {
-    const sortedTags = sortInterviewTags(localSelectedTags);
+    const sortedTags = utilSortInterviewTags(localSelectedTags);
 
     onTagsChange(sortedTags);
     onClose();

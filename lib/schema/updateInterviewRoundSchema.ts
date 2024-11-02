@@ -2,14 +2,9 @@ import { z } from "zod";
 import { parseDate } from "@internationalized/date";
 
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
+import { LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
 
 export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const satisfies readonly InterviewTag[];
-
-export const LEETCODE_DIFFICULTY = {
-  Easy: "Easy",
-  Medium: "Medium",
-  Hard: "Hard",
-} as const satisfies Record<LeetcodeDifficulty, LeetcodeDifficulty>;
 
 // Add new LeetCode question schema
 const leetCodeQuestionSchema = z.object({

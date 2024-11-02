@@ -96,7 +96,7 @@ type LeetcodeQuestion = {
   // url: string;
 } & BaseUser;
 
-type InterviewExperienceLeetCodeQuestion = {
+type InterviewExperienceLeetcodeQuestion = {
   id: string;
   interview_experience_id: string;
   leetcode_question_number: number;

@@ -5,10 +5,10 @@ import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { InterviewTagsModal, sortInterviewTags } from "./InterviewTagsModal";
+import { InterviewTagsModal, utilSortInterviewTags } from "./InterviewTagsModal";
 
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, LEETCODE_DIFFICULTY, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
-import { InterviewExperienceCardData } from "@/lib/sharedTypes";
+import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
+import { InterviewExperienceCardData, LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 
 type EditInterviewDetailsProps = {
@@ -215,7 +215,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                         </Button>
                         {field.value && field.value.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
-                            {sortInterviewTags(field.value).map((tag) => (
+                            {utilSortInterviewTags(field.value).map((tag) => (
                               <Chip key={tag}>{tag}</Chip>
                             ))}
                           </div>
