@@ -2,83 +2,83 @@
 
 import NextLink from "next/link";
 import clsx from "clsx";
-import { Button, Kbd, Link, Input, link as linkStyles, Navbar as NextUINavbar, NavbarContent, NavbarMenu, NavbarBrand, NavbarItem, NavbarMenuItem } from "@nextui-org/react";
+import { Button, Link, Navbar as NextUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 
 import { ClerkUserButton } from "./ClerkUserButton";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { TwitterIcon, GithubIcon, DiscordIcon, HeartFilledIcon, SearchIcon, Logo } from "@/components/icons";
-import { usePathname } from "next/navigation";
 
 export const Navbar = () => {
   const pathname = usePathname();
 
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={<SearchIcon className="pointer-events-none flex-shrink-0 text-base text-default-400" />}
-      type="search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-    />
-  );
-
   return (
-    <NextUINavbar maxWidth="xl" position="sticky">
-      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-        <NavbarBrand as="li" className="max-w-fit gap-3">
-          <NextLink className="flex items-center justify-start gap-1" href="/">
-            <Logo />
-            <p className="font-bold text-inherit">ACME</p>
+    <NextUINavbar
+      maxWidth="xl"
+      position="sticky"
+      classNames={{
+        menu: "max-h-fit",
+      }}
+    >
+      {/* Left side: Menu Toggle, Logo and Nav Items */}
+      <NavbarContent justify="start">
+        <NavbarMenuToggle className="sm:hidden" />
+
+        {/* Mobile Menu */}
+        <NavbarMenu>
+          <div className="mx-4 mt-2 flex flex-col gap-2">
+            {siteConfig.navMenuItems.map((item, index) => (
+              <NavbarMenuItem key={`${item}-${index}`}>
+                <Link color={index === 2 ? "primary" : index === siteConfig.navMenuItems.length - 1 ? "danger" : "foreground"} href={item.href} size="lg">
+                  {item.label}
+                </Link>
+              </NavbarMenuItem>
+            ))}
+          </div>
+        </NavbarMenu>
+
+        <div className="flex w-full items-center gap-4 sm:gap-12">
+          {/* Nav Items - Always visible on mobile and desktop */}
+
+          <NextLink href="/">
+            <p className="hidden text-inherit sm:flex">didtheyghost.me</p>
           </NextLink>
-        </NavbarBrand>
-        <ul className="ml-2 hidden justify-start gap-4 lg:flex">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <NextLink className={clsx(linkStyles({ color: "foreground" }), "data-[active=true]:font-medium data-[active=true]:text-primary")} color="foreground" href={item.href}>
-                {item.label}
-              </NextLink>
-            </NavbarItem>
-          ))}
-        </ul>
+
+          <ul className="flex items-center gap-8">
+            {siteConfig.navItems.map((item) => (
+              <NavbarItem key={item.href}>
+                <NextLink className={clsx("text-sm transition-colors sm:text-base", pathname === item.href ? "font-medium text-blue-500" : "text-default-500 hover:text-default-900")} href={item.href}>
+                  {item.label}
+                </NextLink>
+              </NavbarItem>
+            ))}
+          </ul>
+        </div>
       </NavbarContent>
 
-      <NavbarContent className="hidden basis-1/5 sm:flex sm:basis-full" justify="end">
+      {/* Right side: Theme Switch + Login + Mobile Menu Toggle */}
+      <NavbarContent className="basis-1 pl-4 sm:hidden" justify="end">
+        <ThemeSwitch />
+        <SignedOut>
+          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+            <Button className="bg-default-100 text-sm font-normal text-default-600" variant="flat">
+              Login
+            </Button>
+          </SignInButton>
+        </SignedOut>
+        <SignedIn>
+          <ClerkUserButton />
+        </SignedIn>
+      </NavbarContent>
+
+      {/* Desktop Right side */}
+      <NavbarContent className="hidden basis-1/5 sm:flex sm:basis-auto" justify="end">
         <NavbarItem className="hidden gap-2 sm:flex">
-          <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
-            <TwitterIcon className="text-default-500" />
-          </Link>
-          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
-            <DiscordIcon className="text-default-500" />
-          </Link>
-          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-            <GithubIcon className="text-default-500" />
-          </Link>
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
         <NavbarItem className="hidden md:flex">
-          {/* <Button
-            isExternal
-            as={Link}
-            className="bg-default-100 text-sm font-normal text-default-600"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button> */}
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
               <Button className="bg-default-100 text-sm font-normal text-default-600" variant="flat">
@@ -91,40 +91,6 @@ export const Navbar = () => {
           </SignedIn>
         </NavbarItem>
       </NavbarContent>
-
-      {/* mobile view */}
-      <NavbarContent className="basis-1 pl-4 sm:hidden" justify="end">
-        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
-        <ThemeSwitch />
-
-        <SignedOut>
-          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button className="bg-default-100 text-sm font-normal text-default-600" startContent={<HeartFilledIcon className="text-danger" />} variant="flat">
-              Login
-            </Button>
-          </SignInButton>
-        </SignedOut>
-
-        <SignedIn>
-          <ClerkUserButton />
-        </SignedIn>
-        {/* <NavbarMenuToggle /> */}
-      </NavbarContent>
-
-      <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <Link color={index === 2 ? "primary" : index === siteConfig.navMenuItems.length - 1 ? "danger" : "foreground"} href="#" size="lg">
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          ))}
-        </div>
-      </NavbarMenu>
     </NextUINavbar>
   );
 };
