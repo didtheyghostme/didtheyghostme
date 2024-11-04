@@ -35,11 +35,15 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
         <div className="flex w-full flex-col gap-2">
           {/* first row */}
           <div className="flex items-center justify-between">
-            <div className="flex gap-3">
-              <p className="text-base font-semibold"> Interview status: </p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-medium text-default-500"> Status: </p>
               <Chip color={getStatusColor(application.status)} size="sm" variant="flat">
                 {application.status}
               </Chip>
+              <div className="self-stretch border-r border-divider" />
+              <span className="font-semibold">
+                {application.number_of_rounds} {application.number_of_rounds === 1 ? "round" : "rounds"}
+              </span>
             </div>
 
             <span className="whitespace-nowrap text-tiny text-default-400">{formatHowLongAgo(application.created_at)}</span>
@@ -65,9 +69,6 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
         </div>
 
         <div className="flex flex-col items-end text-sm text-gray-500">
-          <span className="font-semibold text-success-600">
-            {application.number_of_rounds} {application.number_of_rounds === 1 ? "round" : "rounds"}
-          </span>
           <span>
             {application.number_of_comments} {application.number_of_comments === 1 ? "comment" : "comments"}
           </span>

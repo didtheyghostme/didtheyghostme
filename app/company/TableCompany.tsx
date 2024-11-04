@@ -123,7 +123,7 @@ export default function TableCompany() {
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <Input
             isClearable
             placeholder="Search by company name..."
@@ -131,13 +131,13 @@ export default function TableCompany() {
             value={filterValue}
             variant="bordered"
             classNames={{
-              base: "w-full sm:max-w-[44%]",
+              base: "w-full sm:max-w-[44%]", // Keep existing max-width for larger screens
               inputWrapper: "border-1",
             }}
             onClear={() => onClear()}
             onValueChange={onSearchChange}
           />
-          <div className="flex gap-3">
+          <div className="flex flex-row justify-end gap-3">
             <Dropdown>
               <DropdownTrigger>
                 <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">

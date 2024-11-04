@@ -77,7 +77,7 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
         <p className="whitespace-pre-wrap text-default-600">{interviewExperience.description}</p>
       </CardBody>
 
-      <div className="flex items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
+      <div className="flex w-full items-center justify-between bg-default-100 px-4 py-3 dark:bg-default-50">
         <div className="flex items-center gap-2">
           <Avatar className="flex-shrink-0" name={interviewExperience.user_data.full_name} size="sm" src={interviewExperience.user_data.profile_pic_url} />
           <span className="text-small text-default-500">{interviewExperience.user_data.full_name}</span>
