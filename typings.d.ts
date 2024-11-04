@@ -1,8 +1,3 @@
-type Note = {
-  id?: number; // Optional for new entries
-  title: string;
-};
-
 type BaseUser = {
   user_id: string;
 };
