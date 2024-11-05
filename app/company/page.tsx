@@ -1,4 +1,10 @@
+import { Metadata } from "next";
+
 import TableCompany from "./TableCompany";
+
+export const metadata: Metadata = {
+  title: "Companies",
+};
 
 export default function CompanyPage() {
   return (
