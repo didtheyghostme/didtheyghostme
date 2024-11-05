@@ -6,6 +6,8 @@ import { Card, CardBody, CardHeader, Divider, Button, LinkIcon, Link, useDisclos
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import mixpanel from "mixpanel-browser";
+import { toast } from "sonner";
 
 import ReportLinkModal from "./ReportLinkModal";
 import TrackThisJobModal from "./TrackThisJobModal";
@@ -13,6 +15,7 @@ import TableOfAppliedApplication from "./TableOfAppliedApplication";
 import { InterviewExperienceContent } from "./InterviewExperienceContent";
 import { OnlineAssessmentContent } from "./OnlineAssessmentContent";
 import { QuestionContent } from "./QuestionContent";
+import SuggestLinkModal from "./SuggestLinkModal";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
@@ -22,7 +25,6 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import SuggestLinkModal from "./SuggestLinkModal";
 
 // Define the tab mapping
 const TABS = {
@@ -87,46 +89,107 @@ export default function JobDetailsPage() {
   if (!applications?.data) return <div>Applications not found</div>;
 
   const handleBackClick = () => {
-    router.push(`/company/${jobDetails.company.id}`);
-    // router.back();
-    applications.data.forEach((application) => {
-      console.log("application", application);
+    mixpanel.track("back_button_clicked", {
+      page: "job_posting_page",
+      company_id: jobDetails.company.id,
+      job_id: jobDetails.id,
     });
-  };
-
-  const handleReportLinkClick = () => {
-    onReportModalOpen(); // Open the modal
-  };
-
-  const handleTrackThisJobClick = () => {
-    onTrackModalOpen(); // Open the modal
+    router.push(`/company/${jobDetails.company.id}`);
   };
 
   const handleTrackJobSubmit = async (appliedDateUTC: string) => {
-    console.log("Track job submitted", appliedDateUTC);
-    // TODO: add to Application table, status default Applied
     try {
+      mixpanel.track("Job Posting Page", {
+        action: "track_this_job_submitted",
+        job_id: job_posting_id,
+        applied_date: appliedDateUTC,
+      });
+
       const result = await createApplication(appliedDateUTC);
 
+      toast.success("Job tracked successfully");
+
       console.log("Application created", result);
-    } catch (err) {
+    } catch (err: unknown) {
+      mixpanel.track("Job Posting Page", {
+        action: "track_this_job_error",
+        job_id: job_posting_id,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      });
+      toast.error("Error tracking job");
       console.error("Error creating application:", err);
     }
   };
 
-  const handleApplicationClick = (application: ProcessedApplication) => {
-    console.log("Application clicked", application);
-    // TODO: go to specific application page, with application id, show all interview experiences of this application
-    // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
-    router.push(`/interview/${application.id}`);
+  // Track job portal link clicks
+  const handleJobPortalClick = () => {
+    mixpanel.track("Job Posting Page", {
+      action: "job_portal_clicked",
+      job_id: job_posting_id,
+      url: jobDetails.url,
+    });
   };
 
+  const mixpanelTrackReportLinkClick = () => {
+    mixpanel.track("Job Posting Page", {
+      action: "report_link_clicked",
+      job_id: job_posting_id,
+    });
+  };
+
+  // Track report link interactions
+  const handleReportLinkModalOpen = () => {
+    mixpanelTrackReportLinkClick();
+    onReportModalOpen();
+  };
+
+  const mixpanelTrackSuggestLinkClick = () => {
+    mixpanel.track("Job Posting Page", {
+      action: "suggest_link_clicked",
+      job_id: job_posting_id,
+    });
+  };
+
+  // Track suggest link interactions
+  const handleSuggestLinkClick = () => {
+    mixpanelTrackSuggestLinkClick();
+    onSuggestModalOpen();
+  };
+
+  // Track job tracking interactions
+  const handleTrackThisJobClick = () => {
+    mixpanel.track("Job Posting Page", {
+      action: "track_job_modal_opened",
+      job_id: job_posting_id,
+    });
+    onTrackModalOpen();
+  };
+
+  // const handleApplicationClick = (application: ProcessedApplication) => {
+  //   console.log("Application clicked", application);
+  //   // TODO: go to specific application page, with application id, show all interview experiences of this application
+  //   // TODO: interview experience page, can have a button to add LinkedIn URL, update status button Rejected | Accepted | Ghosted from Applied
+  //   router.push(`/interview/${application.id}`);
+  // };
+
+  // Track application view
   const handleViewMyApplicationClick = (applicationId: string) => {
-    console.log("View my application clicked", applicationId);
+    mixpanel.track("Job Posting Page", {
+      action: "view_my_application_clicked",
+      job_id: job_posting_id,
+      application_id: applicationId,
+    });
     router.push(`/interview/${applicationId}`);
   };
 
+  // Track tab changes
   const handleTabChange = (key: Key) => {
+    mixpanel.track("Job Posting Page", {
+      action: "tab_changed",
+      job_id: job_posting_id,
+      from_tab: selectedTab,
+      to_tab: key,
+    });
     setSelectedTab(key as TabKey);
   };
 
@@ -150,18 +213,29 @@ export default function JobDetailsPage() {
           </div>
           {jobDetails.url && (
             <div className="flex items-center gap-2 self-end sm:self-center">
-              <Link isExternal href={jobDetails.url}>
+              <Link isExternal href={jobDetails.url} onPress={handleJobPortalClick}>
                 <LinkIcon />
                 Job portal
               </Link>
+              {/* Separate the signed-in and signed-out states */}
               <SignedIn>
-                <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat" onPress={handleReportLinkClick}>
+                <Button
+                  color="danger"
+                  size="sm"
+                  startContent={<FlagIcon />}
+                  variant="flat"
+                  onPress={() => {
+                    handleReportLinkModalOpen();
+                    onReportModalOpen();
+                  }}
+                >
                   Report Link
                 </Button>
               </SignedIn>
+
               <SignedOut>
                 <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                  <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat">
+                  <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat" onPress={mixpanelTrackReportLinkClick}>
                     Report Link
                   </Button>
                 </SignInButton>
@@ -172,14 +246,15 @@ export default function JobDetailsPage() {
             <>
               <div className="flex flex-col items-end">
                 <p className="text-default-500">No job portal link available</p>
+                {/* Separate the signed-in and signed-out states */}
                 <SignedIn>
-                  <Button color="primary" size="sm" variant="flat" onPress={onSuggestModalOpen}>
+                  <Button color="primary" size="sm" variant="flat" onPress={handleSuggestLinkClick}>
                     Suggest a job portal link
                   </Button>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                    <Button color="primary" size="sm" variant="flat">
+                    <Button color="primary" size="sm" variant="flat" onPress={mixpanelTrackSuggestLinkClick}>
                       Suggest a job portal link
                     </Button>
                   </SignInButton>

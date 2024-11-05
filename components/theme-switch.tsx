@@ -6,6 +6,7 @@ import { SwitchProps, useSwitch } from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import { useIsSSR } from "@react-aria/ssr";
 import clsx from "clsx";
+import mixpanel from "mixpanel-browser";
 
 import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
 
@@ -14,25 +15,24 @@ export interface ThemeSwitchProps {
   classNames?: SwitchProps["classNames"];
 }
 
-export const ThemeSwitch: FC<ThemeSwitchProps> = ({
-  className,
-  classNames,
-}) => {
+export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className, classNames }) => {
   const { theme, setTheme } = useTheme();
   const isSSR = useIsSSR();
 
   const onChange = () => {
-    theme === "light" ? setTheme("dark") : setTheme("light");
+    const newTheme = theme === "light" ? "dark" : "light";
+
+    setTheme(newTheme);
+
+    // Track theme change
+    mixpanel.track("Theme Switch", {
+      action: "theme_changed",
+      from: theme,
+      to: newTheme,
+    });
   };
 
-  const {
-    Component,
-    slots,
-    isSelected,
-    getBaseProps,
-    getInputProps,
-    getWrapperProps,
-  } = useSwitch({
+  const { Component, slots, isSelected, getBaseProps, getInputProps, getWrapperProps } = useSwitch({
     isSelected: theme === "light" || isSSR,
     "aria-label": `Switch to ${theme === "light" || isSSR ? "dark" : "light"} mode`,
     onChange,
@@ -41,11 +41,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   return (
     <Component
       {...getBaseProps({
-        className: clsx(
-          "px-px transition-opacity hover:opacity-80 cursor-pointer",
-          className,
-          classNames?.base,
-        ),
+        className: clsx("px-px transition-opacity hover:opacity-80 cursor-pointer", className, classNames?.base),
       })}
     >
       <VisuallyHidden>
@@ -55,26 +51,12 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
         {...getWrapperProps()}
         className={slots.wrapper({
           class: clsx(
-            [
-              "w-auto h-auto",
-              "bg-transparent",
-              "rounded-lg",
-              "flex items-center justify-center",
-              "group-data-[selected=true]:bg-transparent",
-              "!text-default-500",
-              "pt-px",
-              "px-0",
-              "mx-0",
-            ],
+            ["h-auto w-auto", "bg-transparent", "rounded-lg", "flex items-center justify-center", "group-data-[selected=true]:bg-transparent", "!text-default-500", "pt-px", "px-0", "mx-0"],
             classNames?.wrapper,
           ),
         })}
       >
-        {!isSelected || isSSR ? (
-          <SunFilledIcon size={22} />
-        ) : (
-          <MoonFilledIcon size={22} />
-        )}
+        {!isSelected || isSSR ? <SunFilledIcon size={22} /> : <MoonFilledIcon size={22} />}
       </div>
     </Component>
   );

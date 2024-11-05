@@ -25,6 +25,15 @@ export function MixpanelProvider({ children }: MixpanelProviderProps) {
     });
   }, []);
 
+  // Set Super Property for isSignedIn
+  useEffect(() => {
+    if (isLoaded) {
+      mixpanel.register({
+        is_signed_in: !!user, // true if user is signed in, false otherwise
+      });
+    }
+  }, [isLoaded, user]);
+
   // Identify user when they log in
   useEffect(() => {
     if (isLoaded && user) {

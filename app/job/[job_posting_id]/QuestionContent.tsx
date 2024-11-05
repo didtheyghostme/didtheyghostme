@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import mixpanel from "mixpanel-browser";
 
 import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { fetcher } from "@/lib/fetcher";
@@ -47,6 +48,11 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
       setIsModalOpen(false);
       toast.success("Question created successfully");
     } catch (error) {
+      mixpanel.track("Question Content Tab", {
+        action: "question_creation_failed",
+        job_id: job_posting_id,
+        error: error,
+      });
       console.error("Error creating question:", error);
       toast.error("Error creating question, please try again");
     }
@@ -56,6 +62,18 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
     router.push(`/question/${questionId}`);
   };
 
+  const handleAskAQuestion = () => {
+    mixpanelTrackAskAQuestion();
+    setIsModalOpen(true);
+  };
+
+  const mixpanelTrackAskAQuestion = () => {
+    mixpanel.track("Question Content Tab", {
+      action: "ask_a_question_button_clicked",
+      job_id: job_posting_id,
+    });
+  };
+
   if (isLoading) return <div>Loading questions...</div>;
   if (error) return <div>Error loading questions</div>;
 
@@ -63,11 +81,11 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
     <div className="space-y-4">
       <div className="flex justify-end">
         <SignedIn>
-          <Button onPress={() => setIsModalOpen(true)}>Ask a Question</Button>
+          <Button onPress={handleAskAQuestion}>Ask a Question</Button>
         </SignedIn>
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button>Ask a Question</Button>
+            <Button onPress={mixpanelTrackAskAQuestion}>Ask a Question</Button>
           </SignInButton>
         </SignedOut>
       </div>

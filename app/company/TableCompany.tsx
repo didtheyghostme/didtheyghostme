@@ -8,6 +8,7 @@ import { SignInButton } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
+import mixpanel from "mixpanel-browser";
 
 import { CreateCompanyModal } from "./CreateCompanyModal";
 
@@ -98,6 +99,11 @@ export default function TableCompany() {
     if (value) {
       setFilterValue(value);
       setPage(1);
+
+      mixpanel.track("Company Table", {
+        action: "search",
+        search_term: value,
+      });
     } else {
       setFilterValue("");
     }
@@ -106,10 +112,17 @@ export default function TableCompany() {
   const onClear = React.useCallback(() => {
     setFilterValue("");
     setPage(1);
+    mixpanel.track("Company Table", {
+      action: "clear_search",
+    });
   }, []);
 
   const handleSortChange = (key: SortOption["key"]) => {
     setCurrentSort(key);
+    mixpanel.track("Company Table", {
+      action: "sort_changed",
+      sort_key: key,
+    });
   };
 
   const handleOnRowClick = (key: React.Key) => {
@@ -118,6 +131,35 @@ export default function TableCompany() {
     if (clickedCompany) {
       router.push(`/company/${clickedCompany.id}`);
     }
+  };
+
+  // Track pagination
+  const handlePageChange = (newPage: number) => {
+    mixpanel.track("Company Table", {
+      action: "page_changed",
+      from_page: page,
+      to_page: newPage,
+    });
+    setPage(newPage);
+  };
+
+  // Track modal interactions
+  const handleModalOpen = () => {
+    mixpanelTrackModalOpen();
+    setIsModalOpen(true);
+  };
+
+  const mixpanelTrackModalOpen = () => {
+    mixpanel.track("Company Table", {
+      action: "add_company_modal_opened",
+    });
+  };
+
+  const handleModalClose = () => {
+    mixpanel.track("Company Table", {
+      action: "add_company_modal_closed",
+    });
+    setIsModalOpen(false);
   };
 
   const topContent = React.useMemo(() => {
@@ -157,13 +199,13 @@ export default function TableCompany() {
               </DropdownMenu>
             </Dropdown>
             <SignedIn>
-              <Button color="primary" endContent={<PlusIcon />} onPress={() => setIsModalOpen(true)}>
+              <Button color="primary" endContent={<PlusIcon />} onPress={handleModalOpen}>
                 Add New
               </Button>
             </SignedIn>
             <SignedOut>
               <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                <Button color="primary" endContent={<PlusIcon />}>
+                <Button color="primary" endContent={<PlusIcon />} onPress={mixpanelTrackModalOpen}>
                   Add New
                 </Button>
               </SignInButton>
@@ -180,7 +222,7 @@ export default function TableCompany() {
   const bottomContent = React.useMemo(() => {
     return (
       <div className="flex items-center justify-center px-2 py-2">
-        <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={setPage} />
+        <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={handlePageChange} />
       </div>
     );
   }, [page, pages]);
@@ -217,7 +259,7 @@ export default function TableCompany() {
         </TableBody>
       </Table>
 
-      <CreateCompanyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateCompanyModal isOpen={isModalOpen} onClose={handleModalClose} />
     </>
   );
 }

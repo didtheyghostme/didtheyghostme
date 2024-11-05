@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import mixpanel from "mixpanel-browser";
 
 import { fetcher } from "@/lib/fetcher";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
@@ -16,7 +17,6 @@ import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
-import mixpanel from "mixpanel-browser";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -80,17 +80,31 @@ export default function CompanyDetailsPage() {
       handleCloseModal();
     } catch (err) {
       console.error("Error adding job:", err);
+      mixpanel.track("Company Details", {
+        action: "job_creation_error",
+        company_id,
+        job_title: data.title,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      });
     }
   });
 
   const handleOpenModal = () => {
     console.warn("Opening modal");
 
-    mixpanel.track("Open Add Job Modal", { company_id: company_id });
+    mixpanel.track("Company Details", {
+      action: "add_a_new_job_clicked",
+      company_id,
+      company_name: company.company_name,
+    });
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    mixpanel.track("Company Details", {
+      action: "add_a_new_job_modal_closed",
+      company_id,
+    });
     setIsModalOpen(false);
     reset();
   };
@@ -101,11 +115,31 @@ export default function CompanyDetailsPage() {
     // TODO: on job page, have button to "Track this job", which then add to Application table with today date
     // TODO: the button then changes to "View my application", next step is fill in date of when the first contact -> round 0 = applied, round 1 = contacted
     // TODO: after that, have a button to "Add Interview Experience" with markdown editor
+    mixpanel.track("Company Details", {
+      action: "view_job_clicked",
+      company_id,
+      job_id: job.id,
+      job_status: job.job_status,
+    });
     router.push(`/job/${job.id}`);
   };
 
   const handleViewMoreButtonClick = (job: CompanyDetailsPageAllJobsResponse) => {
+    mixpanel.track("Company Details", {
+      action: "view_more_button_clicked",
+      company_id,
+      job_id: job.id,
+      job_status: job.job_status,
+    });
     handleViewJobClick(job);
+  };
+
+  const handleCompanyWebsiteClick = () => {
+    mixpanel.track("Company Details", {
+      action: "company_website_button_clicked",
+      company_id,
+      company_name: company.company_name,
+    });
   };
 
   return (
@@ -116,7 +150,7 @@ export default function CompanyDetailsPage() {
           <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={company.company_name} src={company.logo_url} />
           <h1 className="break-words text-base font-bold sm:text-3xl">{company.company_name}</h1>
         </div>
-        <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary" href={company.company_url}>
+        <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary" href={company.company_url} onPress={handleCompanyWebsiteClick}>
           Company website
         </Link>
       </div>
@@ -137,7 +171,13 @@ export default function CompanyDetailsPage() {
         </SignedIn>
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90" color="primary" endContent={<PlusIcon />} variant="solid">
+            <Button
+              className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
+              color="primary"
+              endContent={<PlusIcon />}
+              variant="solid"
+              onPress={handleOpenModal}
+            >
               Add a new job
             </Button>
           </SignInButton>

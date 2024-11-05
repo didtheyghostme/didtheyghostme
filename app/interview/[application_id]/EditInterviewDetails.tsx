@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader, Divider, DatePicker, Button, Chip, Select, 
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
+import mixpanel from "mixpanel-browser";
 
 import { InterviewTagsModal, utilSortInterviewTags } from "./InterviewTagsModal";
 
@@ -55,6 +56,15 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   const handleAddNewInterviewRoundClick = async () => {
     const isFormValid = await methods.trigger();
 
+    mixpanel.track("Interview Experience Edit", {
+      action: "add_round_attempted",
+      application_id: applicationDetails.id,
+      current_rounds: fields.length,
+      is_form_valid: isFormValid,
+      error: methods.formState.errors,
+      can_add_round: canAddNewRound(),
+    });
+
     if (!isFormValid) {
       toast.error("Please fix the errors in the form before adding a new one.");
     } else {
@@ -77,7 +87,58 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
   const handleFormSubmit = methods.handleSubmit(onSave, () => {
     // On error callback
     toast.error("Please fix the errors in the form before saving.");
+    mixpanel.track("Interview Experience Edit", {
+      action: "form_validation_error",
+      application_id: applicationDetails.id,
+      error: methods.formState.errors,
+    });
   });
+
+  const trackStatusChange = (value: string) => {
+    mixpanel.track("Interview Experience Edit", {
+      action: "status_changed",
+      application_id: applicationDetails.id,
+      previous_status: methods.getValues("status"),
+      new_status: value,
+    });
+  };
+
+  const trackRoundRemoval = (index: number) => {
+    mixpanel.track("Interview Experience Edit", {
+      action: "round_removed",
+      application_id: applicationDetails.id,
+      round_number: index + 1,
+      total_rounds: fields.length,
+    });
+    remove(index);
+  };
+
+  const trackTagsChange = (index: number, tags: string[]) => {
+    mixpanel.track("Interview Experience Edit", {
+      action: "tags_updated",
+      application_id: applicationDetails.id,
+      round_number: index + 1,
+      tags_count: tags.length,
+      tags: tags,
+    });
+  };
+
+  const trackLeetcodeQuestionAdd = (roundIndex: number) => {
+    mixpanel.track("Interview Experience Edit", {
+      action: "leetcode_question_added",
+      application_id: applicationDetails.id,
+      round_number: roundIndex + 1,
+    });
+  };
+
+  const trackLeetcodeQuestionRemove = (roundIndex: number, questionIndex: number) => {
+    mixpanel.track("Interview Experience Edit", {
+      action: "leetcode_question_removed",
+      application_id: applicationDetails.id,
+      round_number: roundIndex + 1,
+      question_index: questionIndex,
+    });
+  };
 
   return (
     <FormProvider {...methods}>
@@ -106,7 +167,15 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                 control={methods.control}
                 name="status"
                 render={({ field }) => (
-                  <Select label="Application Status" placeholder="Select application status" selectedKeys={[field.value]} onChange={(e) => field.onChange(e.target.value)}>
+                  <Select
+                    label="Application Status"
+                    placeholder="Select application status"
+                    selectedKeys={[field.value]}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      trackStatusChange(e.target.value);
+                    }}
+                  >
                     {Object.values(APPLICATION_STATUS).map((value) => (
                       <SelectItem key={value} value={value}>
                         {value}
@@ -167,7 +236,15 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                 <div key={field.id} className="mb-4 rounded-md border p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">Round {index + 1}</p>
-                    <Button color="danger" size="sm" type="button" onClick={() => remove(index)}>
+                    <Button
+                      color="danger"
+                      size="sm"
+                      type="button"
+                      onClick={() => {
+                        trackRoundRemoval(index);
+                        remove(index);
+                      }}
+                    >
                       Remove
                     </Button>
                   </div>
@@ -241,6 +318,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                           onTagsChange={(tags) => {
                             field.onChange(tags);
                             setOpenModalIndex(null);
+                            trackTagsChange(index, tags);
                           }}
                         />
                       </>
@@ -259,6 +337,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                           <Button
                             size="sm"
                             onClick={() => {
+                              trackLeetcodeQuestionAdd(index);
                               field.onChange([
                                 ...(field.value || []),
                                 {
@@ -284,6 +363,8 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 type="number"
                                 value={question.question_number > 0 ? question.question_number.toString() : ""} // Show empty string for invalid values
                                 onChange={(e) => {
+                                  trackLeetcodeQuestionRemove(index, qIndex);
+
                                   const newQuestions = [...(field.value || [])];
                                   const value = parseInt(e.target.value);
 

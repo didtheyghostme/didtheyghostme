@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { Button, Spacer } from "@nextui-org/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import mixpanel from "mixpanel-browser";
 
 import { ViewInterviewDetails } from "./ViewInterviewDetails";
 import { EditInterviewDetails } from "./EditInterviewDetails";
@@ -45,6 +46,11 @@ export default function InterviewExperiencePage() {
 
   const handleBackClick = () => {
     router.push(`/job/${applicationDetails.job_posting_id}`);
+
+    mixpanel.track("back_button_clicked", {
+      page: "interview_experience_page",
+      application_id: application_id,
+    });
   };
 
   const handleSaveForm = async (data: InterviewExperienceFormValues) => {
@@ -54,11 +60,24 @@ export default function InterviewExperiencePage() {
 
       toast.success("Interview experience updated successfully");
     } catch (error) {
+      mixpanel.track("Interview Experience Page", {
+        action: "update_interview_experience_error",
+        application_id: application_id,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       console.error("Error updating interview experience:", error);
       toast.error("Error updating interview experience");
     }
 
     setIsEditing(false);
+  };
+
+  const handleEditInterviewRoundsButtonClick = () => {
+    mixpanel.track("Interview Experience Page", {
+      action: "edit_interview_rounds_button_clicked",
+      application_id: application_id,
+    });
+    setIsEditing(true);
   };
 
   return (
@@ -80,7 +99,7 @@ export default function InterviewExperiencePage() {
                 </Button>
               </div>
             ) : (
-              <Button className="self-end sm:self-auto" color="primary" onClick={() => setIsEditing(true)}>
+              <Button className="self-end sm:self-auto" color="primary" onClick={handleEditInterviewRoundsButtonClick}>
                 Edit Interview Rounds
               </Button>
             )}

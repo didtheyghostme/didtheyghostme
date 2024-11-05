@@ -5,10 +5,11 @@ import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 
 const features = [
   {
-    title: "Browse jobs ",
+    title: "Browse jobs",
     description: "Discover and explore job opportunities that are currently available",
     screenshot: {
       dark: "/screenshots/homefeature1.png",
@@ -95,11 +96,20 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleFindJobs = () => {
+    mixpanel.track("Home Page", { action: "find_jobs_button_clicked" });
     router.push("/jobs");
   };
 
   const handleFindCompanies = () => {
+    mixpanel.track("Home Page", { action: "find_companies_button_clicked" });
     router.push("/companies");
+  };
+
+  const handleTabChange = (tabName: string) => {
+    mixpanel.track("Home Page", {
+      action: "tab_changed",
+      tab: tabName,
+    });
   };
 
   return (
@@ -115,10 +125,10 @@ export default function HomePage() {
           <p className="mx-auto max-w-xl text-lg text-default-600">Organize your job applications, share interview experiences, and connect with a community of job seekers.</p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button color="default" size="lg" variant="bordered" onClick={handleFindCompanies}>
+            <Button className="transition-colors hover:bg-default-100" color="default" size="lg" variant="bordered" onPress={handleFindCompanies}>
               Find Companies
             </Button>
-            <Button color="primary" size="lg" variant="bordered" onClick={handleFindJobs}>
+            <Button className="transition-colors hover:bg-primary/20" color="primary" size="lg" variant="bordered" onPress={handleFindJobs}>
               Find Jobs
             </Button>
           </div>
@@ -130,7 +140,7 @@ export default function HomePage() {
         <h2 className="mb-8 text-center text-3xl font-bold">Platform Features</h2>
         <Tabs aria-label="Features" className="flex w-full flex-col" color="primary" variant="bordered">
           {features.map((feature) => (
-            <Tab key={feature.title} title={feature.title}>
+            <Tab key={feature.title} title={feature.title} onClick={() => handleTabChange(feature.title)}>
               <Card className="mt-4">
                 <CardBody className="flex flex-col-reverse gap-8 lg:flex-row">
                   <div className="flex-1">

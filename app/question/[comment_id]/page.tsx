@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
+import mixpanel from "mixpanel-browser";
 
 import { CommentSection } from "./CommentSection";
 
@@ -10,6 +11,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
 import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
+import { ArrowLeftIcon } from "@/components/icons";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -23,12 +25,16 @@ export default function QuestionPage() {
   if (!question) return <div>Question not found</div>;
 
   const handleBackClick = () => {
+    mixpanel.track("back_button_clicked", {
+      page: "question_page",
+      comment_id: comment_id,
+    });
     router.push(`/job/${question.entity_id}?tab=Questions`);
   };
 
   return (
     <div className="">
-      <Button className="mb-4" onClick={handleBackClick}>
+      <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onClick={handleBackClick}>
         Back
       </Button>
       <Card className="mb-8">

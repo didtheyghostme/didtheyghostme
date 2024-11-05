@@ -3,8 +3,6 @@ import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { useEffect } from "react";
-import mixpanel from "mixpanel-browser";
 
 import { Providers } from "./providers";
 

@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { parseDate } from "@internationalized/date";
 import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
+import mixpanel from "mixpanel-browser";
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
@@ -232,6 +233,12 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   const handleStatusFilterChange = (keys: Selection) => {
     const selectedKeys = Array.from(keys as Set<string>) as StatusFilterOption[];
 
+    mixpanel.track("Applied Applications Table Tab", {
+      action: "filter_status_button_clicked",
+      previous_filter: statusFilter,
+      new_filter: selectedKeys,
+    });
+
     if (selectedKeys.length === 0 || selectedKeys.length === statusFilterOptions.length - 1) {
       setQueryStates({ status: ["all"] });
     } else {
@@ -240,6 +247,10 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
   };
 
   const handleSortChange = (key: SortOption["key"]) => {
+    mixpanel.track("Applied Applications Table Tab", {
+      action: "sort_by_button_clicked",
+      sort_key: key,
+    });
     setQueryStates({ sort: key });
   };
 

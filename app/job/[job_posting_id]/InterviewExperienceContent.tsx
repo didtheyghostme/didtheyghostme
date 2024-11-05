@@ -2,6 +2,7 @@ import { DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selectio
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import { useRouter } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 
 import { sortOptions, SORT_OPTION_KEYS, SortOption, sortApplicationsByDateTime } from "./OnlineAssessmentContent";
 import { ApplicationCard } from "./ApplicationCard";
@@ -36,6 +37,12 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
     if (typeof selectedKey === "string" && SORT_OPTION_KEYS.includes(selectedKey as SortOption["key"])) {
       setSort(selectedKey as SortOption["key"]);
     }
+
+    mixpanel.track("Interview Experience Table Tab", {
+      action: "sort_changed",
+      job_id: job_posting_id,
+      sort_key: selectedKey,
+    });
   }
 
   const handleCardClick = (application_id: string) => {
