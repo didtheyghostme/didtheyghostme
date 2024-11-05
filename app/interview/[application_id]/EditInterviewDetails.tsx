@@ -104,6 +104,20 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
             <div className="flex w-full flex-wrap gap-4 md:flex-nowrap">
               <Controller
                 control={methods.control}
+                name="status"
+                render={({ field }) => (
+                  <Select label="Application Status" placeholder="Select application status" selectedKeys={[field.value]} onChange={(e) => field.onChange(e.target.value)}>
+                    {Object.values(APPLICATION_STATUS).map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+              />
+
+              <Controller
+                control={methods.control}
                 name="applied_date"
                 render={({ field, fieldState }) => (
                   <DatePicker
@@ -130,20 +144,6 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     value={field.value ? parseDate(field.value) : null}
                     onChange={(date) => field.onChange(date ? date.toString() : null)}
                   />
-                )}
-              />
-
-              <Controller
-                control={methods.control}
-                name="status"
-                render={({ field }) => (
-                  <Select label="Application Status" placeholder="Select application status" selectedKeys={[field.value]} onChange={(e) => field.onChange(e.target.value)}>
-                    {Object.values(APPLICATION_STATUS).map((value) => (
-                      <SelectItem key={value} value={value}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </Select>
                 )}
               />
             </div>

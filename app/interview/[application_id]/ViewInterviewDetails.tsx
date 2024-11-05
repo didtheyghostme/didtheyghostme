@@ -6,6 +6,7 @@ import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { CalendarIcon } from "@/components/icons";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
@@ -37,14 +38,22 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
         <Divider />
         <CardBody>
           <div>
-            <span>Status:</span>
+            <span>Interview status: </span>
             <Chip color={getStatusColor(applicationDetails.status)} variant="flat">
               {applicationDetails.status}
             </Chip>
           </div>
-          <p>Applied on: {applicationDetails.applied_date}</p>
+          <div className="flex items-center gap-1 text-default-400">
+            <CalendarIcon />
+            <p>Applied on: {applicationDetails.applied_date}</p>
+          </div>
 
-          {applicationDetails.first_response_date && <p>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</p>}
+          {applicationDetails.first_response_date && (
+            <div className="flex items-center gap-1 text-default-400">
+              <CalendarIcon />
+              <p>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</p>
+            </div>
+          )}
 
           {!applicationDetails.first_response_date && <p>No first response date set</p>}
         </CardBody>

@@ -67,8 +67,7 @@ export default function InterviewExperiencePage() {
         Back to job
       </Button>
 
-      <div className="flex justify-between">
-        <h1 className="mb-4 text-2xl">Interview Experience</h1>
+      <div className="flex flex-col items-end py-4">
         {applicationDetails.isCurrentUserItem && (
           <>
             {isEditing ? (
@@ -81,7 +80,7 @@ export default function InterviewExperiencePage() {
                 </Button>
               </div>
             ) : (
-              <Button color="primary" onClick={() => setIsEditing(true)}>
+              <Button className="self-end sm:self-auto" color="primary" onClick={() => setIsEditing(true)}>
                 Edit Interview Rounds
               </Button>
             )}
