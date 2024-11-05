@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardHeader, CardBody, Chip, Button, Link } from "@nextui-org/react";
+import mixpanel from "mixpanel-browser";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -12,7 +13,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
   [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title" | "country"> & {
-    [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
+    [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
   };
 };
 
@@ -25,16 +26,31 @@ export default function MyApplicationsPage() {
   if (!applications) return <div>No applications found</div>;
 
   const handleViewApplication = (applicationId: string) => {
+    mixpanel.track("My Applications Page", {
+      action: "view_interview_details_button_clicked",
+      application_id: applicationId,
+    });
     router.push(`/interview/${applicationId}`);
   };
 
   const handleViewJob = (jobId: string) => {
+    mixpanel.track("My Applications Page", {
+      action: "view_job_post_button_clicked",
+      job_id: jobId,
+    });
     router.push(`/job/${jobId}`);
+  };
+
+  const mixpanelTrackCompanyNameClick = (companyId: string) => {
+    mixpanel.track("My Applications Page", {
+      action: "company_name_clicked",
+      company_id: companyId,
+    });
   };
 
   return (
     <>
-      <h1 className="mb-8 text-3xl font-bold">My Job Applications</h1>
+      <h1 className="mb-8 text-xl font-bold sm:text-2xl">My Job Applications</h1>
 
       <div className="flex flex-col gap-4">
         {applications.map((application) => (
@@ -50,10 +66,14 @@ export default function MyApplicationsPage() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <Link className="block text-lg font-semibold text-blue-600 hover:underline" href={`/job/${application.job_posting.id}`}>
-                    {application.job_posting.title}
+                  <p className="text-lg font-semibold">{application.job_posting.title}</p>
+                  <Link
+                    className="inline text-sm text-blue-600 hover:underline"
+                    href={`/company/${application.job_posting.company.id}`}
+                    onClick={() => mixpanelTrackCompanyNameClick(application.job_posting.company.id)}
+                  >
+                    {application.job_posting.company.company_name}
                   </Link>
-                  <p className="text-sm text-gray-500">{application.job_posting.company.company_name}</p>
                 </div>
               </div>
               <div className="flex-shrink-0">

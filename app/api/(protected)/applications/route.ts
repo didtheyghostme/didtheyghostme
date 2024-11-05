@@ -25,6 +25,7 @@ export async function GET() {
       title: true,
       country: true,
       [DBTable.COMPANY]: {
+        id: true,
         company_name: true,
         logo_url: true,
       },
