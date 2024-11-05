@@ -150,7 +150,7 @@ export default function CompanyDetailsPage() {
           <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={company.company_name} src={company.logo_url} />
           <h1 className="break-words text-base font-bold sm:text-3xl">{company.company_name}</h1>
         </div>
-        <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary" href={company.company_url} onPress={handleCompanyWebsiteClick}>
+        <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary hover:underline" href={company.company_url} onPress={handleCompanyWebsiteClick}>
           Company website
         </Link>
       </div>

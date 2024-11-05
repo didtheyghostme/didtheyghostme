@@ -18,7 +18,7 @@ import { QuestionContent } from "./QuestionContent";
 import SuggestLinkModal from "./SuggestLinkModal";
 
 import { fetcher } from "@/lib/fetcher";
-import { ArrowLeftIcon, FlagIcon } from "@/components/icons";
+import { ArrowLeftIcon, FlagIcon, PlusIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
@@ -200,69 +200,179 @@ export default function JobDetailsPage() {
       </Button>
 
       <Card className="mb-8">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <ImageWithFallback alt={jobDetails.company.company_name} className="h-12 w-12 rounded-lg object-cover" companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
-            </div>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Mobile Layout */}
+          <div className="flex w-full flex-col gap-1 sm:hidden">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <ImageWithFallback
+                    alt={jobDetails.company.company_name}
+                    className="h-12 w-12 rounded-lg object-cover"
+                    companyName={jobDetails.company.company_name}
+                    src={jobDetails.company.logo_url}
+                  />
+                </div>
 
+                {/* Job Portal Link - Now next to image */}
+                {jobDetails.url && (
+                  <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={handleJobPortalClick}>
+                    <LinkIcon />
+                    Job portal
+                  </Link>
+                )}
+              </div>
+
+              {/* Report Link | Suggest Link Button - Stays on right */}
+              {jobDetails.url && (
+                <>
+                  <SignedIn>
+                    <Button
+                      className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                      color="danger"
+                      size="sm"
+                      startContent={<FlagIcon />}
+                      variant="flat"
+                      onPress={handleReportLinkModalOpen}
+                    >
+                      Report Link
+                    </Button>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                      <Button
+                        className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                        color="danger"
+                        size="sm"
+                        startContent={<FlagIcon />}
+                        variant="flat"
+                        onPress={mixpanelTrackReportLinkClick}
+                      >
+                        Report Link
+                      </Button>
+                    </SignInButton>
+                  </SignedOut>
+                </>
+              )}
+              {!jobDetails.url && (
+                <div className="flex flex-col items-end gap-1">
+                  <p className="text-default-500">No job portal link available</p>
+                  <SignedIn>
+                    <Button
+                      className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
+                      color="primary"
+                      size="sm"
+                      startContent={<PlusIcon />}
+                      variant="flat"
+                      onPress={handleSuggestLinkClick}
+                    >
+                      Suggest a job portal link
+                    </Button>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                      <Button
+                        className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
+                        color="primary"
+                        size="sm"
+                        startContent={<PlusIcon />}
+                        variant="flat"
+                        onPress={mixpanelTrackSuggestLinkClick}
+                      >
+                        Suggest a job portal link
+                      </Button>
+                    </SignInButton>
+                  </SignedOut>
+                </div>
+              )}
+            </div>
             <div>
-              <h1 className="text-lg font-normal">{jobDetails.title}</h1>
+              <p className="text-lg font-normal">{jobDetails.title}</p>
               <p className="text-default-500">{jobDetails.company.company_name}</p>
             </div>
           </div>
-          {jobDetails.url && (
-            <div className="flex items-center gap-2 self-end sm:self-center">
-              <Link isExternal href={jobDetails.url} onPress={handleJobPortalClick}>
-                <LinkIcon />
-                Job portal
-              </Link>
-              {/* Separate the signed-in and signed-out states */}
-              <SignedIn>
-                <Button
-                  color="danger"
-                  size="sm"
-                  startContent={<FlagIcon />}
-                  variant="flat"
-                  onPress={() => {
-                    handleReportLinkModalOpen();
-                    onReportModalOpen();
-                  }}
-                >
-                  Report Link
-                </Button>
-              </SignedIn>
 
-              <SignedOut>
-                <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                  <Button color="danger" size="sm" startContent={<FlagIcon />} variant="flat" onPress={mixpanelTrackReportLinkClick}>
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex sm:items-center sm:gap-3">
+            <div className="flex-shrink-0">
+              <ImageWithFallback alt={jobDetails.company.company_name} className="h-12 w-12 rounded-lg object-cover" companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
+            </div>
+            <div>
+              <p className="text-lg font-normal">{jobDetails.title}</p>
+              <p className="text-default-500">{jobDetails.company.company_name}</p>
+            </div>
+          </div>
+
+          {/* Buttons Section for Desktop */}
+          <div className="hidden sm:block">
+            {jobDetails.url && (
+              <div className="flex items-center gap-2">
+                <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={handleJobPortalClick}>
+                  <LinkIcon />
+                  Job portal
+                </Link>
+                <SignedIn>
+                  <Button
+                    className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                    color="danger"
+                    size="sm"
+                    startContent={<FlagIcon />}
+                    variant="flat"
+                    onPress={handleReportLinkModalOpen}
+                  >
                     Report Link
                   </Button>
-                </SignInButton>
-              </SignedOut>
-            </div>
-          )}
-          {!jobDetails.url && (
-            <>
-              <div className="flex flex-col items-end">
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                    <Button
+                      className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                      color="danger"
+                      size="sm"
+                      startContent={<FlagIcon />}
+                      variant="flat"
+                      onPress={mixpanelTrackReportLinkClick}
+                    >
+                      Report Link
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            )}
+            {!jobDetails.url && (
+              <div className="flex flex-col items-end gap-1">
                 <p className="text-default-500">No job portal link available</p>
-                {/* Separate the signed-in and signed-out states */}
                 <SignedIn>
-                  <Button color="primary" size="sm" variant="flat" onPress={handleSuggestLinkClick}>
+                  <Button
+                    className="gap-0 px-2 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
+                    color="primary"
+                    size="sm"
+                    startContent={<PlusIcon />}
+                    variant="flat"
+                    onPress={handleSuggestLinkClick}
+                  >
                     Suggest a job portal link
                   </Button>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                    <Button color="primary" size="sm" variant="flat" onPress={mixpanelTrackSuggestLinkClick}>
+                    <Button
+                      className="gap-0 px-2 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
+                      color="primary"
+                      size="sm"
+                      startContent={<PlusIcon />}
+                      variant="flat"
+                      onPress={mixpanelTrackSuggestLinkClick}
+                    >
                       Suggest a job portal link
                     </Button>
                   </SignInButton>
                 </SignedOut>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </CardHeader>
+
         <Divider />
 
         <CardBody>

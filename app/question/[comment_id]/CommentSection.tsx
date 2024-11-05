@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
@@ -40,9 +41,20 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
       reset();
       toast.success("Comment added successfully");
     } catch (error) {
+      mixpanel.track("Error adding comment", {
+        entity_type,
+        entity_id,
+      });
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment");
     }
+  };
+
+  const mixpanelTrackSignInToAddComment = () => {
+    mixpanel.track("Sign In to Add Comment", {
+      entity_type,
+      entity_id,
+    });
   };
 
   if (commentsLoading) return <div>Loading comments...</div>;
@@ -71,7 +83,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
         <div className="mb-8 rounded-lg border border-gray-200 p-4 text-center">
           <p className="mb-2 text-gray-600">Sign in to join the discussion</p>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button color="primary" variant="flat">
+            <Button color="primary" variant="flat" onPress={mixpanelTrackSignInToAddComment}>
               Sign In
             </Button>
           </SignInButton>
