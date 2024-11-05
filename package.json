@@ -37,6 +37,7 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "framer-motion": "^11.2.9",
     "intl-messageformat": "^10.5.0",
+    "mixpanel-browser": "^2.55.1",
     "next": "14.2.3",
     "next-themes": "^0.2.1",
     "nuqs": "^2.0.4",
@@ -53,6 +54,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/mixpanel-browser": "^2.50.2",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "prisma": "^5.15.0"
   }

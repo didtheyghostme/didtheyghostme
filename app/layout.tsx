@@ -3,6 +3,8 @@ import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { useEffect } from "react";
+import mixpanel from "mixpanel-browser";
 
 import { Providers } from "./providers";
 
@@ -10,6 +12,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import { ToastProvider } from "@/components/ToastProvider";
+import { MixpanelProvider } from "@/components/MixpanelProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -38,10 +41,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
             <ToastProvider>
               <NuqsAdapter>
-                <div className="relative flex h-screen flex-col">
-                  <Navbar />
-                  <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">{children}</main>
-                </div>
+                <MixpanelProvider>
+                  <div className="relative flex h-screen flex-col">
+                    <Navbar />
+                    <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">{children}</main>
+                  </div>
+                </MixpanelProvider>
               </NuqsAdapter>
             </ToastProvider>
           </Providers>

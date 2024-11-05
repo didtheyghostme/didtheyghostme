@@ -16,6 +16,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
+import mixpanel from "mixpanel-browser";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -83,6 +84,9 @@ export default function CompanyDetailsPage() {
   });
 
   const handleOpenModal = () => {
+    console.warn("Opening modal");
+
+    mixpanel.track("Open Add Job Modal", { company_id: company_id });
     setIsModalOpen(true);
   };
 
