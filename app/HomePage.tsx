@@ -132,7 +132,7 @@ export default function HomePage() {
           {features.map((feature) => (
             <Tab key={feature.title} title={feature.title}>
               <Card className="mt-4">
-                <CardBody className="flex flex-col gap-8 lg:flex-row">
+                <CardBody className="flex flex-col-reverse gap-8 lg:flex-row">
                   <div className="flex-1">
                     <h3 className="mb-4 text-2xl font-semibold">{feature.title}</h3>
                     <p className="mb-6 text-default-600">{feature.description}</p>
@@ -146,7 +146,17 @@ export default function HomePage() {
                     </ul>
                   </div>
                   <div className="flex-1">
-                    <Image alt={feature.title} className="rounded-lg object-cover shadow-lg" height={400} src={feature.screenshot[theme === "dark" ? "dark" : "light"]} width={600} />
+                    <Image
+                      alt={feature.title}
+                      className="rounded-lg object-cover shadow-lg"
+                      height={400}
+                      src={feature.screenshot[theme === "dark" ? "dark" : "light"]}
+                      width={600}
+                      classNames={{
+                        wrapper: "w-full",
+                        img: "w-full object-cover",
+                      }}
+                    />
                   </div>
                 </CardBody>
               </Card>
