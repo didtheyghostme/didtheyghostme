@@ -4,6 +4,7 @@ export const ERROR_CODES = {
 
 export const ERROR_MESSAGES = {
   DUPLICATE_URL: "A company with this URL already exists.",
+  DUPLICATE_NAME: "A company with this name already exists.",
   // Add other error messages here
 };
 
@@ -15,4 +16,8 @@ export const getErrorMessage = (error: unknown): string => {
 
 export const isDuplicateUrlError = (error: unknown): boolean => {
   return getErrorMessage(error) === ERROR_MESSAGES.DUPLICATE_URL;
+};
+
+export const isDuplicateNameError = (error: unknown): boolean => {
+  return getErrorMessage(error) === ERROR_MESSAGES.DUPLICATE_NAME;
 };

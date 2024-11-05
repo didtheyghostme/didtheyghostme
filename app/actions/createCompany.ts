@@ -30,9 +30,15 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
     const { data, error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select();
 
     if (error) {
-      console.error("Insert error fail:", error.message);
+      console.error("Insert error fail:", error);
       if (error.code === ERROR_CODES.UNIQUE_VIOLATION) {
-        throw new Error(ERROR_MESSAGES.DUPLICATE_URL);
+        if (error.message.includes("company_name")) {
+          throw new Error(ERROR_MESSAGES.DUPLICATE_NAME);
+        }
+
+        if (error.message.includes("company_url")) {
+          throw new Error(ERROR_MESSAGES.DUPLICATE_URL);
+        }
       }
       throw new Error(error.message);
     }

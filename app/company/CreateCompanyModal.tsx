@@ -35,12 +35,23 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
       if (isDuplicateUrlError(error)) {
         console.error("Duplicate company URL");
       }
-      toast.error("Error creating company", { description: getErrorMessage(error) });
+
+      toast.error("Error creating company", {
+        description: getErrorMessage(error),
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+        cancelButtonStyle: {
+          color: "inherit",
+          backgroundColor: "inherit",
+        },
+      });
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} placement="center" onClose={onClose}>
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader>Add New Company</ModalHeader>
