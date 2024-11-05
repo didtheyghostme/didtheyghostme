@@ -44,7 +44,7 @@ export default function InterviewExperiencePage() {
   if (!interviewRounds) return <div>Interview rounds not found</div>;
 
   const handleBackClick = () => {
-    router.back();
+    router.push(`/job/${applicationDetails.job_posting_id}`);
   };
 
   const handleSaveForm = async (data: InterviewExperienceFormValues) => {
@@ -63,12 +63,12 @@ export default function InterviewExperiencePage() {
 
   return (
     <div className="">
-      <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
+      <Button className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to job
       </Button>
 
       <div className="flex justify-between">
-        <h1 className="mb-4 text-3xl font-bold">Interview Experience</h1>
+        <h1 className="mb-4 text-2xl">Interview Experience</h1>
         {applicationDetails.isCurrentUserItem && (
           <>
             {isEditing ? (

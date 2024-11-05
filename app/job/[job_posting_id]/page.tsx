@@ -21,6 +21,7 @@ import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
+import ImageWithFallback from "@/components/ImageWithFallback";
 
 // Define the tab mapping
 const TABS = {
@@ -47,7 +48,7 @@ type TabKey = keyof typeof TABS;
 const tabKeys = Object.keys(TABS) as TabKey[];
 
 export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
-  [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name">;
+  [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
 };
 
 export default function JobDetailsPage() {
@@ -128,15 +129,24 @@ export default function JobDetailsPage() {
 
   return (
     <div className="">
-      <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
+      <Button className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to {jobDetails.company.company_name}
       </Button>
 
       <Card className="mb-8">
-        <CardHeader className="flex flex-row justify-between">
-          <h1 className="text-3xl font-bold">{jobDetails.title}</h1>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <ImageWithFallback alt={jobDetails.company.company_name} className="h-12 w-12 rounded-lg object-cover" companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
+            </div>
+
+            <div>
+              <h1 className="text-lg font-normal">{jobDetails.title}</h1>
+              <p className="text-default-500">{jobDetails.company.company_name}</p>
+            </div>
+          </div>
           {jobDetails.url && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-end sm:self-center">
               <Link isExternal href={jobDetails.url}>
                 <LinkIcon />
                 Job portal

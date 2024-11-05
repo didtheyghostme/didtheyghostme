@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     [DBTable.COMPANY]: {
       id: true,
       company_name: true,
+      logo_url: true,
     },
   };
   const selectString = buildSelectString(selectObject);
@@ -31,7 +32,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     .eq("id", params.job_posting_id)
     .maybeSingle();
 
-  console.error("data in route handler of this joaab", data, error);
+  // console.error("data in route handler of this joaab", data, error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -41,7 +42,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  console.warn("data in route handler of this job", data);
+  // console.warn("data in route handler of this job", data);
 
   return NextResponse.json(data);
 }

@@ -201,7 +201,7 @@ export default function CompanyDetailsPage() {
 
       {/* Job Cards open */}
       {openJobs.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {openJobs.map((job) => (
             <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
               <CardBody className="flex h-full flex-col">
