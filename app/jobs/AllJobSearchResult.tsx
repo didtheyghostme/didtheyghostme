@@ -11,6 +11,7 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import mixpanel from "mixpanel-browser";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -29,7 +30,11 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
 
   const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
 
-  const handleJobClick = (jobId: string) => {
+  const handleJobClick = (job_id: string) => {
+    mixpanel.track("All Jobs Search", {
+      action: "job_clicked",
+      job_id: job_id,
+    });
     // router.push(`/job/${jobId}`);
   };
 

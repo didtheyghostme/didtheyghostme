@@ -51,7 +51,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
       mixpanel.track("Question Content Tab", {
         action: "question_creation_failed",
         job_id: job_posting_id,
-        error: error,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
       });
       console.error("Error creating question:", error);
       toast.error("Error creating question, please try again");

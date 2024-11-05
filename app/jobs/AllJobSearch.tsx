@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import mixpanel from "mixpanel-browser";
 
 import AllJobsSearchInput from "./AllJobSearchInput";
 import AllJobsSearchResult from "./AllJobSearchResult";
@@ -13,10 +14,20 @@ export default function AllJobSearch() {
 
   // Handlers
   const handleSearchChange = (newSearch: string) => {
+    mixpanel.track("All Jobs Search", {
+      action: "search_input_changed",
+      search_query: newSearch,
+    });
     setQueryStates({ search: newSearch, page: 1 });
   };
 
   const handlePageChange = (newPage: number) => {
+    mixpanel.track("All Jobs Search", {
+      action: "page_changed",
+      previous_page: page,
+      page_number: newPage,
+      current_search_query: search,
+    });
     setQueryStates({ page: newPage });
   };
 
