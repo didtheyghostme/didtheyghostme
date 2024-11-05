@@ -82,11 +82,11 @@ export default function InterviewExperiencePage() {
 
   return (
     <div className="">
-      <Button className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
+      <Button className="px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to job
       </Button>
 
-      <div className="flex flex-col items-end py-4">
+      <div className="flex flex-col items-end pb-4">
         {applicationDetails.isCurrentUserItem && (
           <>
             {isEditing ? (

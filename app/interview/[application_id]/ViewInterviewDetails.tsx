@@ -55,7 +55,12 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
             </div>
           )}
 
-          {!applicationDetails.first_response_date && <p>No first response date set</p>}
+          {!applicationDetails.first_response_date && (
+            <div className="flex items-center gap-1 text-default-400">
+              <CalendarIcon />
+              <p> No first response date yet</p>
+            </div>
+          )}
         </CardBody>
       </Card>
 
