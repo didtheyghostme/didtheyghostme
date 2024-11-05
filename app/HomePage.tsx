@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 const features = [
   {
-    title: "Browse Job Postings",
+    title: "Browse jobs ",
     description: "Discover and explore job opportunities that are currently available",
     screenshot: {
       dark: "/screenshots/homefeature1.png",
@@ -115,7 +115,7 @@ export default function HomePage() {
           <p className="mx-auto max-w-xl text-lg text-default-600">Organize your job applications, share interview experiences, and connect with a community of job seekers.</p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button color="default" size="lg" variant="faded" onClick={handleFindCompanies}>
+            <Button color="default" size="lg" variant="bordered" onClick={handleFindCompanies}>
               Find Companies
             </Button>
             <Button color="primary" size="lg" variant="bordered" onClick={handleFindJobs}>

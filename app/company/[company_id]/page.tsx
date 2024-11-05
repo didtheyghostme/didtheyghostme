@@ -15,6 +15,7 @@ import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { PlusIcon } from "@/components/icons";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -121,8 +122,10 @@ export default function CompanyDetailsPage() {
         <p className="text-2xl font-semibold">Open Positions</p>
         <SignedIn>
           <Button
-            className="rounded-full border-2 border-green-700 px-4 py-2 text-green-700 transition-colors duration-300 hover:bg-green-700 hover:text-white"
-            variant="flat"
+            className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
+            color="primary"
+            endContent={<PlusIcon />}
+            variant="solid"
             onPress={handleOpenModal}
           >
             Add a new job
@@ -130,7 +133,7 @@ export default function CompanyDetailsPage() {
         </SignedIn>
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button className="rounded-full border-2 border-green-700 px-4 py-2 text-green-700 transition-colors duration-300 hover:bg-green-700 hover:text-white" variant="flat">
+            <Button className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90" color="primary" endContent={<PlusIcon />} variant="solid">
               Add a new job
             </Button>
           </SignInButton>

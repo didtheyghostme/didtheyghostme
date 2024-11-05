@@ -15,6 +15,7 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     title: true,
     country: true,
     url: true,
+    job_status: true,
     [DBTable.COMPANY]: {
       id: true,
       company_name: true,

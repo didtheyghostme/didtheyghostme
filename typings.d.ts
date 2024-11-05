@@ -109,11 +109,15 @@ type CommentTable = {
   created_at: string;
 } & BaseUser;
 
+type ReportEntityType = CommentEntityType | "contact_us";
+
+type ReportAdminReportType = "Link Expired" | "Invalid Link" | "Suggest Link" | "Other";
+
 type ReportAdminTable = {
   id: string;
-  entity_type: CommentEntityType;
+  entity_type: ReportEntityType;
   entity_id: string;
-  report_type: "Link Expired" | "Other";
+  report_type: ReportAdminReportType;
   report_message: string | null;
   report_status: "Pending" | "Rejected" | "Resolved"; // default Pending in DB
   created_at: string;

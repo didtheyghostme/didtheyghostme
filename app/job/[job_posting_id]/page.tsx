@@ -2,7 +2,7 @@
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, Chip, Button, Spacer, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, Button, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
@@ -22,6 +22,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import SuggestLinkModal from "./SuggestLinkModal";
 
 // Define the tab mapping
 const TABS = {
@@ -47,7 +48,7 @@ type TabKey = keyof typeof TABS;
 
 const tabKeys = Object.keys(TABS) as TabKey[];
 
-export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url"> & {
+export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url" | "job_status"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
 };
 
@@ -65,6 +66,8 @@ export default function JobDetailsPage() {
   const router = useRouter();
   const { isOpen: isReportModalOpen, onOpen: onReportModalOpen, onClose: onReportModalClose } = useDisclosure();
   const { isOpen: isTrackModalOpen, onOpen: onTrackModalOpen, onClose: onTrackModalClose } = useDisclosure();
+
+  const { isOpen: isSuggestModalOpen, onOpen: onSuggestModalOpen, onClose: onSuggestModalClose } = useDisclosure();
 
   const {
     data: applications,
@@ -165,6 +168,25 @@ export default function JobDetailsPage() {
               </SignedOut>
             </div>
           )}
+          {!jobDetails.url && (
+            <>
+              <div className="flex flex-col items-end">
+                <p className="text-default-500">No job portal link available</p>
+                <SignedIn>
+                  <Button color="primary" size="sm" variant="flat" onPress={onSuggestModalOpen}>
+                    Suggest a job portal link
+                  </Button>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                    <Button color="primary" size="sm" variant="flat">
+                      Suggest a job portal link
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            </>
+          )}
         </CardHeader>
         <Divider />
 
@@ -219,9 +241,11 @@ export default function JobDetailsPage() {
         {/* done add nuqs, get clerk user table (id, name, profile pic url) */}
       </div>
 
-      <ReportLinkModal isOpen={isReportModalOpen} jobId={jobDetails.id} onClose={onReportModalClose} />
+      <ReportLinkModal isOpen={isReportModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onReportModalClose} />
 
       <TrackThisJobModal isOpen={isTrackModalOpen} onClose={onTrackModalClose} onSubmit={handleTrackJobSubmit} />
+
+      <SuggestLinkModal isOpen={isSuggestModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onSuggestModalClose} />
     </div>
   );
 }
