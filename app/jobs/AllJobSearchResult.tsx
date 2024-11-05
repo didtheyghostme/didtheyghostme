@@ -3,6 +3,7 @@
 import React from "react";
 import useSWR from "swr";
 import { Pagination, Card, CardBody, Chip, Link } from "@nextui-org/react";
+import mixpanel from "mixpanel-browser";
 
 import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
@@ -11,7 +12,6 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import mixpanel from "mixpanel-browser";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -96,13 +96,6 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
           {/* Pagination */}
           <div className="mt-4 flex justify-center">
             <Pagination showControls initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
-          </div>
-
-          {/* Attribution */}
-          <div className="mt-6 text-center">
-            <a className="text-xs text-default-400" href="https://logo.dev" rel="noreferrer" target="_blank">
-              Logos provided by Logo.dev
-            </a>
           </div>
         </>
       )}
