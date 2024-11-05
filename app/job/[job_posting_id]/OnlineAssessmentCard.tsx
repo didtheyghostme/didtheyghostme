@@ -1,9 +1,13 @@
-import { Card, CardBody, CardHeader, Avatar, Tooltip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Avatar, Tooltip, Chip } from "@nextui-org/react";
 import { motion } from "framer-motion";
 
 import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
 import { GetOnlineAssessmentsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/interview/online/route";
+import { LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
+import { utilSortLeetcodeQuestionsDifficulty } from "@/lib/sharedTypes";
+import { utilSortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
+import { InterviewTagsAndLeetcodeChips } from "./InterviewTagsAndLeetcodeChips";
 
 type OnlineAssessmentCardProps = {
   application: GetOnlineAssessmentsByJobPostingIdResponse;
@@ -43,6 +47,8 @@ export function OnlineAssessmentCard({ application, onCardClick }: OnlineAssessm
               </div>
             )}
           </div>
+
+          <InterviewTagsAndLeetcodeChips interview_tags={application.interview_tags} leetcode_questions={application.leetcode_questions} />
         </div>
       </CardHeader>
 

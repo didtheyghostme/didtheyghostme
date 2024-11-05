@@ -340,6 +340,7 @@ RETURNS TABLE (
   response_date DATE,
   created_at TIMESTAMPTZ,
   interview_tags TEXT[],
+  leetcode_questions JSONB[],
   user_data JSONB,
   application_id UUID
 ) AS $$
@@ -353,6 +354,21 @@ BEGIN
     ie.response_date,
     ie.created_at,
     ARRAY_AGG(it.tag_name) FILTER (WHERE it.tag_name IS NOT NULL) AS interview_tags,
+    (
+      SELECT ARRAY_AGG(
+        jsonb_build_object(
+          'question_number', ielq.leetcode_question_number,
+          'difficulty', lq.difficulty
+        )
+      )
+      FROM interview_experience_leetcode_question ielq
+      LEFT JOIN leetcode_question lq ON 
+        ielq.interview_experience_id = lq.interview_experience_id AND
+        ielq.interview_experience_round_no = lq.interview_experience_round_no AND
+        ielq.leetcode_question_number = lq.question_number
+      WHERE ielq.interview_experience_id = ie.id
+        AND ielq.interview_experience_round_no = ie.round_no
+    ) AS leetcode_questions,
     jsonb_build_object(
       'full_name', ud.full_name,
       'profile_pic_url', ud.profile_pic_url

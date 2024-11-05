@@ -1,9 +1,10 @@
-import { Card, CardBody, CardHeader, Chip, Avatar, Tooltip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Avatar, Tooltip } from "@nextui-org/react";
+
+import { InterviewTagsAndLeetcodeChips } from "./InterviewTagsAndLeetcodeChips";
 
 import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
-import { InterviewExperienceCardData, LEETCODE_DIFFICULTY, utilSortLeetcodeQuestionsDifficulty } from "@/lib/sharedTypes";
-import { utilSortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
+import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 type InterviewExperienceCardProps = {
   interviewExperience: InterviewExperienceCardData;
@@ -26,32 +27,7 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
           </div>
 
           {/* second row - interview tags and leetcode questions */}
-          {((interviewExperience.interview_tags && interviewExperience.interview_tags.length > 0) || (interviewExperience.leetcode_questions && interviewExperience.leetcode_questions.length > 0)) && (
-            <div className="flex flex-wrap gap-2">
-              {/* Interview tags */}
-              {interviewExperience.interview_tags &&
-                interviewExperience.interview_tags.length > 0 &&
-                utilSortInterviewTags(interviewExperience.interview_tags).map((tag) => (
-                  <Chip key={tag} color="secondary" size="sm" variant="flat">
-                    {tag}
-                  </Chip>
-                ))}
-
-              {/* LeetCode questions */}
-              {interviewExperience.leetcode_questions &&
-                interviewExperience.leetcode_questions.length > 0 &&
-                utilSortLeetcodeQuestionsDifficulty(interviewExperience.leetcode_questions).map((question, index) => (
-                  <Chip
-                    key={index}
-                    color={question.difficulty === LEETCODE_DIFFICULTY.Easy ? "success" : question.difficulty === LEETCODE_DIFFICULTY.Medium ? "warning" : "danger"}
-                    size="sm"
-                    variant="flat"
-                  >
-                    LC-{question.question_number} ({question.difficulty})
-                  </Chip>
-                ))}
-            </div>
-          )}
+          <InterviewTagsAndLeetcodeChips interview_tags={interviewExperience.interview_tags} leetcode_questions={interviewExperience.leetcode_questions} />
 
           {/* third row - interview date and response date */}
           <div className="flex flex-col text-small text-default-400">
