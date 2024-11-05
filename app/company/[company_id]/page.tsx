@@ -2,7 +2,7 @@
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, Link, Chip, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardBody, Link, Chip, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,15 +14,20 @@ import { useCreateJob } from "@/lib/hooks/useCreateJob";
 import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
+import ImageWithFallback from "@/components/ImageWithFallback";
+
+export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
+
+export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date">;
 
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
 
   const { company_id } = useParams();
 
-  const { data: company, error, isLoading } = useSWR<Company>(API.COMPANY.getById(company_id as string), fetcher);
+  const { data: company, error, isLoading } = useSWR<CompanyDetailsPageCompanyResponse>(API.COMPANY.getById(company_id as string), fetcher);
 
-  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<JobPosting[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
+  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
 
   // console.warn("jobs", allJobs);
 
@@ -85,7 +90,7 @@ export default function CompanyDetailsPage() {
     reset();
   };
 
-  const handleViewJobClick = (job: JobPosting) => {
+  const handleViewJobClick = (job: CompanyDetailsPageAllJobsResponse) => {
     console.log("Viewing job", job);
     // TODO: implement go to the job page, show all the interview experiences
     // TODO: on job page, have button to "Track this job", which then add to Application table with today date
@@ -94,22 +99,25 @@ export default function CompanyDetailsPage() {
     router.push(`/job/${job.id}`);
   };
 
-  const handleViewMoreButtonClick = (job: JobPosting) => {
+  const handleViewMoreButtonClick = (job: CompanyDetailsPageAllJobsResponse) => {
     handleViewJobClick(job);
   };
 
   return (
-    <div className="">
-      {/* Company Name and URL */}
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-4xl font-bold">{company.company_name}</h1>
-        <Link isExternal showAnchorIcon className="text-primary" href={company.company_url}>
+    <div className="pb-12">
+      {/* Company Name and Logo and URL */}
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-shrink-0 items-center gap-4">
+          <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={company.company_name} src={company.logo_url} />
+          <h1 className="break-words text-base font-bold sm:text-3xl">{company.company_name}</h1>
+        </div>
+        <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary" href={company.company_url}>
           Company website
         </Link>
       </div>
 
       {/* Open Positions with modal */}
-      <div className="mb-4 flex justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <p className="text-2xl font-semibold">Open Positions</p>
         <SignedIn>
           <Button
@@ -194,13 +202,12 @@ export default function CompanyDetailsPage() {
       {/* Job Cards open */}
       {openJobs.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {/* TODO 5 nov: ongoing / closed */}
           {openJobs.map((job) => (
             <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
               <CardBody className="flex h-full flex-col">
                 <div className="flex-grow">
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
-                  <p className="mb-4 text-default-500">• {formatHowLongAgo(job.created_at)} </p>
+                  <p className="mb-4 text-default-500">• {formatHowLongAgo(job.updated_at)} </p>
                   {job.job_posted_date && isRecentDate(job.job_posted_date) && (
                     <Chip className="mb-4" color="secondary" variant="flat">
                       New
@@ -226,7 +233,7 @@ export default function CompanyDetailsPage() {
               <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
                 <CardBody className="flex h-full flex-col">
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
-                  <p className="mb-4 text-default-500">• {formatHowLongAgo(job.created_at)} </p>
+                  <p className="mb-4 text-default-500">• {formatHowLongAgo(job.updated_at)} </p>
                   <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => handleViewMoreButtonClick(job)}>
                     View More
                   </Button>

@@ -2,10 +2,24 @@ import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
+import { buildSelectString } from "@/lib/buildSelectString";
+import { SelectObject } from "@/lib/buildSelectString";
+import { CompanyDetailsPageCompanyResponse } from "@/app/company/[company_id]/page";
+
+// TODO 5 nov: select only required fields, get positions statistics in future / remove the statisics for now?
 
 export async function GET(request: Request, { params }: { params: { company_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
-  const { data, error } = await supabase.from(DBTable.COMPANY).select().eq("id", params.company_id).maybeSingle();
+
+  const selectObject: SelectObject<CompanyDetailsPageCompanyResponse> = {
+    company_name: true,
+    company_url: true,
+    logo_url: true,
+  };
+
+  let selectString = buildSelectString(selectObject);
+
+  const { data, error } = await supabase.from(DBTable.COMPANY).select(selectString).eq("id", params.company_id).maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
