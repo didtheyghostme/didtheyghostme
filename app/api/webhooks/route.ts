@@ -4,6 +4,7 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
+import { mixpanel } from "@/lib/mixpanel-server";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -51,14 +52,41 @@ export async function POST(req: Request) {
   }
 
   if (evt.type === "user.created" || evt.type === "user.updated") {
+    // mixpanel tracking server side
+
+    const userId = evt.data.id;
+    const isNewUser = evt.type === "user.created";
+    const timestamp = new Date().toISOString();
+
+    mixpanel.people.set(userId, {
+      $email: evt.data.email_addresses[0]?.email_address,
+      $github: evt.data.external_accounts.find((account) => account.provider === "oauth_github")?.username,
+      $name: `${evt.data.first_name} ${evt.data.last_name}`,
+      clerk_id: userId,
+      ...(isNewUser ? { signup_date: timestamp } : { update_date: timestamp }),
+    });
+
+    const event_name = isNewUser ? "User Signed Up" : "User Profile Updated";
+
+    mixpanel.track(event_name, {
+      distinct_id: userId,
+      clerk_id: userId,
+      $email: evt.data.email_addresses[0]?.email_address,
+      $github: evt.data.external_accounts.find((account) => account.provider === "oauth_github")?.username,
+      $name: `${evt.data.first_name} ${evt.data.last_name}`,
+      source: "Clerk Webhook",
+      ...(isNewUser ? { signup_date: timestamp } : { update_date: timestamp }),
+    });
+
+    // Supabase create/update user data
     const supabase = await createSupabaseAdminClient();
 
-    console.log("user.updated userId:", evt.data.id);
+    console.log("user.updated userId:", userId);
 
     // Upsert user data into Supabase
     const { error } = await supabase.from(DBTable.USER_DATA).upsert(
       {
-        user_id: evt.data.id,
+        user_id: userId,
         full_name: `${evt.data.first_name} ${evt.data.last_name}`,
         profile_pic_url: evt.data.image_url,
       },
