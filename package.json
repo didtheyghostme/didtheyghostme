@@ -22,6 +22,8 @@
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
     "@typescript-eslint/parser": "^7.10.0",
+    "@upstash/ratelimit": "^2.0.4",
+    "@upstash/redis": "^1.34.3",
     "autoprefixer": "10.4.19",
     "clsx": "^2.0.0",
     "date-fns": "^4.1.0",
