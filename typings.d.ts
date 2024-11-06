@@ -111,7 +111,7 @@ type CommentTable = {
 
 type ReportEntityType = CommentEntityType | "contact_us";
 
-type ReportAdminReportType = "Link Expired" | "Invalid Link" | "Suggest Link" | "Other";
+type ReportAdminReportType = "Link Expired" | "Invalid Link" | "Suggest Link" | "Contact Us" | "Other";
 
 type ReportAdminTable = {
   id: string;

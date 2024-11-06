@@ -48,9 +48,9 @@ export const Navbar = () => {
       isMenuOpen={isMenuOpen}
       maxWidth="xl"
       position="sticky"
-      classNames={{
-        menu: "max-h-fit",
-      }}
+      // classNames={{
+      //   menu: "max-h-fit",
+      // }}
       onMenuOpenChange={handleMenuToggle}
     >
       {/* Left side: Menu Toggle, Logo and Nav Items */}
