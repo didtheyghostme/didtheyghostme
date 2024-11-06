@@ -28,15 +28,23 @@ export function MixpanelProvider({ children }: MixpanelProviderProps) {
   // Set Super Property for isSignedIn
   useEffect(() => {
     if (isLoaded) {
-      mixpanel.register({
-        is_signed_in: !!user, // true if user is signed in, false otherwise
-      });
+      const isSignedIn = !!user;
+
+      const currentIsSignedIn = mixpanel.get_property("is_signed_in");
+
+      if (isSignedIn !== currentIsSignedIn) {
+        mixpanel.register({
+          is_signed_in: isSignedIn, // true if user is signed in, false otherwise
+        });
+      }
     }
   }, [isLoaded, user]);
 
   // Identify user when they log in
   useEffect(() => {
-    if (isLoaded && user) {
+    if (!isLoaded) return;
+
+    if (user) {
       mixpanel.identify(user.id);
       mixpanel.people.set({
         $email: user.primaryEmailAddress?.emailAddress,
@@ -46,9 +54,15 @@ export function MixpanelProvider({ children }: MixpanelProviderProps) {
         $created: user.createdAt,
         clerk_id: user.id,
       });
-    } else if (isLoaded && !user) {
-      // Reset user identification when logged out
-      mixpanel.reset();
+    } else {
+      // Only reset if we're transitioning from logged in to logged out
+      // Not on initial load or browser refresh
+      const currentDistinctId = mixpanel.get_distinct_id();
+      const wasLoggedIn = typeof currentDistinctId === "string" && currentDistinctId.startsWith("user_");
+
+      if (wasLoggedIn) {
+        mixpanel.reset();
+      }
     }
   }, [isLoaded, user]);
 
