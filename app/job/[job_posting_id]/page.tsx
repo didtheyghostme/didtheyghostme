@@ -97,15 +97,15 @@ export default function JobDetailsPage() {
     router.push(`/company/${jobDetails.company.id}`);
   };
 
-  const handleTrackJobSubmit = async (appliedDateUTC: string) => {
+  const handleTrackJobSubmit = async (appliedDateString: string) => {
     try {
       mixpanel.track("Job Posting Page", {
         action: "track_this_job_submitted",
         job_id: job_posting_id,
-        applied_date: appliedDateUTC,
+        applied_date: appliedDateString,
       });
 
-      const result = await createApplication(appliedDateUTC);
+      const result = await createApplication(appliedDateString);
 
       toast.success("Job tracked successfully");
 

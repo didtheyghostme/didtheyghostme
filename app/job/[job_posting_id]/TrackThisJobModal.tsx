@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
 import { DatePicker } from "@nextui-org/react";
-import { CalendarDate, getLocalTimeZone, today, toZoned } from "@internationalized/date";
+import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 
 type TrackThisJobModalProps = {
   isOpen: boolean;
@@ -13,9 +13,7 @@ export default function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackTh
   const [appliedDate, setAppliedDate] = useState<CalendarDate>(today(getLocalTimeZone()));
 
   const handleSubmit = () => {
-    const utcDate = toZoned(appliedDate, "UTC").toAbsoluteString();
-
-    onSubmit(utcDate);
+    onSubmit(appliedDate.toString());
     onClose();
   };
 
