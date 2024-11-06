@@ -21,21 +21,21 @@ type AllJobSearchResultProps = {
   search: string;
   page: number;
   onPageChange: (newPage: number) => void;
+  isVerified: boolean;
 };
 
-export default function AllJobSearchResult({ search, page, onPageChange }: AllJobSearchResultProps) {
+export default function AllJobSearchResult({ search, page, onPageChange, isVerified }: AllJobSearchResultProps) {
   const debouncedSearch = useDebounce(search);
 
-  const { data, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch }), fetcher);
+  const { data, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified }), fetcher);
 
   const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
 
-  const handleJobClick = (job_id: string) => {
+  const mixpanelTrackJobClick = (job_id: string) => {
     mixpanel.track("All Jobs Search", {
       action: "job_clicked",
       job_id: job_id,
     });
-    // router.push(`/job/${jobId}`);
   };
 
   console.log("jobs", jobs);
@@ -55,7 +55,7 @@ export default function AllJobSearchResult({ search, page, onPageChange }: AllJo
         <>
           <div className="flex flex-col gap-3">
             {jobs.map((job) => (
-              <Card key={job.id} isPressable as={Link} className="bg-background/60 hover:bg-default-100 dark:bg-default-100/50" href={`/job/${job.id}`} onPress={() => handleJobClick(job.id)}>
+              <Card key={job.id} isPressable as={Link} className="bg-background/60 hover:bg-default-100 dark:bg-default-100/50" href={`/job/${job.id}`} onPress={() => mixpanelTrackJobClick(job.id)}>
                 <CardBody className="p-4">
                   <div className="flex gap-4">
                     {/* Company Logo */}

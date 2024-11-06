@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const search = searchParams.get("search") ?? "";
+  const isVerified = searchParams.get("isVerified") === "true";
 
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -34,7 +35,13 @@ export async function GET(request: NextRequest) {
 
   const selectString = buildSelectString(selectObject);
   // query filter closed_date jobs and url is not null, TODO: add job_status and use that to filter not "CLOSED"
-  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" }).in("job_status", [JOB_STATUS.Pending, JOB_STATUS.Verified]);
+  let query = supabase.from(DBTable.JOB_POSTING).select(selectString, { count: "exact" });
+
+  if (isVerified) {
+    query = query.eq("job_status", JOB_STATUS.Verified);
+  } else {
+    query = query.in("job_status", [JOB_STATUS.Pending, JOB_STATUS.Verified]);
+  }
 
   if (search) {
     query = query.ilike("title", `%${search}%`);
