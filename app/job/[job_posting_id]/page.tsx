@@ -122,7 +122,7 @@ export default function JobDetailsPage() {
   };
 
   // Track job portal link clicks
-  const handleJobPortalClick = () => {
+  const mixpanelTrackJobPortalClick = () => {
     mixpanel.track("Job Posting Page", {
       action: "job_portal_clicked",
       job_id: job_posting_id,
@@ -216,7 +216,7 @@ export default function JobDetailsPage() {
 
                 {/* Job Portal Link - Now next to image */}
                 {jobDetails.url && (
-                  <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={handleJobPortalClick}>
+                  <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={mixpanelTrackJobPortalClick}>
                     <LinkIcon />
                     Job portal
                   </Link>
@@ -307,7 +307,7 @@ export default function JobDetailsPage() {
           <div className="hidden sm:block">
             {jobDetails.url && (
               <div className="flex items-center gap-2">
-                <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={handleJobPortalClick}>
+                <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={mixpanelTrackJobPortalClick}>
                   <LinkIcon />
                   Job portal
                 </Link>

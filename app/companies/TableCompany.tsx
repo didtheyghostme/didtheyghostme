@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import useSWR from "swr";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import mixpanel from "mixpanel-browser";
+import NextLink from "next/link";
 
 import { CreateCompanyModal } from "./CreateCompanyModal";
 
@@ -39,7 +40,6 @@ export default function TableCompany() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
   const { data: companies = [], isLoading } = useSWR<CompanyTable[]>(API.COMPANY.getAll, fetcher);
-  const router = useRouter();
 
   const [currentSort, setCurrentSort] = useQueryState("sort", parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("name_asc"));
 
@@ -125,12 +125,11 @@ export default function TableCompany() {
     });
   };
 
-  const handleOnRowClick = (key: React.Key) => {
-    const clickedCompany = paginatedItems.find((company) => company.id === key);
-
-    if (clickedCompany) {
-      router.push(`/company/${clickedCompany.id}`);
-    }
+  const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+    mixpanel.track("Company Table", {
+      action: action,
+      company_id: id,
+    });
   };
 
   // Track pagination
@@ -243,9 +242,7 @@ export default function TableCompany() {
         topContentPlacement="outside"
         classNames={{
           wrapper: "max-h-[500px]",
-          tr: "cursor-pointer",
         }}
-        onRowAction={handleOnRowClick}
       >
         <TableHeader columns={columns}>
           {(column) => (
@@ -255,7 +252,33 @@ export default function TableCompany() {
           )}
         </TableHeader>
         <TableBody emptyContent={"No companies found"} items={paginatedItems}>
-          {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell>
+                  <NextLink
+                    className="block h-full w-full hover:opacity-70"
+                    href={`/company/${item.id}`}
+                    onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")} // Add this to capture right-click events
+                    onClick={(e) => {
+                      if (e.metaKey || e.ctrlKey) {
+                        mixpanelTrackOnRowClick(item.id, "cmd_clicked");
+                      } else {
+                        mixpanelTrackOnRowClick(item.id, "row_clicked");
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      if (e.button === 1) {
+                        mixpanelTrackOnRowClick(item.id, "middle_clicked");
+                      }
+                    }}
+                  >
+                    {renderCell(item, columnKey as ColumnKey)}
+                  </NextLink>
+                </TableCell>
+              )}
+            </TableRow>
+          )}
         </TableBody>
       </Table>
 

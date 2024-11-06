@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, Link, Chip, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
@@ -34,8 +34,6 @@ export default function CompanyDetailsPage() {
   // console.warn("jobs", allJobs);
 
   const { createJob } = useCreateJob(company_id as string);
-
-  const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -109,29 +107,27 @@ export default function CompanyDetailsPage() {
     reset();
   };
 
-  const handleViewJobClick = (job: CompanyDetailsPageAllJobsResponse) => {
+  const mixpanelTrackViewJobCardClick = (job: CompanyDetailsPageAllJobsResponse) => {
     console.log("Viewing job", job);
     // TODO: implement go to the job page, show all the interview experiences
     // TODO: on job page, have button to "Track this job", which then add to Application table with today date
     // TODO: the button then changes to "View my application", next step is fill in date of when the first contact -> round 0 = applied, round 1 = contacted
     // TODO: after that, have a button to "Add Interview Experience" with markdown editor
     mixpanel.track("Company Details", {
-      action: "view_job_clicked",
+      action: "view_job_card_clicked",
       company_id,
       job_id: job.id,
       job_status: job.job_status,
     });
-    router.push(`/job/${job.id}`);
   };
 
-  const handleViewMoreButtonClick = (job: CompanyDetailsPageAllJobsResponse) => {
+  const mixpanelTrackViewMoreButtonClick = (job: CompanyDetailsPageAllJobsResponse) => {
     mixpanel.track("Company Details", {
       action: "view_more_button_clicked",
       company_id,
       job_id: job.id,
       job_status: job.job_status,
     });
-    handleViewJobClick(job);
   };
 
   const handleCompanyWebsiteClick = () => {
@@ -250,7 +246,7 @@ export default function CompanyDetailsPage() {
       {openJobs.length > 0 && (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {openJobs.map((job) => (
-            <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
+            <Card key={job.id} isPressable as={Link} href={`/job/${job.id}`} onPress={() => mixpanelTrackViewJobCardClick(job)}>
               <CardBody className="flex h-full flex-col">
                 <div className="flex-grow">
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
@@ -261,7 +257,7 @@ export default function CompanyDetailsPage() {
                     </Chip>
                   )}
                 </div>
-                <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => handleViewMoreButtonClick(job)}>
+                <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
                   View More
                 </Button>
               </CardBody>
@@ -277,11 +273,11 @@ export default function CompanyDetailsPage() {
 
           <div className="grid grid-cols-1 gap-4 opacity-75 sm:grid-cols-2 md:grid-cols-3">
             {closedJobs.map((job) => (
-              <Card key={job.id} isPressable onPress={() => handleViewJobClick(job)}>
+              <Card key={job.id} isPressable as={Link} href={`/job/${job.id}`} onPress={() => mixpanelTrackViewJobCardClick(job)}>
                 <CardBody className="flex h-full flex-col">
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
                   <p className="mb-4 text-default-500">• {formatHowLongAgo(job.updated_at)} </p>
-                  <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => handleViewMoreButtonClick(job)}>
+                  <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
                     View More
                   </Button>
                 </CardBody>

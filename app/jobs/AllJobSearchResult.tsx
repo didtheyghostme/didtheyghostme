@@ -31,9 +31,9 @@ export default function AllJobSearchResult({ search, page, onPageChange, isVerif
 
   const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
 
-  const mixpanelTrackJobClick = (job_id: string) => {
-    mixpanel.track("All Jobs Search", {
-      action: "job_clicked",
+  const mixpanelTrackJobClick = (job_id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+    mixpanel.track("All Jobs Card Click", {
+      action: action,
       job_id: job_id,
     });
   };
@@ -55,7 +55,26 @@ export default function AllJobSearchResult({ search, page, onPageChange, isVerif
         <>
           <div className="flex flex-col gap-3">
             {jobs.map((job) => (
-              <Card key={job.id} isPressable as={Link} className="bg-background/60 hover:bg-default-100 dark:bg-default-100/50" href={`/job/${job.id}`} onPress={() => mixpanelTrackJobClick(job.id)}>
+              <Card
+                key={job.id}
+                isPressable
+                as={Link}
+                className="w-full bg-background/60 hover:bg-default-100 dark:bg-default-100/50"
+                href={`/job/${job.id}`}
+                onContextMenu={() => mixpanelTrackJobClick(job.id, "right_clicked")}
+                onMouseDown={(e) => {
+                  if (e.button === 1) {
+                    mixpanelTrackJobClick(job.id, "middle_clicked");
+                  }
+                }}
+                onPress={(e) => {
+                  if (e.metaKey || e.ctrlKey) {
+                    mixpanelTrackJobClick(job.id, "cmd_clicked");
+                  } else {
+                    mixpanelTrackJobClick(job.id, "row_clicked");
+                  }
+                }}
+              >
                 <CardBody className="p-4">
                   <div className="flex gap-4">
                     {/* Company Logo */}

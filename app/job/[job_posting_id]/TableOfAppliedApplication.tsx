@@ -16,10 +16,10 @@ import {
   Selection,
   ChipProps,
 } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
 import { parseDate } from "@internationalized/date";
 import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
 import mixpanel from "mixpanel-browser";
+import NextLink from "next/link";
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
@@ -121,8 +121,6 @@ function generateMockApplications(count: number): ProcessedApplication[] {
 // const applications = generateMockApplications(100);
 
 export default function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
-  const router = useRouter();
-
   const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
     status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]),
     sort: parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("applied_date_asc"),
@@ -145,12 +143,11 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
     return response.compare(applied);
   };
 
-  const handleOnRowClick = (key: React.Key) => {
-    const clickedApplication = paginatedItems.find((application) => application.id === key);
-
-    if (clickedApplication) {
-      router.push(`/interview/${clickedApplication.id}`);
-    }
+  const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+    mixpanel.track("Applied Applications Table Tab", {
+      action: action,
+      application_id: id,
+    });
   };
 
   const sortedItems = React.useMemo(() => {
@@ -330,11 +327,9 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
       topContentPlacement="outside"
       classNames={{
         wrapper: "max-h-[500px]",
-        th: "text-center py-2 px-1 sm:px-2 sm:text-sm cursor-default",
+        th: "text-center py-2 px-1 sm:px-2 sm:text-sm",
         td: "text-center py-2 px-1 sm:px-2",
-        tr: "cursor-pointer",
       }}
-      onRowAction={handleOnRowClick}
     >
       <TableHeader columns={columns}>
         {(column) => (
@@ -345,7 +340,33 @@ export default function TableOfAppliedApplication({ applications }: TableOfAppli
         )}
       </TableHeader>
       <TableBody emptyContent={"No applications found"} items={paginatedItems}>
-        {(item) => <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey as ColumnKey)}</TableCell>}</TableRow>}
+        {(item) => (
+          <TableRow key={item.id}>
+            {(columnKey) => (
+              <TableCell>
+                <NextLink
+                  className="block h-full w-full text-foreground hover:opacity-70"
+                  href={`/interview/${item.id}`}
+                  onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")} // Add this to capture right-click events
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey) {
+                      mixpanelTrackOnRowClick(item.id, "cmd_clicked");
+                    } else {
+                      mixpanelTrackOnRowClick(item.id, "row_clicked");
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    if (e.button === 1) {
+                      mixpanelTrackOnRowClick(item.id, "middle_clicked");
+                    }
+                  }}
+                >
+                  {renderCell(item, columnKey as ColumnKey)}
+                </NextLink>
+              </TableCell>
+            )}
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );
