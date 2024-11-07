@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
-import { getErrorMessage, isDuplicateUrlError } from "@/lib/errorHandling";
+import { ERROR_MESSAGES, getErrorMessage, isDuplicateNameError, isDuplicateUrlError, isRateLimitError } from "@/lib/errorHandling";
 import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
+import mixpanel from "mixpanel-browser";
 
 type CreateCompanyModalProps = {
   isOpen: boolean;
@@ -32,8 +33,22 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
       onClose();
     } catch (error) {
       console.error("Error creating company:", getErrorMessage(error));
-      if (isDuplicateUrlError(error)) {
+
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS, {
+          description: `Retry after ${error.cause?.retryAfter} seconds`,
+        });
+
+        return; // Return early to avoid showing generic error
+      }
+
+      if (isDuplicateUrlError(error) || isDuplicateNameError(error)) {
         console.error("Duplicate company URL");
+        mixpanel.track("Duplicate company error", {
+          company_name: data.company_name,
+          company_url: data.company_url,
+          error: getErrorMessage(error),
+        });
       }
 
       toast.error("Error creating company", {

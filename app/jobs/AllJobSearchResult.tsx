@@ -12,6 +12,9 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { getErrorMessage } from "@/lib/errorHandling";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -40,7 +43,15 @@ export default function AllJobSearchResult({ search, page, onPageChange, isVerif
 
   console.log("jobs", jobs);
 
-  if (error) return <div>Failed to load jobs</div>;
+  // Handle rate limit error
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage error={error} />;
+    }
+
+    return <div>Failed to load jobs: {getErrorMessage(error)}</div>;
+  }
+
   if (isLoading) return <div>Loading...</div>;
 
   return (

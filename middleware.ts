@@ -1,17 +1,44 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { writeRateLimiter, readRateLimiter, RATE_LIMITS } from "@/lib/rateLimit";
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
+const isRateLimitedRoute = createRouteMatcher(["/api/comment(.*)", "/api/applications(.*)", "/api/job(.*)", "/api/company(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
-  // First check: Protects API routes (requires authentication)
+  // First: Apply rate limiting to specific routes
+  if (isRateLimitedRoute(req)) {
+    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    // Choose rate limiter based on HTTP method
+    const limiter = ["GET", "HEAD"].includes(req.method) ? readRateLimiter : writeRateLimiter;
+
+    const { success, limit, reset, remaining } = await limiter.limit(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+            "Retry-After": RATE_LIMITS.WINDOW_SIZE.toString(),
+          },
+        },
+      );
+    }
+  }
+
+  // Second check: Protects API routes (requires authentication)
   if (isProtectedRoute(req)) {
     await auth().protect();
   }
 
-  // Second check: Protects admin routes (requires admin role)
+  // Third check: Protects admin routes (requires admin role)
   if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== "admin") {
     const url = new URL("/", req.url);
 

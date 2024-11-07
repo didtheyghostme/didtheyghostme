@@ -6,6 +6,7 @@ export const ERROR_MESSAGES = {
   DUPLICATE_URL: "A company with this URL already exists.",
   DUPLICATE_NAME: "A company with this name already exists.",
   // Add other error messages here
+  TOO_MANY_REQUESTS: "Too many requests. Please try again later.",
 };
 
 export const getErrorMessage = (error: unknown): string => {
@@ -20,4 +21,16 @@ export const isDuplicateUrlError = (error: unknown): boolean => {
 
 export const isDuplicateNameError = (error: unknown): boolean => {
   return getErrorMessage(error) === ERROR_MESSAGES.DUPLICATE_NAME;
+};
+
+export type RateLimitError = Error & {
+  cause?: {
+    retryAfter: number;
+    reset: number;
+  };
+};
+
+// Add a type guard function
+export const isRateLimitError = (error: unknown): error is RateLimitError => {
+  return error instanceof Error && error.message === ERROR_MESSAGES.TOO_MANY_REQUESTS && "cause" in error;
 };
