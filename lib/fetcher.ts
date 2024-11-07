@@ -1,16 +1,18 @@
 import mixpanel from "mixpanel-browser";
 
-import { RateLimitError, ERROR_MESSAGES } from "./errorHandling";
+import { RateLimitError, ERROR_MESSAGES, RateLimitErrorResponse } from "./errorHandling";
 
 export const fetcher = async <T = any>(resource: RequestInfo, init?: RequestInit): Promise<T> => {
   const response = await fetch(resource, init);
 
   if (!response.ok) {
     if (response.status === 429) {
+      const data = (await response.json()) as RateLimitErrorResponse;
+
       mixpanel.track("Rate limit violation", {
         distinct_id: mixpanel.get_distinct_id(),
         url: resource.toString(),
-        type: "fetcher client track",
+        limiter_type: data.limiterType === "primary" ? "Upstash" : "Fallback",
         method: init?.method || "GET",
         status: response.status,
       });

@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { ERROR_MESSAGES } from "./lib/errorHandling";
-
-import { jobLimiters, othersLimiters, companyLimiters } from "@/lib/rateLimit";
+import { createRateLimitResponse } from "@/lib/errorHandling";
+import { jobLimiters, othersLimiters, companyLimiters, isUpstashDailyLimitError, createFallbackRateLimiters } from "@/lib/rateLimit";
+import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
@@ -16,7 +16,24 @@ const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(
 export default clerkMiddleware(async (auth, req) => {
   const session = await auth();
 
-  // Apply rate limiting only for matched routes
+  // First check: Protects API routes (requires authentication)
+  if (isProtectedRoute(req)) {
+    await auth().protect();
+  }
+
+  // Second check: Protects admin routes (requires admin role)
+  if (isAdminRoute(req)) {
+    if (session?.sessionClaims?.metadata?.role !== "admin") {
+      const url = new URL("/", req.url);
+
+      return NextResponse.redirect(url);
+    }
+
+    // Admin users bypass rate limiting
+    return;
+  }
+
+  // Third check: Apply rate limiting only for matched routes
   let limiters;
 
   if (isJobRoutes(req)) limiters = jobLimiters;
@@ -24,9 +41,6 @@ export default clerkMiddleware(async (auth, req) => {
   else if (isOtherRoutes(req)) limiters = othersLimiters;
 
   if (limiters) {
-    // Skip rate limiting for admin
-    if (session?.sessionClaims?.metadata?.role === "admin") return;
-
     const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
 
     // Choose rate limiter based on HTTP method
@@ -37,23 +51,34 @@ export default clerkMiddleware(async (auth, req) => {
     const sustainedLimiter = isRead ? limiters.sustainedRead : limiters.sustainedWrite;
 
     // Check both limits
-    const [burstResult, sustainedResult] = await Promise.all([burstLimiter.limit(ip), sustainedLimiter.limit(ip)]);
+    try {
+      // Try primary limiters first
+      const [burstResult, sustainedResult] = await Promise.all([burstLimiter.limit(ip), sustainedLimiter.limit(ip)]);
 
-    if (!burstResult.success || !sustainedResult.success) {
-      return NextResponse.json({ error: ERROR_MESSAGES.TOO_MANY_REQUESTS }, { status: 429 });
+      // If rate limit exceeded, return 429 immediately
+      if (!burstResult.success || !sustainedResult.success) {
+        console.error("upstash rate limit exceeded...");
+        const response = createRateLimitResponse("primary");
+
+        return NextResponse.json(response, { status: 429 });
+      }
+    } catch (error) {
+      // Only use fallback if Upstash fails (connection error, etc)
+      console.warn("Upstash rate limiter failed, using fallback:", error);
+
+      if (isUpstashDailyLimitError(error)) {
+        const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : "OTHERS";
+        const operation: OperationType = isRead ? "READ" : "WRITE";
+
+        const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({ routeType, operation, ip });
+
+        if (!burstFallback.success || !sustainedFallback.success) {
+          const response = createRateLimitResponse("fallback");
+
+          return NextResponse.json(response, { status: 429 });
+        }
+      }
     }
-  }
-
-  // Second check: Protects API routes (requires authentication)
-  if (isProtectedRoute(req)) {
-    await auth().protect();
-  }
-
-  // Third check: Protects admin routes (requires admin role)
-  if (isAdminRoute(req) && session?.sessionClaims?.metadata?.role !== "admin") {
-    const url = new URL("/", req.url);
-
-    return NextResponse.redirect(url);
   }
 });
 

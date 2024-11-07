@@ -39,6 +39,7 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "framer-motion": "^11.2.9",
     "intl-messageformat": "^10.5.0",
+    "lru-cache": "^11.0.2",
     "mixpanel": "^0.18.0",
     "mixpanel-browser": "^2.55.1",
     "next": "14.2.3",

@@ -23,9 +23,24 @@ export const isDuplicateNameError = (error: unknown): boolean => {
   return getErrorMessage(error) === ERROR_MESSAGES.DUPLICATE_NAME;
 };
 
+type LimiterType = "primary" | "fallback";
+
+export type RateLimitErrorResponse = {
+  error: typeof ERROR_MESSAGES.TOO_MANY_REQUESTS; // string
+  limiterType: LimiterType;
+};
+
 export type RateLimitError = Error;
 
 // Add a type guard function
 export const isRateLimitError = (error: unknown): error is RateLimitError => {
   return error instanceof Error && error.message === ERROR_MESSAGES.TOO_MANY_REQUESTS;
+};
+
+// reusable function to create a rate limit response
+export const createRateLimitResponse = (limiterType: LimiterType): RateLimitErrorResponse => {
+  return {
+    error: ERROR_MESSAGES.TOO_MANY_REQUESTS,
+    limiterType,
+  };
 };
