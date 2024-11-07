@@ -23,14 +23,9 @@ export const isDuplicateNameError = (error: unknown): boolean => {
   return getErrorMessage(error) === ERROR_MESSAGES.DUPLICATE_NAME;
 };
 
-export type RateLimitError = Error & {
-  cause?: {
-    retryAfter: number;
-    reset: number;
-  };
-};
+export type RateLimitError = Error;
 
 // Add a type guard function
 export const isRateLimitError = (error: unknown): error is RateLimitError => {
-  return error instanceof Error && error.message === ERROR_MESSAGES.TOO_MANY_REQUESTS && "cause" in error;
+  return error instanceof Error && error.message === ERROR_MESSAGES.TOO_MANY_REQUESTS;
 };

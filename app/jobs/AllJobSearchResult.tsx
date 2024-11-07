@@ -46,7 +46,7 @@ export default function AllJobSearchResult({ search, page, onPageChange, isVerif
   // Handle rate limit error
   if (error) {
     if (isRateLimitError(error)) {
-      return <RateLimitErrorMessage error={error} />;
+      return <RateLimitErrorMessage />;
     }
 
     return <div>Failed to load jobs: {getErrorMessage(error)}</div>;

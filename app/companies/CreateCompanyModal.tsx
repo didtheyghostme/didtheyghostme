@@ -35,9 +35,7 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
       console.error("Error creating company:", getErrorMessage(error));
 
       if (isRateLimitError(error)) {
-        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS, {
-          description: `Retry after ${error.cause?.retryAfter} seconds`,
-        });
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
 
         return; // Return early to avoid showing generic error
       }

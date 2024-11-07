@@ -1,54 +1,46 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { writeRateLimiter, readRateLimiter, RATE_LIMITS } from "@/lib/rateLimit";
-import { mixpanel } from "@/lib/mixpanelServer";
+import { ERROR_MESSAGES } from "./lib/errorHandling";
+
+import { jobLimiters, othersLimiters, companyLimiters } from "@/lib/rateLimit";
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
-const isRateLimitedRoute = createRouteMatcher(["/api/comment(.*)", "/api/applications(.*)", "/api/job(.*)", "/api/company(.*)"]);
+// Update route matchers to match RouteType
+const isJobRoutes = createRouteMatcher(["/api/job(.*)"]);
+const isCompanyRoutes = createRouteMatcher(["/api/company(.*)"]);
+const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // First: Apply rate limiting to specific routes
-  if (isRateLimitedRoute(req)) {
-    const session = await auth();
+  const session = await auth();
 
+  // Apply rate limiting only for matched routes
+  let limiters;
+
+  if (isJobRoutes(req)) limiters = jobLimiters;
+  else if (isCompanyRoutes(req)) limiters = companyLimiters;
+  else if (isOtherRoutes(req)) limiters = othersLimiters;
+
+  if (limiters) {
     // Skip rate limiting for admin
     if (session?.sessionClaims?.metadata?.role === "admin") return;
 
     const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+
     // Choose rate limiter based on HTTP method
-    const limiter = ["GET", "HEAD"].includes(req.method) ? readRateLimiter : writeRateLimiter;
+    const isRead = ["GET", "HEAD"].includes(req.method);
 
-    const { success, limit, reset, remaining } = await limiter.limit(ip);
+    // Use both burst and sustained limiters
+    const burstLimiter = isRead ? limiters.burstRead : limiters.burstWrite;
+    const sustainedLimiter = isRead ? limiters.sustainedRead : limiters.sustainedWrite;
 
-    if (!success) {
-      // Log rate limit violation mixpanel
-      await mixpanel.track("Rate limit violation", {
-        distinct_id: session?.userId || `anon_${ip}`, // Use IP for anonymous users
-        route: req.url,
-        method: req.method,
-        limit,
-        remaining_attempts: remaining,
-        attempts_made: limit - remaining,
-        reset_time: reset,
-        window_size: RATE_LIMITS.WINDOW_SIZE,
-        ip_address: ip,
-      });
+    // Check both limits
+    const [burstResult, sustainedResult] = await Promise.all([burstLimiter.limit(ip), sustainedLimiter.limit(ip)]);
 
-      return NextResponse.json(
-        { error: "Too many requests" },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": limit.toString(),
-            "X-RateLimit-Remaining": remaining.toString(),
-            "X-RateLimit-Reset": reset.toString(),
-            "Retry-After": RATE_LIMITS.WINDOW_SIZE.toString(),
-          },
-        },
-      );
+    if (!burstResult.success || !sustainedResult.success) {
+      return NextResponse.json({ error: ERROR_MESSAGES.TOO_MANY_REQUESTS }, { status: 429 });
     }
   }
 
@@ -58,7 +50,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // Third check: Protects admin routes (requires admin role)
-  if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== "admin") {
+  if (isAdminRoute(req) && session?.sessionClaims?.metadata?.role !== "admin") {
     const url = new URL("/", req.url);
 
     return NextResponse.redirect(url);
@@ -72,4 +64,5 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
+  runtime: "nodejs",
 };
