@@ -1,7 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
-
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
@@ -10,14 +8,9 @@ import { withRateLimit } from "@/lib/withRateLimit";
 export type CreateApplicationArgs = Pick<ApplicationTable, "job_posting_id" | "applied_date">;
 
 const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplicationArgs }): Promise<ApplicationTable> => {
-  return await withRateLimit(async () => {
+  return await withRateLimit(async (user_id) => {
     const { job_posting_id, applied_date } = arg;
     const supabase = await createClerkSupabaseClientSsr();
-    const { userId: user_id } = auth();
-
-    if (!user_id) {
-      throw new Error("User not authenticated");
-    }
 
     try {
       const { data, error } = await supabase
@@ -41,7 +34,7 @@ const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplic
       console.error("Error executing insert:", err);
       throw err;
     }
-  });
+  }, "TrackApplication");
 };
 
 export default actionCreateApplication;

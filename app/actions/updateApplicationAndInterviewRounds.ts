@@ -1,21 +1,14 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
-
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { withRateLimit } from "@/lib/withRateLimit";
 
 const actionUpdateApplicationAndInterviewRounds = async (key: string, { arg }: { arg: InterviewExperienceFormValues & { application_id: string } }) => {
-  return await withRateLimit(async () => {
+  return await withRateLimit(async (user_id) => {
     const { application_id, applied_date, first_response_date, status, interviewRounds } = arg;
     const supabase = await createClerkSupabaseClientSsr();
-    const { userId: user_id } = auth();
-
-    if (!user_id) {
-      throw new Error("User not authenticated");
-    }
 
     try {
       const { error } = await supabase.rpc(DB_RPC.UPDATE_APPLICATION_AND_INTERVIEW_ROUNDS, {
@@ -32,7 +25,7 @@ const actionUpdateApplicationAndInterviewRounds = async (key: string, { arg }: {
       console.error("Error updating action application and interview rounds:", err);
       throw err;
     }
-  });
+  }, "UpdateInterviewRounds");
 };
 
 export default actionUpdateApplicationAndInterviewRounds;

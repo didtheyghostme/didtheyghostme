@@ -1,7 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
@@ -15,12 +14,9 @@ export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
 type InsertedJobData = AddJobFormData & Pick<JobPostingTable, "company_id" | "user_id" | "job_status">;
 
 const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Promise<JobPostingTable> => {
-  return await withRateLimit(async () => {
+  return await withRateLimit(async (user_id) => {
     const supabase = await createClerkSupabaseClientSsr();
-    const { userId: user_id } = auth();
     const { company_id, newJob } = arg;
-
-    if (!user_id) throw new Error("User not authenticated");
 
     try {
       // Server-side validation
@@ -49,7 +45,7 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
       console.error("Error executing insert:", err);
       throw err;
     }
-  });
+  }, "CreateJob");
 };
 
 export default actionCreateJob;

@@ -1,20 +1,13 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
-
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { ServerCreateCommentArgs } from "@/lib/hooks/useCreateComment";
 import { withRateLimit } from "@/lib/withRateLimit";
 
 const actionCreateComment = async (key: string, { arg }: { arg: ServerCreateCommentArgs }) => {
-  return await withRateLimit(async () => {
+  return await withRateLimit(async (user_id) => {
     const supabase = await createClerkSupabaseClientSsr();
-    const { userId } = auth();
-
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
 
     const { content, entity_type, entity_id } = arg;
 
@@ -24,7 +17,7 @@ const actionCreateComment = async (key: string, { arg }: { arg: ServerCreateComm
         content,
         entity_type,
         entity_id,
-        user_id: userId,
+        user_id,
       })
       .select()
       .single();
@@ -34,7 +27,7 @@ const actionCreateComment = async (key: string, { arg }: { arg: ServerCreateComm
     }
 
     return data;
-  });
+  }, "CreateComment");
 };
 
 export default actionCreateComment;

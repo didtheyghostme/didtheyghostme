@@ -60,8 +60,6 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
           method: "POST",
           company_name: newCompany.company_name,
           company_url: newCompany.company_url,
-          retry_after: err.cause?.retryAfter,
-          reset_time: err.cause?.reset,
         });
       } else if (err instanceof z.ZodError) {
         console.error("Zod validation error:", err.errors);
@@ -70,7 +68,7 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
       console.error("Error executing insert:", err);
       throw err;
     }
-  });
+  }, "CreateCompany");
 };
 
 export default actionCreateCompany;
