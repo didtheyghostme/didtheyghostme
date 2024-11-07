@@ -28,7 +28,7 @@ export const RATE_LIMITS: RateLimitConfig = {
   // Job routes (higher limits for backend search)
   JOB: {
     BURST: {
-      READ: 20, // Higher limit for backend search
+      READ: 40, // Higher limit for backend search
       WRITE: 10, // Posting jobs still limited
     },
     SUSTAINED: {

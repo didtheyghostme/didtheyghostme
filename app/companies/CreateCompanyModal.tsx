@@ -4,9 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
-import { ERROR_MESSAGES, getErrorMessage, isDuplicateNameError, isDuplicateUrlError, isRateLimitError } from "@/lib/errorHandling";
+import { ERROR_MESSAGES, getErrorMessage, isRateLimitError } from "@/lib/errorHandling";
 import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
-import mixpanel from "mixpanel-browser";
 
 type CreateCompanyModalProps = {
   isOpen: boolean;

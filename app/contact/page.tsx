@@ -64,9 +64,9 @@ export default function ContactPage() {
 
   return (
     <div className="mx-auto max-w-2xl p-4">
-      <Card>
+      <Card className="gap-2">
         <CardHeader>
-          <h1 className="text-2xl font-bold">Contact Us</h1>
+          <h1 className="font-semibold sm:text-2xl">Contact Support</h1>
         </CardHeader>
         <CardBody>
           {isSubmitted ? (
