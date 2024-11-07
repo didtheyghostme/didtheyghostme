@@ -4,8 +4,7 @@ export const REPORT_LINK_TYPES = {
   "Link Expired": "Link Expired",
   "Invalid Link": "Invalid Link",
   "Suggest Link": "Suggest Link",
-  Other: "Other",
-} as const satisfies Record<ReportAdminReportType, ReportAdminReportType>;
+} as const satisfies Record<ReportJobPostingType, ReportJobPostingType>;
 
 export const reportLinkSchema = z.object({
   report_type: z.nativeEnum(REPORT_LINK_TYPES),

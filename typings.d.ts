@@ -113,7 +113,9 @@ type ReportEntityType = CommentEntityType | "contact_us";
 
 type ContactType = "Bug Report" | "Feature Request" | "General Feedback" | "Data Issue";
 
-type ReportAdminReportType = "Link Expired" | "Invalid Link" | "Suggest Link" | ContactType | "Other";
+type ReportJobPostingType = "Link Expired" | "Invalid Link" | "Suggest Link";
+
+type ReportAdminReportType = ReportJobPostingType | ContactType | "Other";
 
 type ReportAdminTable = {
   id: string;

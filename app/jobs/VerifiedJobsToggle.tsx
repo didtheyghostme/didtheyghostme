@@ -21,7 +21,7 @@ export function VerifiedJobsToggle() {
       search_query: search,
       is_verified: `from ${isSelected} to ${!isSelected}`,
     });
-    setQueryStates({ isVerified: isSelected });
+    setQueryStates({ isVerified: isSelected, page: 1 });
   };
 
   return (
