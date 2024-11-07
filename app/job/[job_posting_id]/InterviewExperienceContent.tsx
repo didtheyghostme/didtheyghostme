@@ -11,6 +11,8 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ChevronDownIcon } from "@/components/icons";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { isRateLimitError } from "@/lib/errorHandling";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
@@ -26,7 +28,13 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
   const router = useRouter();
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading interview experiences</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading interview experiences</div>;
+  }
   if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <div>No interview experiences found</div>;
 
   const sortedApplications = sortApplicationsByDateTime(applicationsWithCounts, sort);

@@ -25,6 +25,8 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 
 // Define the tab mapping
 const TABS = {
@@ -82,7 +84,13 @@ export default function JobDetailsPage() {
   const { createApplication } = useCreateApplication(job_posting_id as string);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading job details</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading job details</div>;
+  }
   if (!jobDetails) return <div>Job not found</div>;
   if (applicationsIsLoading) return <div>Loading applications...</div>;
   if (applicationsError) return <div>Error loading applications</div>;
@@ -111,6 +119,12 @@ export default function JobDetailsPage() {
 
       console.log("Application created", result);
     } catch (err: unknown) {
+      if (isRateLimitError(err)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
+
       mixpanel.track("Job Posting Page", {
         action: "track_this_job_error",
         job_id: job_posting_id,

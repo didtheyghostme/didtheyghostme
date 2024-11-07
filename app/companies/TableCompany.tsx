@@ -16,6 +16,8 @@ import { CreateCompanyModal } from "./CreateCompanyModal";
 import { PlusIcon, SearchIcon, ChevronDownIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 type ColumnKey = keyof Pick<CompanyTable, "company_name" | "company_url">;
 
@@ -39,7 +41,7 @@ type SortOption = (typeof sortOptions)[number];
 export default function TableCompany() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
-  const { data: companies = [], isLoading } = useSWR<CompanyTable[]>(API.COMPANY.getAll, fetcher);
+  const { data: companies = [], isLoading, error } = useSWR<CompanyTable[]>(API.COMPANY.getAll, fetcher);
 
   const [currentSort, setCurrentSort] = useQueryState("sort", parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("name_asc"));
 
@@ -225,6 +227,15 @@ export default function TableCompany() {
       </div>
     );
   }, [page, pages]);
+
+  // Handle rate limit error
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Failed to load companies</div>;
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;

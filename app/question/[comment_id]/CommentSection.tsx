@@ -15,6 +15,8 @@ import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { AddCommentFormValues, addCommentSchema } from "@/lib/schema/addCommentSchema";
 import { CommentsForThisEntityResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 type CommentSectionProps = Pick<CommentTable, "entity_type" | "entity_id">;
 
@@ -58,7 +60,13 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
   };
 
   if (commentsLoading) return <div>Loading comments...</div>;
-  if (commentsError) return <div>Error loading comments</div>;
+  if (commentsError) {
+    if (isRateLimitError(commentsError)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading comments</div>;
+  }
 
   return (
     <div>

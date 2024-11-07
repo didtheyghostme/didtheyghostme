@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { suggestLinkSchema, type SuggestLinkFormValues } from "@/lib/schema/suggestLinkSchema";
+import { ERROR_MESSAGES } from "@/lib/errorHandling";
+import { isRateLimitError } from "@/lib/errorHandling";
 
 type SuggestLinkModalProps = {
   isOpen: boolean;
@@ -34,6 +36,11 @@ export default function SuggestLinkModal({ isOpen, onClose, jobId, jobStatus }: 
       toast.success("Link suggestion submitted successfully");
       onClose();
     } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
       console.error("Error suggesting link:", error);
       toast.error("Error submitting link suggestion");
     }

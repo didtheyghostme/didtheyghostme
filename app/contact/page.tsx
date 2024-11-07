@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
 
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { contactSchema, type ContactFormValues, CONTACT_TYPES } from "@/lib/schema/contactSchema";
 
 const CONTACT_PLACEHOLDER_MAP = {
@@ -52,6 +53,12 @@ export default function ContactPage() {
       setIsSubmitted(true);
       reset();
     } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
+
       mixpanel.track("Contact Page", {
         action: "contact_form_error",
         contact_type: data.contactType,

@@ -8,6 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import mixpanel from "mixpanel-browser";
+import { toast } from "sonner";
 
 import { fetcher } from "@/lib/fetcher";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
@@ -17,6 +18,8 @@ import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -59,7 +62,13 @@ export default function CompanyDetailsPage() {
   }, [isModalOpen, setFocus]);
 
   if (isLoading) return <div>Loading company...</div>;
-  if (error) return <div>Error loading company data</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading company data</div>;
+  }
   if (!company) return <div>Company not found</div>;
 
   if (jobIsLoading) return <div>Loading...</div>;
@@ -78,6 +87,12 @@ export default function CompanyDetailsPage() {
       handleCloseModal();
     } catch (err) {
       console.error("Error adding job:", err);
+      if (isRateLimitError(err)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
+
       mixpanel.track("Company Details", {
         action: "job_creation_error",
         company_id,

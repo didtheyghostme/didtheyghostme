@@ -12,6 +12,8 @@ import { fetcher } from "@/lib/fetcher";
 import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { ArrowLeftIcon } from "@/components/icons";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -21,7 +23,13 @@ export default function QuestionPage() {
   const { data: question, error, isLoading } = useSWR<QuestionPageRequest>(API.COMMENT.getById(comment_id as string), fetcher);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading question</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading question</div>;
+  }
   if (!question) return <div>Question not found</div>;
 
   const handleBackClick = () => {

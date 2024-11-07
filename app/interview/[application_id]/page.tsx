@@ -18,6 +18,9 @@ import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
 import { useUpdateApplicationAndInterviewRounds } from "@/lib/hooks/useUpdateApplicationAndInterviewRounds";
+import { ERROR_MESSAGES } from "@/lib/errorHandling";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -40,7 +43,13 @@ export default function InterviewExperiencePage() {
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading || interviewRoundsLoading) return <div>Loading...</div>;
-  if (error || interviewRoundsError) return <div>Error loading application details</div>;
+  if (error || interviewRoundsError) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading application details</div>;
+  }
   if (!applicationDetails) return <div>Application not found</div>;
   if (!interviewRounds) return <div>Interview rounds not found</div>;
 
@@ -60,6 +69,12 @@ export default function InterviewExperiencePage() {
 
       toast.success("Interview experience updated successfully");
     } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return;
+      }
+
       mixpanel.track("Interview Experience Page", {
         action: "update_interview_experience_error",
         application_id: application_id,

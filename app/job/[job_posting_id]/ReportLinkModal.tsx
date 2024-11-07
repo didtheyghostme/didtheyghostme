@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { REPORT_LINK_TYPES, reportLinkSchema, type ReportLinkFormValues } from "@/lib/schema/reportLinkSchema";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { ERROR_MESSAGES } from "@/lib/errorHandling";
 
 type ReportLinkModalProps = {
   isOpen: boolean;
@@ -39,6 +41,11 @@ export default function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: R
       onClose();
     } catch (error) {
       console.error("Error reporting link:", error);
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
       toast.error("Error reporting link");
     }
   };

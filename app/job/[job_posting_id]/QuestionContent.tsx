@@ -16,6 +16,8 @@ import { API } from "@/lib/constants/apiRoutes";
 import { addQuestionSchema, AddQuestionFormValues } from "@/lib/schema/addQuestionSchema";
 import { QuestionWithReplyCountResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 type QuestionContentProps = {
   job_posting_id: string;
@@ -48,6 +50,11 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
       setIsModalOpen(false);
       toast.success("Question created successfully");
     } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return; // Return early to avoid showing generic error
+      }
       mixpanel.track("Question Content Tab", {
         action: "question_creation_failed",
         job_id: job_posting_id,
@@ -75,7 +82,13 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
   };
 
   if (isLoading) return <div>Loading questions...</div>;
-  if (error) return <div>Error loading questions</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading questions</div>;
+  }
 
   return (
     <div className="space-y-4">

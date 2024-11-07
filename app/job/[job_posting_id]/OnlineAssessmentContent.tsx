@@ -10,6 +10,8 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ChevronDownIcon } from "@/components/icons";
 import { GetOnlineAssessmentsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/interview/online/route";
+import { isRateLimitError } from "@/lib/errorHandling";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 
 export const sortOptions = [
   { key: "newest", label: "Date posted: Newest to Oldest" },
@@ -44,7 +46,13 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
   console.warn("onlineAssessments", onlineAssessments);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading online assessments</div>;
+  if (error) {
+    if (isRateLimitError(error)) {
+      return <RateLimitErrorMessage />;
+    }
+
+    return <div>Error loading online assessments</div>;
+  }
   if (!onlineAssessments || onlineAssessments.length === 0) return <div>No interview assessments found</div>;
 
   if (onlineAssessments.length === 0) return <div>No online assessments have been added yet</div>;
