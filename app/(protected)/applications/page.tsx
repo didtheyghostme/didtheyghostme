@@ -10,6 +10,8 @@ import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { DBTable } from "@/lib/constants/dbTables";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
   [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title" | "country"> & {
@@ -21,9 +23,9 @@ export default function MyApplicationsPage() {
   const router = useRouter();
   const { data: applications, error, isLoading } = useSWR<MyApplicationResponse[]>(API.PROTECTED.getByCurrentUser, fetcher);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading applications</div>;
-  if (!applications) return <div>No applications found</div>;
+  if (isLoading) return <LoadingContent />;
+  if (error) return <ErrorMessageContent message="Failed to load applications" />;
+  if (!applications) return <ErrorMessageContent message="No applications found" />;
 
   const handleViewApplication = (applicationId: string) => {
     mixpanel.track("My Applications Page", {

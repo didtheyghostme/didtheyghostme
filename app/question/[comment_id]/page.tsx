@@ -13,7 +13,10 @@ import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { ArrowLeftIcon } from "@/components/icons";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -22,15 +25,15 @@ export default function QuestionPage() {
 
   const { data: question, error, isLoading } = useSWR<QuestionPageRequest>(API.COMMENT.getById(comment_id as string), fetcher);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingContent />;
   if (error) {
     if (isRateLimitError(error)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading question</div>;
+    return <ErrorMessageContent message="Error loading question" />;
   }
-  if (!question) return <div>Question not found</div>;
+  if (!question) return <DataNotFoundMessage message="Question not found" />;
 
   const handleBackClick = () => {
     mixpanel.track("back_button_clicked", {

@@ -8,11 +8,13 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { AdminReportResponse } from "@/app/api/(admin)/admin/route";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 type ColumnKey = keyof Pick<AdminReportResponse, "entity_type" | "report_type" | "report_message" | "report_status" | "created_at" | "resolution_notes" | "reporter" | "handler">;
 
 export default function AdminReportTable() {
-  const { data: reports, error } = useSWR<AdminReportResponse[]>(API.ADMIN.getAllReports, fetcher);
+  const { data: reports, error, isLoading } = useSWR<AdminReportResponse[]>(API.ADMIN.getAllReports, fetcher);
 
   const renderCell = useCallback((report: AdminReportResponse, columnKey: Key) => {
     // Type assertion here is safe because we control the column keys in TableHeader
@@ -49,8 +51,9 @@ export default function AdminReportTable() {
     }
   }, []);
 
-  if (error) return <div>Failed to load reports</div>;
-  if (!reports) return <div>Loading...</div>;
+  if (isLoading) return <LoadingContent />;
+  if (error) return <ErrorMessageContent message="Failed to load reports" />;
+  if (!reports) return <ErrorMessageContent message="No reports found" />;
 
   return (
     <Table aria-label="Admin reports table">

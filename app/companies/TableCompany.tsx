@@ -17,7 +17,9 @@ import { PlusIcon, SearchIcon, ChevronDownIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 type ColumnKey = keyof Pick<CompanyTable, "company_name" | "company_url">;
 
@@ -234,11 +236,11 @@ export default function TableCompany() {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Failed to load companies</div>;
+    return <ErrorMessageContent message="Failed to load companies" />;
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingContent />;
   }
 
   return (

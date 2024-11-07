@@ -16,7 +16,9 @@ import { AddCommentFormValues, addCommentSchema } from "@/lib/schema/addCommentS
 import { CommentsForThisEntityResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 type CommentSectionProps = Pick<CommentTable, "entity_type" | "entity_id">;
 
@@ -59,13 +61,13 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
     });
   };
 
-  if (commentsLoading) return <div>Loading comments...</div>;
+  if (commentsLoading) return <LoadingContent />;
   if (commentsError) {
     if (isRateLimitError(commentsError)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading comments</div>;
+    return <ErrorMessageContent message="Error loading comments" />;
   }
 
   return (
@@ -80,7 +82,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
             )}
           />
           <div className="flex justify-end">
-            <Button disabled={isCreating} type="submit">
+            <Button disabled={isCreating} isLoading={isCreating} type="submit">
               {isCreating ? "Commenting..." : "Comment"}
             </Button>
           </div>

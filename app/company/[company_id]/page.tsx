@@ -19,7 +19,10 @@ import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -61,19 +64,16 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  if (isLoading) return <div>Loading company...</div>;
-  if (error) {
-    if (isRateLimitError(error)) {
+  if (isLoading || jobIsLoading) return <LoadingContent />;
+  if (error || jobError) {
+    if (isRateLimitError(error) || isRateLimitError(jobError)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading company data</div>;
+    return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!company) return <div>Company not found</div>;
-
-  if (jobIsLoading) return <div>Loading...</div>;
-  if (jobError) return <div>Error loading job data</div>;
-  if (!allJobs) return <div>Job not found</div>;
+  if (!company) return <DataNotFoundMessage message="Company not found" />;
+  if (!allJobs) return <DataNotFoundMessage message="Job not found" />;
 
   const openJobs = allJobs.filter((job) => job.job_status !== "Closed");
   const closedJobs = allJobs.filter((job) => job.job_status === "Closed");

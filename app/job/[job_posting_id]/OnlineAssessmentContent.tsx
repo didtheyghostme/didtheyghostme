@@ -11,7 +11,10 @@ import { API } from "@/lib/constants/apiRoutes";
 import { ChevronDownIcon } from "@/components/icons";
 import { GetOnlineAssessmentsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/interview/online/route";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
 
 export const sortOptions = [
   { key: "newest", label: "Date posted: Newest to Oldest" },
@@ -45,17 +48,15 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
 
   console.warn("onlineAssessments", onlineAssessments);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingContent />;
   if (error) {
     if (isRateLimitError(error)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading online assessments</div>;
+    return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!onlineAssessments || onlineAssessments.length === 0) return <div>No interview assessments found</div>;
-
-  if (onlineAssessments.length === 0) return <div>No online assessments have been added yet</div>;
+  if (!onlineAssessments || onlineAssessments.length === 0) return <DataNotFoundMessage message="No online assessments found" />;
 
   const sortedOnlineAssessments = sortApplicationsByDateTime(onlineAssessments, sort);
 

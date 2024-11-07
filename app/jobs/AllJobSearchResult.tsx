@@ -12,9 +12,10 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import { getErrorMessage } from "@/lib/errorHandling";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -49,10 +50,10 @@ export default function AllJobSearchResult({ search, page, onPageChange, isVerif
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Failed to load jobs: {getErrorMessage(error)}</div>;
+    return <ErrorMessageContent message="Failed to load jobs" />;
   }
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingContent />;
 
   return (
     <div className="flex flex-col gap-4">

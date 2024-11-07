@@ -20,7 +20,10 @@ import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
 import { useUpdateApplicationAndInterviewRounds } from "@/lib/hooks/useUpdateApplicationAndInterviewRounds";
 import { ERROR_MESSAGES } from "@/lib/errorHandling";
 import { isRateLimitError } from "@/lib/errorHandling";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -42,16 +45,16 @@ export default function InterviewExperiencePage() {
   // local states
   const [isEditing, setIsEditing] = useState(false);
 
-  if (isLoading || interviewRoundsLoading) return <div>Loading...</div>;
+  if (isLoading || interviewRoundsLoading) return <LoadingContent />;
   if (error || interviewRoundsError) {
-    if (isRateLimitError(error)) {
+    if (isRateLimitError(error) || isRateLimitError(interviewRoundsError)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading application details</div>;
+    return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!applicationDetails) return <div>Application not found</div>;
-  if (!interviewRounds) return <div>Interview rounds not found</div>;
+  if (!applicationDetails) return <DataNotFoundMessage message="Application not found" />;
+  if (!interviewRounds) return <DataNotFoundMessage message="Interview rounds not found" />;
 
   const handleBackClick = () => {
     router.push(`/job/${applicationDetails.job_posting_id}`);

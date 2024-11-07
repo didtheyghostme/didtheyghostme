@@ -25,8 +25,11 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
 import ImageWithFallback from "@/components/ImageWithFallback";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
 
 // Define the tab mapping
 const TABS = {
@@ -81,20 +84,18 @@ export default function JobDetailsPage() {
 
   console.warn("applications", applications);
 
-  const { createApplication } = useCreateApplication(job_posting_id as string);
+  const { createApplication, isCreating } = useCreateApplication(job_posting_id as string);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) {
-    if (isRateLimitError(error)) {
+  if (isLoading || applicationsIsLoading) return <LoadingContent />;
+  if (error || applicationsError) {
+    if (isRateLimitError(error) || isRateLimitError(applicationsError)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading job details</div>;
+    return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!jobDetails) return <div>Job not found</div>;
-  if (applicationsIsLoading) return <div>Loading applications...</div>;
-  if (applicationsError) return <div>Error loading applications</div>;
-  if (!applications?.data) return <div>Applications not found</div>;
+  if (!jobDetails) return <DataNotFoundMessage message="Job not found" />;
+  if (!applications?.data) return <DataNotFoundMessage message="Applications not found" />;
 
   const handleBackClick = () => {
     mixpanel.track("back_button_clicked", {
@@ -442,7 +443,7 @@ export default function JobDetailsPage() {
 
       <ReportLinkModal isOpen={isReportModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onReportModalClose} />
 
-      <TrackThisJobModal isOpen={isTrackModalOpen} onClose={onTrackModalClose} onSubmit={handleTrackJobSubmit} />
+      <TrackThisJobModal isOpen={isTrackModalOpen} onClose={onTrackModalClose} onSubmit={handleTrackJobSubmit} isCreating={isCreating} />
 
       <SuggestLinkModal isOpen={isSuggestModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onSuggestModalClose} />
     </div>

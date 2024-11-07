@@ -7,9 +7,10 @@ type TrackThisJobModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (appliedDate: string) => void;
+  isCreating: boolean;
 };
 
-export default function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobModalProps) {
+export default function TrackThisJobModal({ isOpen, onClose, onSubmit, isCreating }: TrackThisJobModalProps) {
   const [appliedDate, setAppliedDate] = useState<CalendarDate>(today(getLocalTimeZone()));
 
   const handleSubmit = () => {
@@ -28,7 +29,7 @@ export default function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackTh
           <Button color="danger" variant="light" onPress={onClose}>
             Cancel
           </Button>
-          <Button color="primary" onPress={handleSubmit}>
+          <Button color="primary" isLoading={isCreating} onPress={handleSubmit}>
             Track Job
           </Button>
         </ModalFooter>

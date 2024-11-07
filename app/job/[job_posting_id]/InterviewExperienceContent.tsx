@@ -11,8 +11,11 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { ChevronDownIcon } from "@/components/icons";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
-import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { isRateLimitError } from "@/lib/errorHandling";
+import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
+import LoadingContent from "@/components/LoadingContent";
+import ErrorMessageContent from "@/components/ErrorMessageContent";
+import DataNotFoundMessage from "@/components/DataNotFoundMessage";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
@@ -27,15 +30,15 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
 
   const router = useRouter();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingContent />;
   if (error) {
     if (isRateLimitError(error)) {
       return <RateLimitErrorMessage />;
     }
 
-    return <div>Error loading interview experiences</div>;
+    return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <div>No interview experiences found</div>;
+  if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <DataNotFoundMessage message="No interview experiences found" />;
 
   const sortedApplications = sortApplicationsByDateTime(applicationsWithCounts, sort);
 
