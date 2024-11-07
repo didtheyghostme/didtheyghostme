@@ -42,15 +42,6 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
         return; // Return early to avoid showing generic error
       }
 
-      if (isDuplicateUrlError(error) || isDuplicateNameError(error)) {
-        console.error("Duplicate company URL");
-        mixpanel.track("Duplicate company error", {
-          company_name: data.company_name,
-          company_url: data.company_url,
-          error: getErrorMessage(error),
-        });
-      }
-
       toast.error("Error creating company", {
         description: getErrorMessage(error),
         cancel: {

@@ -2,6 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { writeRateLimiter, readRateLimiter, RATE_LIMITS } from "@/lib/rateLimit";
+import { mixpanel } from "@/lib/mixpanelServer";
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
@@ -11,6 +12,11 @@ const isRateLimitedRoute = createRouteMatcher(["/api/comment(.*)", "/api/applica
 export default clerkMiddleware(async (auth, req) => {
   // First: Apply rate limiting to specific routes
   if (isRateLimitedRoute(req)) {
+    const session = await auth();
+
+    // Skip rate limiting for admin
+    if (session?.sessionClaims?.metadata?.role === "admin") return;
+
     const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
     // Choose rate limiter based on HTTP method
     const limiter = ["GET", "HEAD"].includes(req.method) ? readRateLimiter : writeRateLimiter;
@@ -18,6 +24,19 @@ export default clerkMiddleware(async (auth, req) => {
     const { success, limit, reset, remaining } = await limiter.limit(ip);
 
     if (!success) {
+      // Log rate limit violation mixpanel
+      await mixpanel.track("Rate limit violation", {
+        distinct_id: session?.userId || `anon_${ip}`, // Use IP for anonymous users
+        route: req.url,
+        method: req.method,
+        limit,
+        remaining_attempts: remaining,
+        attempts_made: limit - remaining,
+        reset_time: reset,
+        window_size: RATE_LIMITS.WINDOW_SIZE,
+        ip_address: ip,
+      });
+
       return NextResponse.json(
         { error: "Too many requests" },
         {
