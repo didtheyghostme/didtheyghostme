@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createRateLimitResponse } from "@/lib/errorHandling";
 import { jobLimiters, othersLimiters, companyLimiters, isUpstashDailyLimitError, createFallbackRateLimiters } from "@/lib/rateLimit";
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
+
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
@@ -19,6 +20,8 @@ export default clerkMiddleware(async (auth, req) => {
   // First check: Protects API routes (requires authentication)
   if (isProtectedRoute(req)) {
     await auth().protect();
+
+    return NextResponse.next();
   }
 
   // Second check: Protects admin routes (requires admin role)
@@ -30,7 +33,7 @@ export default clerkMiddleware(async (auth, req) => {
     }
 
     // Admin users bypass rate limiting
-    return;
+    return NextResponse.next();
   }
 
   // Third check: Apply rate limiting only for matched routes
