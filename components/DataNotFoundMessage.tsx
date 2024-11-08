@@ -7,7 +7,7 @@ type DataNotFoundMessageProps = {
   message?: string;
 };
 
-export default function DataNotFoundMessage({ title = "No Results Found", message = "We couldn't find what you're looking for." }: DataNotFoundMessageProps) {
+export function DataNotFoundMessage({ title = "No Results Found", message = "We couldn't find what you're looking for." }: DataNotFoundMessageProps) {
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
       <Card className="w-full max-w-[500px]">

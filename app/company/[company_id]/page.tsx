@@ -16,13 +16,13 @@ import { useCreateJob } from "@/lib/hooks/useCreateJob";
 import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
-import DataNotFoundMessage from "@/components/DataNotFoundMessage";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 

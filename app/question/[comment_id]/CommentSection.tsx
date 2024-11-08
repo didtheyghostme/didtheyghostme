@@ -16,9 +16,9 @@ import { AddCommentFormValues, addCommentSchema } from "@/lib/schema/addCommentS
 import { CommentsForThisEntityResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 type CommentSectionProps = Pick<CommentTable, "entity_type" | "entity_id">;
 

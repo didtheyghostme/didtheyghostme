@@ -1,7 +1,7 @@
-import AllJobSearch from "./AllJobSearch";
+import { AllJobSearch } from "./AllJobSearch";
 import { VerifiedJobsToggle } from "./VerifiedJobsToggle";
 
-export default function AllJobPage() {
+export function AllJobPageContainer() {
   return (
     <>
       <div className="flex items-center justify-between">

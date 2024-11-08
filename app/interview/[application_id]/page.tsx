@@ -20,10 +20,10 @@ import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
 import { useUpdateApplicationAndInterviewRounds } from "@/lib/hooks/useUpdateApplicationAndInterviewRounds";
 import { ERROR_MESSAGES } from "@/lib/errorHandling";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
-import DataNotFoundMessage from "@/components/DataNotFoundMessage";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();

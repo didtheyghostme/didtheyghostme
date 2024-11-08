@@ -11,11 +11,11 @@ import { API } from "@/lib/constants/apiRoutes";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
 import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -28,7 +28,7 @@ type AllJobSearchResultProps = {
   isVerified: boolean;
 };
 
-export default function AllJobSearchResult({ search, page, onPageChange, isVerified }: AllJobSearchResultProps) {
+export function AllJobSearchResult({ search, page, onPageChange, isVerified }: AllJobSearchResultProps) {
   const debouncedSearch = useDebounce(search);
 
   const { data, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified }), fetcher);

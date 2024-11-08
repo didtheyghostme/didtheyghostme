@@ -3,10 +3,10 @@
 import { useQueryStates, parseAsInteger, parseAsString, parseAsBoolean } from "nuqs";
 import mixpanel from "mixpanel-browser";
 
-import AllJobsSearchInput from "./AllJobSearchInput";
-import AllJobsSearchResult from "./AllJobSearchResult";
+import { AllJobSearchInput } from "./AllJobSearchInput";
+import { AllJobSearchResult } from "./AllJobSearchResult";
 
-export default function AllJobSearch() {
+export function AllJobSearch() {
   const [{ page, search, isVerified }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     search: parseAsString.withDefault(""),
@@ -37,8 +37,8 @@ export default function AllJobSearch() {
 
   return (
     <>
-      <AllJobsSearchInput search={search} onSearchChange={handleSearchChange} />
-      <AllJobsSearchResult isVerified={isVerified} page={page} search={search} onPageChange={handlePageChange} />
+      <AllJobSearchInput search={search} onSearchChange={handleSearchChange} />
+      <AllJobSearchResult isVerified={isVerified} page={page} search={search} onPageChange={handlePageChange} />
     </>
   );
 }

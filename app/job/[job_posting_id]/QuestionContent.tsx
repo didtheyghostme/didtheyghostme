@@ -17,9 +17,9 @@ import { addQuestionSchema, AddQuestionFormValues } from "@/lib/schema/addQuesti
 import { QuestionWithReplyCountResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 type QuestionContentProps = {
   job_posting_id: string;

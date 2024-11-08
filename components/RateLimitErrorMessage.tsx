@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-export default function RateLimitErrorMessage() {
+export function RateLimitErrorMessage() {
   const pathname = usePathname();
 
   useEffect(() => {

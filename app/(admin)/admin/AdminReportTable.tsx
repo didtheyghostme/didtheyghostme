@@ -8,12 +8,12 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { AdminReportResponse } from "@/app/api/(admin)/admin/route";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 type ColumnKey = keyof Pick<AdminReportResponse, "entity_type" | "report_type" | "report_message" | "report_status" | "created_at" | "resolution_notes" | "reporter" | "handler">;
 
-export default function AdminReportTable() {
+export function AdminReportTable() {
   const { data: reports, error, isLoading } = useSWR<AdminReportResponse[]>(API.ADMIN.getAllReports, fetcher);
 
   const renderCell = useCallback((report: AdminReportResponse, columnKey: Key) => {

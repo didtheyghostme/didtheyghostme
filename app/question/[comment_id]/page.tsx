@@ -13,10 +13,10 @@ import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { ArrowLeftIcon } from "@/components/icons";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import DataNotFoundMessage from "@/components/DataNotFoundMessage";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();

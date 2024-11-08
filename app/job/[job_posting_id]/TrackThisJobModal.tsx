@@ -9,7 +9,7 @@ type TrackThisJobModalProps = {
   onSubmit: (appliedDate: string) => void;
 };
 
-export default function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobModalProps) {
+export function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobModalProps) {
   const [appliedDate, setAppliedDate] = useState<CalendarDate>(today(getLocalTimeZone()));
 
   const handleSubmit = () => {

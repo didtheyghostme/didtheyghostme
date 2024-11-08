@@ -11,10 +11,10 @@ import { API } from "@/lib/constants/apiRoutes";
 import { ChevronDownIcon } from "@/components/icons";
 import { GetOnlineAssessmentsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/interview/online/route";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
-import DataNotFoundMessage from "@/components/DataNotFoundMessage";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 export const sortOptions = [
   { key: "newest", label: "Date posted: Newest to Oldest" },

@@ -17,9 +17,9 @@ import { PlusIcon, SearchIcon, ChevronDownIcon } from "@/components/icons";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { GetAllCompaniesResponse } from "@/app/api/company/route";
 
 type ColumnKey = keyof Pick<GetAllCompaniesResponse, "company_name" | "company_url">;
@@ -41,7 +41,7 @@ const sortOptions = [
 
 type SortOption = (typeof sortOptions)[number];
 
-export default function TableCompany() {
+export function TableCompany() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
   const { data: companies = [], isLoading, error } = useSWR<GetAllCompaniesResponse[]>(API.COMPANY.getAll, fetcher);

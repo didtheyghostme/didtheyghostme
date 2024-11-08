@@ -8,7 +8,7 @@ type AllJobSearchInputProps = {
   onSearchChange: (newSearch: string) => void;
 };
 
-export default function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputProps) {
+export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
   };

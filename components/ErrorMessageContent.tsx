@@ -11,7 +11,7 @@ type ErrorMessageContentProps = {
   message: string;
 };
 
-export default function ErrorMessageContent({ title = "Error", message }: ErrorMessageContentProps) {
+export function ErrorMessageContent({ title = "Error", message }: ErrorMessageContentProps) {
   const pathname = usePathname();
   const handleRefresh = () => {
     window.location.reload();

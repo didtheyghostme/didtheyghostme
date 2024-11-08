@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import HomePage from "./HomePage";
+import { HomePage } from "./HomePage";
 
 import { siteConfig } from "@/config/site";
 

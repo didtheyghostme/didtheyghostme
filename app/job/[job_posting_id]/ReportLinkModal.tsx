@@ -15,7 +15,7 @@ type ReportLinkModalProps = {
   jobStatus: JobStatus;
 };
 
-export default function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLinkModalProps) {
+export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLinkModalProps) {
   const { createReportAdmin, isCreating } = useCreateReportAdmin();
 
   const { control, watch, handleSubmit, reset } = useForm<ReportLinkFormValues>({

@@ -32,7 +32,7 @@ function getLogoDevFullUrl(url: string | null) {
   return `${LOGO_DEV_URL}${url}${LOGO_DEV_TOKEN}`;
 }
 
-export default function ImageWithFallback({
+export function ImageWithFallback({
   src,
   fallbackSrc = EMPTY_PLACEHOLDER_URL,
   companyName,

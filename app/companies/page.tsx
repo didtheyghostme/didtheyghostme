@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import TableCompany from "./TableCompany";
+import { TableCompany } from "./TableCompany";
 
 export const metadata: Metadata = {
   title: "Companies",

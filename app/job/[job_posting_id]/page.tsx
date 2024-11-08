@@ -9,13 +9,13 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import mixpanel from "mixpanel-browser";
 import { toast } from "sonner";
 
-import ReportLinkModal from "./ReportLinkModal";
-import TrackThisJobModal from "./TrackThisJobModal";
-import TableOfAppliedApplication from "./TableOfAppliedApplication";
+import { ReportLinkModal } from "./ReportLinkModal";
+import { TrackThisJobModal } from "./TrackThisJobModal";
+import { TableOfAppliedApplication } from "./TableOfAppliedApplication";
 import { InterviewExperienceContent } from "./InterviewExperienceContent";
 import { OnlineAssessmentContent } from "./OnlineAssessmentContent";
 import { QuestionContent } from "./QuestionContent";
-import SuggestLinkModal from "./SuggestLinkModal";
+import { SuggestLinkModal } from "./SuggestLinkModal";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon, PlusIcon } from "@/components/icons";
@@ -24,12 +24,12 @@ import { API } from "@/lib/constants/apiRoutes";
 import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
-import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
-import DataNotFoundMessage from "@/components/DataNotFoundMessage";
+import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 // Define the tab mapping
 const TABS = {

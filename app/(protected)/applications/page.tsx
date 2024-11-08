@@ -8,10 +8,10 @@ import mixpanel from "mixpanel-browser";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { DBTable } from "@/lib/constants/dbTables";
-import LoadingContent from "@/components/LoadingContent";
-import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { LoadingContent } from "@/components/LoadingContent";
+import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
   [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title" | "country"> & {

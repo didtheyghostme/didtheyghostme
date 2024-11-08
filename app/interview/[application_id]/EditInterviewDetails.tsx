@@ -12,7 +12,7 @@ import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperi
 import { InterviewExperienceCardData, LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 type EditInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;

@@ -120,7 +120,7 @@ function generateMockApplications(count: number): ProcessedApplication[] {
 
 // const applications = generateMockApplications(100);
 
-export default function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
+export function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
   const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
     status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]),
     sort: parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("applied_date_asc"),

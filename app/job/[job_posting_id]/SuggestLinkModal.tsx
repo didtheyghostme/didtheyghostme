@@ -15,7 +15,7 @@ type SuggestLinkModalProps = {
   jobStatus: JobStatus;
 };
 
-export default function SuggestLinkModal({ isOpen, onClose, jobId, jobStatus }: SuggestLinkModalProps) {
+export function SuggestLinkModal({ isOpen, onClose, jobId, jobStatus }: SuggestLinkModalProps) {
   const { createReportAdmin, isCreating } = useCreateReportAdmin();
 
   const { control, handleSubmit } = useForm<SuggestLinkFormValues>({

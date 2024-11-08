@@ -1,12 +1,11 @@
 "use client";
 
-import { Button, Card, CardBody, CardHeader, Tabs, Tab, Image } from "@nextui-org/react";
-import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { Button, Card, CardBody, Tabs, Tab, Image, AccordionItem, Accordion, Link } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 
+// TODO: replace screenshots with actual screenshots
 const features = [
   {
     title: "Browse jobs",
@@ -91,18 +90,15 @@ const faqs = [
   },
 ];
 
-export default function HomePage() {
+export function HomePage() {
   const { theme } = useTheme();
-  const router = useRouter();
 
-  const handleFindJobs = () => {
+  const mixpanelTrackFindJobsButtonClick = () => {
     mixpanel.track("Home Page", { action: "find_jobs_button_clicked" });
-    router.push("/jobs");
   };
 
-  const handleFindCompanies = () => {
+  const mixpanelTrackFindCompaniesButtonClick = () => {
     mixpanel.track("Home Page", { action: "find_companies_button_clicked" });
-    router.push("/companies");
   };
 
   const handleTabChange = (tabName: string) => {
@@ -113,7 +109,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-16 md:py-10">
+    <div className="flex flex-col items-center gap-16 pb-12 md:py-10">
       {/* Hero Section */}
       <section className="flex flex-col items-center gap-4 text-center">
         <motion.div animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4" initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }}>
@@ -125,10 +121,10 @@ export default function HomePage() {
           <p className="mx-auto max-w-xl text-lg text-default-600">Organize your job applications, share interview experiences, and connect with a community of job seekers.</p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button className="transition-colors hover:bg-default-100" color="default" size="lg" variant="bordered" onPress={handleFindCompanies}>
+            <Button as={Link} className="transition-colors hover:bg-default-100" color="default" href="/companies" size="lg" variant="bordered" onPress={mixpanelTrackFindCompaniesButtonClick}>
               Find Companies
             </Button>
-            <Button className="transition-colors hover:bg-primary/20" color="primary" size="lg" variant="bordered" onPress={handleFindJobs}>
+            <Button as={Link} className="transition-colors hover:bg-primary/20" color="primary" href="/jobs" size="lg" variant="bordered" onPress={mixpanelTrackFindJobsButtonClick}>
               Find Jobs
             </Button>
           </div>
@@ -178,40 +174,29 @@ export default function HomePage() {
       {/* FAQ Section */}
       <section className="w-full max-w-4xl px-6">
         <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
-        <div className="grid gap-4">
-          {faqs.map((faq, index) => (
-            <motion.div key={index} animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ delay: index * 0.1 }}>
-              <Card>
-                <CardHeader className="flex gap-3">
+        {/* TODO: 8 nov add the FAQ content from didtheyghost.me */}
+        <motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }}>
+          <Accordion defaultExpandedKeys={["0"]} selectionMode="multiple" variant="bordered">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                aria-label={faq.question}
+                title={faq.question}
+                classNames={{
+                  title: "text-lg font-semibold",
+                  content: "text-default-600",
+                }}
+                startContent={
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
                     <span className="text-primary">Q</span>
                   </div>
-                  <h3 className="text-lg font-semibold">{faq.question}</h3>
-                </CardHeader>
-                <CardBody>
-                  <p className="text-default-600">{faq.answer}</p>
-                </CardBody>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="w-full max-w-4xl px-6">
-        <Card className="bg-gradient-to-r from-primary/20 to-secondary/20">
-          <CardBody className="flex flex-col items-center gap-4 p-12 text-center">
-            <h2 className="text-3xl font-bold">Ready to Start Your Journey?</h2>
-            <p className="max-w-lg text-default-600">Join thousands of job seekers who are already using our platform to manage their job search process.</p>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button color="primary" size="lg" variant="shadow">
-                  Get Started Now
-                </Button>
-              </SignInButton>
-            </SignedOut>
-          </CardBody>
-        </Card>
+                }
+              >
+                {faq.answer}
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>{" "}
       </section>
     </div>
   );

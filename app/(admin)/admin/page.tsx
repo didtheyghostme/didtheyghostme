@@ -1,8 +1,8 @@
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
-import AdminReportTable from "./AdminReportTable";
+import { AdminReportTable } from "./AdminReportTable";
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-4 p-4">
       <Card>

@@ -5,7 +5,7 @@ import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExp
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
-import ImageWithFallback from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CalendarIcon } from "@/components/icons";
 
 type ViewInterviewDetailsProps = {
