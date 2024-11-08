@@ -2,7 +2,6 @@
 
 import { Card, CardBody, CardHeader, Button, Link } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
-import { usePathname } from "next/navigation";
 
 import { AlertCircleIcon } from "./icons";
 
@@ -12,15 +11,17 @@ type ErrorMessageContentProps = {
 };
 
 export function ErrorMessageContent({ title = "Error", message }: ErrorMessageContentProps) {
-  const pathname = usePathname();
   const handleRefresh = () => {
+    mixpanel.track("Refresh Page Clicked", {
+      component: "ErrorMessageContent",
+      error_message: message,
+    });
     window.location.reload();
   };
 
   const mixpanelTrackContactSupportClick = () => {
     mixpanel.track("Contact Support Clicked", {
-      pathname,
-      placement: "ErrorMessageContent",
+      component: "ErrorMessageContent",
       error_message: message,
     });
   };

@@ -11,7 +11,7 @@ export const ClerkUserButton = () => {
 
   const handleViewMyApplicationsClick = () => {
     mixpanel.track("View My Applications Clicked", {
-      placement: "ClerkUserButton navbar /applications",
+      component: "ClerkUserButton navbar /applications",
     });
 
     router.push("/applications");
@@ -19,7 +19,7 @@ export const ClerkUserButton = () => {
 
   const handleContactSupportClick = () => {
     mixpanel.track("Contact Support Clicked", {
-      placement: "ClerkUserButton navbar /contact",
+      component: "ClerkUserButton navbar /contact",
     });
 
     router.push("/contact");

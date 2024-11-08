@@ -1,14 +1,11 @@
 "use client";
 
 import { Link } from "@nextui-org/react";
-import mixpanel from "mixpanel-browser";
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import mixpanel from "mixpanel-browser";
 
 export function RateLimitErrorMessage() {
-  const pathname = usePathname();
-
   useEffect(() => {
     toast.error("Too many requests. Please try again later.", {
       duration: 5000,
@@ -17,8 +14,7 @@ export function RateLimitErrorMessage() {
 
   const mixpanelTrackContactSupportClick = () => {
     mixpanel.track("Contact Support Clicked", {
-      pathname: pathname,
-      placement: "RateLimitErrorMessage",
+      component: "RateLimitErrorMessage",
     });
   };
 
