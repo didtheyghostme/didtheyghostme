@@ -20,8 +20,9 @@ import { isRateLimitError } from "@/lib/errorHandling";
 import RateLimitErrorMessage from "@/components/RateLimitErrorMessage";
 import LoadingContent from "@/components/LoadingContent";
 import ErrorMessageContent from "@/components/ErrorMessageContent";
+import { GetAllCompaniesResponse } from "@/app/api/company/route";
 
-type ColumnKey = keyof Pick<CompanyTable, "company_name" | "company_url">;
+type ColumnKey = keyof Pick<GetAllCompaniesResponse, "company_name" | "company_url">;
 
 type Column = {
   name: ColumnKey;
@@ -43,7 +44,7 @@ type SortOption = (typeof sortOptions)[number];
 export default function TableCompany() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const pathname = usePathname();
-  const { data: companies = [], isLoading, error } = useSWR<CompanyTable[]>(API.COMPANY.getAll, fetcher);
+  const { data: companies = [], isLoading, error } = useSWR<GetAllCompaniesResponse[]>(API.COMPANY.getAll, fetcher);
 
   const [currentSort, setCurrentSort] = useQueryState("sort", parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("name_asc"));
 
@@ -82,7 +83,7 @@ export default function TableCompany() {
     return sortedAndFilteredItems.slice(start, end);
   }, [page, sortedAndFilteredItems]);
 
-  const renderCell = React.useCallback((company: CompanyTable, columnKey: ColumnKey) => {
+  const renderCell = React.useCallback((company: GetAllCompaniesResponse, columnKey: ColumnKey) => {
     const cellValue = company[columnKey];
 
     switch (columnKey) {
