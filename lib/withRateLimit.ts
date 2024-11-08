@@ -28,6 +28,15 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
     const [burstResult, sustainedResult] = await Promise.all([limiters.burstWrite.limit(ip), limiters.sustainedWrite.limit(ip)]);
 
     if (!burstResult.success || !sustainedResult.success) {
+      await mixpanel.track("Rate limit violation", {
+        distinct_id: user_id || `anon_${ip}`,
+        limiter_type: "Primary",
+        route_type: routeType,
+        endpoint_name: endpointName,
+        attempts_made: burstResult.limit - burstResult.remaining,
+        window_type: burstResult.success ? "BURST" : "SUSTAINED",
+        ip_address: ip,
+      });
       throw new Error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
     }
   } catch (error) {

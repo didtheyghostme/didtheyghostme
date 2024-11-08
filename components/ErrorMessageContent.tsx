@@ -1,6 +1,8 @@
 "use client";
 
 import { Card, CardBody, CardHeader, Button, Link } from "@nextui-org/react";
+import mixpanel from "mixpanel-browser";
+import { usePathname } from "next/navigation";
 
 import { AlertCircleIcon } from "./icons";
 
@@ -10,8 +12,17 @@ type ErrorMessageContentProps = {
 };
 
 export default function ErrorMessageContent({ title = "Error", message }: ErrorMessageContentProps) {
+  const pathname = usePathname();
   const handleRefresh = () => {
     window.location.reload();
+  };
+
+  const mixpanelTrackContactSupportClick = () => {
+    mixpanel.track("Contact Support Clicked", {
+      pathname,
+      placement: "ErrorMessageContent",
+      error_message: message,
+    });
   };
 
   return (
@@ -28,7 +39,7 @@ export default function ErrorMessageContent({ title = "Error", message }: ErrorM
               Refresh Page
             </Button>
 
-            <Link showAnchorIcon className="text-primary hover:underline" href="/contact">
+            <Link showAnchorIcon className="text-primary hover:underline" href="/contact" onPress={mixpanelTrackContactSupportClick}>
               Contact Support
             </Link>
           </div>
