@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { ERROR_MESSAGES } from "./errorHandling";
 import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, jobLimiters, othersLimiters } from "./rateLimit";
 import { RateLimitRouteType } from "./rateLimitConfig";
-import { mixpanel } from "./mixpanelServer";
+import { mp } from "./mixpanelServer";
 
 type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackApplication" | "ReportAdmin" | "UpdateInterviewRounds";
 
@@ -28,7 +28,7 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
     const [burstResult, sustainedResult] = await Promise.all([limiters.burstWrite.limit(ip), limiters.sustainedWrite.limit(ip)]);
 
     if (!burstResult.success || !sustainedResult.success) {
-      await mixpanel.track("Rate limit violation", {
+      await mp.track("Rate limit exceeded", {
         distinct_id: user_id || `anon_${ip}`,
         limiter_type: "Primary",
         route_type: routeType,
@@ -49,7 +49,7 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
         const failedLimit = !burstFallback.success ? burstFallback : sustainedFallback;
         const windowType = !burstFallback.success ? "BURST" : "SUSTAINED";
 
-        await mixpanel.track("Rate limit violation", {
+        await mp.track("Rate limit exceeded", {
           distinct_id: user_id || `anon_${ip}`,
           limiter_type: "Fallback",
           route_type: routeType,

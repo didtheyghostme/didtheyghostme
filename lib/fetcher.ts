@@ -9,7 +9,7 @@ export const fetcher = async <T = any>(resource: RequestInfo, init?: RequestInit
     if (response.status === 429) {
       const data = (await response.json()) as RateLimitErrorResponse;
 
-      mixpanel.track("Rate limit violation", {
+      mixpanel.track("Rate limit exceeded", {
         distinct_id: mixpanel.get_distinct_id(),
         url: resource.toString(),
         limiter_type: data.limiterType === "primary" ? "Upstash" : "Fallback",

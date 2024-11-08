@@ -4,7 +4,7 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { mixpanel } from "@/lib/mixpanelServer";
+import { mp } from "@/lib/mixpanelServer";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const isNewUser = evt.type === "user.created";
     const timestamp = new Date().toISOString();
 
-    mixpanel.people.set(userId, {
+    mp.people.set(userId, {
       $email: evt.data.email_addresses[0]?.email_address,
       $github: evt.data.external_accounts.find((account) => account.provider === "oauth_github")?.username,
       $name: `${evt.data.first_name} ${evt.data.last_name}`,
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
     const event_name = isNewUser ? "User Signed Up" : "User Profile Updated";
 
-    mixpanel.track(event_name, {
+    mp.track(event_name, {
       distinct_id: userId,
       clerk_id: userId,
       $email: evt.data.email_addresses[0]?.email_address,
