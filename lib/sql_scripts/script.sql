@@ -401,3 +401,61 @@ BEGIN
   ORDER BY ie.created_at DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+
+
+-- TRIGGERS
+
+DROP TRIGGER IF EXISTS after_trigger_job_posting_changelog ON job_posting;
+DROP FUNCTION IF EXISTS trigger_job_posting_changelog();
+
+CREATE OR REPLACE FUNCTION trigger_job_posting_changelog()
+RETURNS TRIGGER AS $$
+DECLARE
+  history JSONB := '{}'::JSONB;
+BEGIN
+  IF TG_OP = 'UPDATE' THEN
+    -- Get only the changed fields with their old and new values
+    SELECT jsonb_object_agg(
+      NEW_data.key,
+      jsonb_build_object(
+        'old', OLD_data.value,
+        'new', NEW_data.value
+      )
+    )
+    INTO history
+    FROM jsonb_each(to_jsonb(NEW)) AS NEW_data(key, value)
+    JOIN jsonb_each(to_jsonb(OLD)) AS OLD_data(key, value)
+      ON NEW_data.key = OLD_data.key
+    WHERE NEW_data.key NOT IN ('id', 'created_at', 'updated_at', 'user_id')
+      AND OLD_data.value IS DISTINCT FROM NEW_data.value;
+
+    -- Only insert if there are actual changes
+    IF history IS NOT NULL AND history <> '{}'::JSONB THEN
+      INSERT INTO job_posting_changelog (
+        job_posting_id,
+        history,  -- This will store only changed fields with old/new values
+        handled_by
+      ) VALUES (
+        NEW.id,
+        history,
+        requesting_user_id()
+      );
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Then create the trigger
+CREATE TRIGGER after_trigger_job_posting_changelog
+AFTER UPDATE ON job_posting
+FOR EACH ROW
+EXECUTE FUNCTION trigger_job_posting_changelog();
+
+
+-- SELECT * FROM information_schema.triggers 
+-- WHERE trigger_name = 'after_trigger_job_posting_changelog';
