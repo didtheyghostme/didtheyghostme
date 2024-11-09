@@ -90,12 +90,12 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified }: A
                 <CardBody className="p-4">
                   <div className="flex gap-4">
                     {/* Company Logo */}
-                    <div className="flex-shrink-0">
-                      <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={job.company.company_name} src={job.company.logo_url} />
+                    <div className="h-14 w-14 flex-shrink-0">
+                      <ImageWithFallback alt={job.company.company_name} companyName={job.company.company_name} src={job.company.logo_url} />
                     </div>
 
                     {/* Job Details */}
-                    <div className="flex flex-1 flex-col gap-2">
+                    <div className="flex flex-1 flex-col justify-center gap-2">
                       {/* Title Row with New Badge and Time */}
                       <div className="flex items-start justify-between gap-1">
                         <div className="flex flex-wrap items-center gap-2">

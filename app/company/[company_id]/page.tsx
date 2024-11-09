@@ -157,8 +157,10 @@ export default function CompanyDetailsPage() {
     <div className="pb-12">
       {/* Company Name and Logo and URL */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-shrink-0 items-center gap-4">
-          <ImageWithFallback className="h-16 w-16 rounded-lg object-contain p-1" companyName={company.company_name} src={company.logo_url} />
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 flex-shrink-0">
+            <ImageWithFallback companyName={company.company_name} src={company.logo_url} />
+          </div>
           <h1 className="break-words text-base font-bold sm:text-3xl">{company.company_name}</h1>
         </div>
         <Link isExternal showAnchorIcon className="whitespace-nowrap text-primary hover:underline" href={company.company_url} onPress={handleCompanyWebsiteClick}>

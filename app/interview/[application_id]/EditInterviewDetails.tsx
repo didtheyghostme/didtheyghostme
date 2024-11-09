@@ -146,10 +146,9 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
+              <div className="h-12 w-12 flex-shrink-0">
                 <ImageWithFallback
                   alt={applicationDetails.job_posting.company.company_name}
-                  className="h-12 w-12 rounded-lg object-cover"
                   companyName={applicationDetails.job_posting.company.company_name}
                   src={applicationDetails.job_posting.company.logo_url}
                 />

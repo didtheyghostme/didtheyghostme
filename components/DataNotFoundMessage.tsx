@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Link } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, cn, Link } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
 
 import { AlertCircleIcon } from "./icons";
@@ -6,9 +6,10 @@ import { AlertCircleIcon } from "./icons";
 type DataNotFoundMessageProps = {
   title?: string;
   message?: string;
+  className?: string;
 };
 
-export function DataNotFoundMessage({ title = "No Results Found", message = "We couldn't find what you're looking for." }: DataNotFoundMessageProps) {
+export function DataNotFoundMessage({ title = "No results found", message = "We couldn't find what you're looking for.", className }: DataNotFoundMessageProps) {
   const mixpanelTrackBrowseAllJobsClick = () => {
     mixpanel.track("Browse All Jobs Clicked", {
       component: "DataNotFoundMessage",
@@ -17,7 +18,7 @@ export function DataNotFoundMessage({ title = "No Results Found", message = "We 
   };
 
   return (
-    <div className="flex min-h-[400px] items-center justify-center p-4">
+    <div className={cn("flex min-h-[400px] items-center justify-center p-4", className)}>
       <Card className="w-full max-w-[500px]">
         <CardHeader className="flex gap-3">
           <AlertCircleIcon className="text-default-400" />

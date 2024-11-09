@@ -208,6 +208,13 @@ export default function JobDetailsPage() {
     setSelectedTab(key as TabKey);
   };
 
+  const mixpanelTrackSignInToTrackJobClick = () => {
+    mixpanel.track("Job Posting Page", {
+      action: "sign_in_to_track_job_clicked",
+      job_id: job_posting_id,
+    });
+  };
+
   return (
     <div className="">
       <Button className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
@@ -220,13 +227,8 @@ export default function JobDetailsPage() {
           <div className="flex w-full flex-col gap-1 sm:hidden">
             <div className="flex items-center justify-between">
               <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <ImageWithFallback
-                    alt={jobDetails.company.company_name}
-                    className="h-12 w-12 rounded-lg object-cover"
-                    companyName={jobDetails.company.company_name}
-                    src={jobDetails.company.logo_url}
-                  />
+                <div className="h-12 w-12 flex-shrink-0">
+                  <ImageWithFallback alt={jobDetails.company.company_name} companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
                 </div>
 
                 {/* Job Portal Link - Now next to image */}
@@ -309,8 +311,8 @@ export default function JobDetailsPage() {
 
           {/* Desktop Layout */}
           <div className="hidden sm:flex sm:items-center sm:gap-3">
-            <div className="flex-shrink-0">
-              <ImageWithFallback alt={jobDetails.company.company_name} className="h-12 w-12 rounded-lg object-cover" companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
+            <div className="h-12 w-12 flex-shrink-0">
+              <ImageWithFallback alt={jobDetails.company.company_name} companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
             </div>
             <div>
               <p className="text-lg font-normal">{jobDetails.title}</p>
@@ -356,7 +358,7 @@ export default function JobDetailsPage() {
             )}
             {!jobDetails.url && (
               <div className="flex flex-col items-end gap-1">
-                <p className="text-default-500">No job portal link available</p>
+                <p className="text-center text-default-500">No job portal link available</p>
                 <SignedIn>
                   <Button
                     className="gap-0 px-2 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
@@ -416,7 +418,12 @@ export default function JobDetailsPage() {
 
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-              <Button className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground" color="primary" variant="bordered">
+              <Button
+                className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
+                color="primary"
+                variant="bordered"
+                onPress={mixpanelTrackSignInToTrackJobClick}
+              >
                 Sign in to track this job
               </Button>
             </SignInButton>

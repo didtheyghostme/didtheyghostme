@@ -38,7 +38,7 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
 
     return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <DataNotFoundMessage message="No interview experiences found" />;
+  if (!applicationsWithCounts || applicationsWithCounts.length === 0) return <DataNotFoundMessage message="No interview experiences yet" />;
 
   const sortedApplications = sortApplicationsByDateTime(applicationsWithCounts, sort);
 

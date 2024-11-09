@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ImageProps, Image } from "@nextui-org/react";
+import { ImageProps, Image, cn } from "@nextui-org/react";
 
 const EMPTY_PLACEHOLDER_URL = "https://placehold.co/48?text=?";
 
 const LOGO_DEV_URL = "https://img.logo.dev/";
 const LOGO_DEV_TOKEN = "?token=pk_DxrQtA58T7qDKnpL24nlww";
+
+const COMPANY_ROUNDED_LOGO_LIST = ["TikTok"];
 
 function cleanCompanyName(name: string): string {
   // Remove special characters, spaces, and convert to lowercase
@@ -36,11 +38,13 @@ export function ImageWithFallback({
   src,
   fallbackSrc = EMPTY_PLACEHOLDER_URL,
   companyName,
+  className,
   ...props
 }: {
   src: string | null;
   fallbackSrc?: string;
   companyName?: string;
+  className?: string;
 } & Omit<ImageProps, "src">) {
   const [imgSrc, setImgSrc] = useState(getLogoDevFullUrl(src) || fallbackSrc);
   const [fallbackStage, setFallbackStage] = useState(0); // 0: initial, 1: domain tried, 2: company tried
@@ -78,5 +82,17 @@ export function ImageWithFallback({
     }
   };
 
-  return <Image {...props} alt="logo" src={imgSrc} onError={handleImageError} />;
+  return (
+    <Image
+      {...props}
+      alt="logo"
+      src={imgSrc}
+      classNames={{
+        img: cn("h-full w-full !object-contain !rounded-large", className, {
+          "!rounded-full": companyName && COMPANY_ROUNDED_LOGO_LIST.includes(companyName),
+        }),
+      }}
+      onError={handleImageError}
+    />
+  );
 }

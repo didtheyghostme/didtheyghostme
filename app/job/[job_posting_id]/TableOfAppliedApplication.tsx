@@ -299,18 +299,20 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
 
   const bottomContent = React.useMemo(() => {
     return (
-      <div className="flex flex-row items-center justify-between px-2 py-2">
-        <span className="text-small text-default-400"> {filteredItems.length} applicants </span>
-        <div className="flex flex-1 items-center justify-end sm:flex-initial sm:justify-center">
-          <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={(newPage) => setQueryStates({ page: newPage })} />
-        </div>
-        <div className="hidden gap-2 sm:flex">
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
-            Previous
-          </Button>
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
-            Next
-          </Button>
+      <div className="flex flex-col-reverse gap-4 px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-center text-small text-default-400 sm:text-left"> {filteredItems.length} applicants </span>
+        <div className="flex flex-col items-center gap-4 sm:flex-1 sm:flex-row">
+          <div className="flex w-full items-center justify-center sm:flex-1">
+            <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={(newPage) => setQueryStates({ page: newPage })} />
+          </div>
+          <div className="hidden gap-2 sm:flex">
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
+              Previous
+            </Button>
+            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     );

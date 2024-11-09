@@ -20,6 +20,7 @@ import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 type QuestionContentProps = {
   job_posting_id: string;
@@ -132,8 +133,9 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
         </Modal>
       </SignedIn>
 
-      <Spacer y={4} />
-      {questions.length === 0 && <div>No questions yet</div>}
+      {questions.length === 0 && <DataNotFoundMessage className="min-h-[288px]" message="No questions yet" />}
+
+      {questions.length > 0 && <Spacer y={4} />}
 
       {questions.length > 0 &&
         questions.map((question) => (

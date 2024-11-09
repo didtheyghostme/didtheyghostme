@@ -56,7 +56,7 @@ export function OnlineAssessmentContent({ job_posting_id }: OnlineAssessmentCont
 
     return <ErrorMessageContent message="Failed to load data" />;
   }
-  if (!onlineAssessments || onlineAssessments.length === 0) return <DataNotFoundMessage message="No online assessments found" />;
+  if (!onlineAssessments || onlineAssessments.length === 0) return <DataNotFoundMessage message="No online assessments yet" />;
 
   const sortedOnlineAssessments = sortApplicationsByDateTime(onlineAssessments, sort);
 
