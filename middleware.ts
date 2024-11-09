@@ -2,8 +2,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { createRateLimitResponse } from "@/lib/errorHandling";
-import { jobLimiters, othersLimiters, companyLimiters, isUpstashDailyLimitError, createFallbackRateLimiters } from "@/lib/rateLimit";
+import { jobLimiters, othersLimiters, companyLimiters, createFallbackRateLimiters } from "@/lib/rateLimit";
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
+import { getUpstashFailedStatus, setUpstashFailedStatus } from "@/lib/rateLimitFallbackRedis";
 
 const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
 
@@ -14,10 +15,21 @@ const isJobRoutes = createRouteMatcher(["/api/job(.*)"]);
 const isCompanyRoutes = createRouteMatcher(["/api/company(.*)"]);
 const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(.*)"]);
 
+async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; ip: string }): Promise<boolean> {
+  const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({
+    routeType: params.routeType,
+    operation: params.operation,
+    ip: params.ip,
+  });
+
+  return burstFallback.success && sustainedFallback.success;
+}
+
 export default clerkMiddleware(async (auth, req) => {
   const session = await auth();
 
   // First check: Protects API routes (requires authentication)
+
   if (isProtectedRoute(req)) {
     await auth().protect();
 
@@ -31,7 +43,7 @@ export default clerkMiddleware(async (auth, req) => {
 
       return NextResponse.redirect(url);
     }
-
+    
     // Admin users bypass rate limiting
     return NextResponse.next();
   }
@@ -44,45 +56,49 @@ export default clerkMiddleware(async (auth, req) => {
   else if (isOtherRoutes(req)) limiters = othersLimiters;
 
   if (limiters) {
-    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
-
     // Choose rate limiter based on HTTP method
+    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const isRead = ["GET", "HEAD"].includes(req.method);
+    const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : "OTHERS";
+    const operation: OperationType = isRead ? "READ" : "WRITE";
 
-    // Use both burst and sustained limiters
-    const burstLimiter = isRead ? limiters.burstRead : limiters.burstWrite;
-    const sustainedLimiter = isRead ? limiters.sustainedRead : limiters.sustainedWrite;
+    // Check if Upstash is in failed state
+    const isUpstashFailed = await getUpstashFailedStatus();
 
-    // Check both limits
+    if (isUpstashFailed) {
+      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
+
+      if (!isFallbackSuccess) {
+        return NextResponse.json(createRateLimitResponse("fallback"), { status: 429 });
+      }
+
+      return NextResponse.next();
+    }
+
     try {
-      // Try primary limiters first
+      const burstLimiter = isRead ? limiters.burstRead : limiters.burstWrite;
+      const sustainedLimiter = isRead ? limiters.sustainedRead : limiters.sustainedWrite;
+
       const [burstResult, sustainedResult] = await Promise.all([burstLimiter.limit(ip), sustainedLimiter.limit(ip)]);
 
-      // If rate limit exceeded, return 429 immediately
       if (!burstResult.success || !sustainedResult.success) {
-        console.error("upstash rate limit exceeded...");
-        const response = createRateLimitResponse("primary");
-
-        return NextResponse.json(response, { status: 429 });
+        return NextResponse.json(createRateLimitResponse("primary"), { status: 429 });
       }
     } catch (error) {
-      // Only use fallback if Upstash fails (connection error, etc)
-      console.warn("Upstash rate limiter failed, using fallback:", error);
+      console.warn("Upstash rate limiter failed:", error);
 
-      if (isUpstashDailyLimitError(error)) {
-        const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : "OTHERS";
-        const operation: OperationType = isRead ? "READ" : "WRITE";
+      await setUpstashFailedStatus();
 
-        const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({ routeType, operation, ip });
+      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
 
-        if (!burstFallback.success || !sustainedFallback.success) {
-          const response = createRateLimitResponse("fallback");
-
-          return NextResponse.json(response, { status: 429 });
-        }
+      if (!isFallbackSuccess) {
+        return NextResponse.json(createRateLimitResponse("fallback"), { status: 429 });
       }
     }
   }
+
+  // Ensure the request proceeds if all checks pass
+  return NextResponse.next();
 });
 
 export const config = {
