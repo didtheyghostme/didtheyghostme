@@ -1,8 +1,17 @@
+export class APINotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "APINotFoundError";
+  }
+}
+
 export const ERROR_CODES = {
   UNIQUE_VIOLATION: "23505",
+  INVALID_TEXT_REPRESENTATION: "22P02",
 };
 
 export const ERROR_MESSAGES = {
+  NOT_FOUND: "Not found",
   DUPLICATE_URL: "A company with this URL already exists.",
   DUPLICATE_NAME: "A company with this name already exists.",
   // Add other error messages here

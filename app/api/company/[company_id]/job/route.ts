@@ -5,6 +5,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString } from "@/lib/buildSelectString";
 import { SelectObject } from "@/lib/buildSelectString";
 import { CompanyDetailsPageAllJobsResponse } from "@/app/company/[company_id]/page";
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // Select all the jobs from job_posting table for a company on the specific company page
 
@@ -29,6 +30,10 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     .order("updated_at", { ascending: false });
 
   if (error) {
+    if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
+      return NextResponse.json({ error: ERROR_MESSAGES.NOT_FOUND }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

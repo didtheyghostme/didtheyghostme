@@ -4,6 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { processDataOwnershipArray } from "@/lib/processDataOwnership";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 export type GetAllApplicationsByJobPostingIdResponse = ProcessedApplications;
 
@@ -29,9 +30,13 @@ export async function GET(request: Request, { params }: { params: { job_posting_
 
   const { data, error } = await supabase.from(DBTable.APPLICATION).select(selectString).eq("job_posting_id", params.job_posting_id).returns<JoinedApplication[]>();
 
-  console.warn("data in route handler applications", data);
+  // console.warn("data in route handler applications", data, error);
 
   if (error) {
+    if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
+      return NextResponse.json({ error: ERROR_MESSAGES.NOT_FOUND }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

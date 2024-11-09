@@ -4,6 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { JobDetails } from "@/app/job/[job_posting_id]/page";
 import { SelectObject, buildSelectString } from "@/lib/buildSelectString";
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // TODO: on this job specific page, select all the applications for this job
 
@@ -36,6 +37,10 @@ export async function GET(request: Request, { params }: { params: { job_posting_
   // console.error("data in route handler of this joaab", data, error);
 
   if (error) {
+    if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
+      return NextResponse.json({ error: ERROR_MESSAGES.NOT_FOUND }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

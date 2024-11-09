@@ -4,6 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { processDataOwnershipObject } from "@/lib/processDataOwnership";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 export type GetApplicationByIdResponse = ProcessedApplication & {
   [DBTable.JOB_POSTING]: Pick<JobPostingTable, "title"> & {
@@ -49,6 +50,10 @@ export async function GET(request: Request, { params }: { params: { application_
   // console.warn("data in route handler application", data, error);
 
   if (error) {
+    if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
+      return NextResponse.json({ error: ERROR_MESSAGES.NOT_FOUND }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

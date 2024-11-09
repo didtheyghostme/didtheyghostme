@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
+import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 export type QuestionPageRequest = Pick<CommentTable, "id" | "content" | "created_at" | "entity_id"> & {
   [DBTable.USER_DATA]: ClerkUserProfileData;
@@ -27,6 +28,10 @@ export async function GET(request: Request, { params }: { params: { comment_id: 
   const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("id", params.comment_id).maybeSingle();
 
   if (error) {
+    if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
+      return NextResponse.json({ error: ERROR_MESSAGES.NOT_FOUND }, { status: 404 });
+    }
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
