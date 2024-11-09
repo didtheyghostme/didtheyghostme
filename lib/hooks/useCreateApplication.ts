@@ -1,9 +1,10 @@
 import useSWRMutation from "swr/mutation";
 
 import actionCreateApplication from "@/app/actions/createApplication";
+import { API } from "@/lib/constants/apiRoutes";
 
 export const useCreateApplication = (job_posting_id: string) => {
-  const { trigger, isMutating } = useSWRMutation(`/api/job/${job_posting_id}/application`, actionCreateApplication);
+  const { trigger, isMutating } = useSWRMutation(API.APPLICATION.getAllByJobPostingId(job_posting_id), actionCreateApplication);
 
   return {
     createApplication: async (applied_date: string) => {

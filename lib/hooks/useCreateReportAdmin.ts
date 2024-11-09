@@ -2,9 +2,10 @@ import useSWRMutation from "swr/mutation";
 
 import { getErrorMessage } from "@/lib/errorHandling";
 import actionCreateReportAdmin, { CreateReportAdminArgs } from "@/app/actions/createReportAdmin";
+import { API } from "@/lib/constants/apiRoutes";
 
 export const useCreateReportAdmin = () => {
-  const { trigger, isMutating } = useSWRMutation("/api/report", actionCreateReportAdmin);
+  const { trigger, isMutating } = useSWRMutation(API.ADMIN.getAllReports, actionCreateReportAdmin);
 
   return {
     createReportAdmin: async (reportData: CreateReportAdminArgs) => {

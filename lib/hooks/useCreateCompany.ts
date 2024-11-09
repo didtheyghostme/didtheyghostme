@@ -4,9 +4,10 @@ import useSWRMutation from "swr/mutation";
 import actionCreateCompany from "@/app/actions/createCompany";
 import { getErrorMessage } from "@/lib/errorHandling";
 import { CompanyFormData } from "@/lib/schema/addCompanySchema";
+import { API } from "@/lib/constants/apiRoutes";
 
 const useCreateCompany = () => {
-  const { trigger, isMutating } = useSWRMutation("/api/company", actionCreateCompany);
+  const { trigger, isMutating } = useSWRMutation(API.COMPANY.getAll, actionCreateCompany);
 
   return {
     createCompany: async (newCompany: CompanyFormData) => {
