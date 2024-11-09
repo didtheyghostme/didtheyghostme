@@ -40,6 +40,21 @@ type JobPostingTable = {
   updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
 } & BaseUser;
 
+type StrictOmit<T, K extends keyof T> = Omit<T, K>;
+
+type JobPostingChangelogTable = {
+  id: string;
+  job_posting_id: string;
+  history: {
+    [K in keyof StrictOmit<JobPostingTable, keyof BaseUser | "id" | "created_at" | "updated_at">]?: {
+      old: JobPostingTable[K] | null;
+      new: JobPostingTable[K] | null;
+    };
+  };
+  handled_by: string;
+  created_at: string;
+};
+
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Ghosted" | "Offered";
 
 type ApplicationTable = {

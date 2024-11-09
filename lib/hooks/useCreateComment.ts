@@ -3,8 +3,6 @@ import useSWRMutation from "swr/mutation";
 import actionCreateComment from "@/app/actions/createComment";
 import { API } from "@/lib/constants/apiRoutes";
 
-type StrictOmit<T, K extends keyof T> = Omit<T, K>;
-
 export type ServerCreateCommentArgs = Pick<CommentTable, "entity_type" | "entity_id" | "content">;
 
 type ClientCreateCommentArgs = StrictOmit<ServerCreateCommentArgs, "content">;

@@ -22,10 +22,12 @@ export const API = {
     getById: (comment_id: string) => `/api/comment/${comment_id}`, // return one comment by id
   },
   PROTECTED: {
-    getByCurrentUser: () => `/api/applications`, // return all applications for the current user
+    getByCurrentUser: "/api/applications", // return all applications for the current user
   },
   ADMIN: {
-    getAllReports: () => `/api/admin`, // return all reports
+    getAllReports: "/api/admin", // return all reports
+    getAllJobs: "/api/admin/job", // return all jobs
+    getJobChangelog: (job_posting_id: string) => `/api/admin/job/${job_posting_id}/changelog`, // return changelog for a job
   },
 } as const;
 

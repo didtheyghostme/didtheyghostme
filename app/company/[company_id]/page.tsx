@@ -232,7 +232,7 @@ export default function CompanyDetailsPage() {
                   control={control}
                   name="country"
                   render={({ field }) => (
-                    <Select {...field} defaultSelectedKeys={[field.value]} errorMessage={errors.country?.message} label="Country" placeholder="Select a country">
+                    <Select defaultSelectedKeys={[field.value]} errorMessage={errors.country?.message} label="Country" placeholder="Select a country">
                       {COUNTRIES.map((country) => (
                         <SelectItem key={country} value={country}>
                           {country}
