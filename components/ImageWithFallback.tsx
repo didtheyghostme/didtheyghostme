@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ImageProps, Image, cn } from "@nextui-org/react";
 
-const EMPTY_PLACEHOLDER_URL = "https://placehold.co/48?text=?";
+const EMPTY_PLACEHOLDER_URL = "https://placehold.co/56?text=?";
 
 const LOGO_DEV_URL = "https://img.logo.dev/";
 const LOGO_DEV_TOKEN = "?token=pk_DxrQtA58T7qDKnpL24nlww";
