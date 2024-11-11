@@ -7,7 +7,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
+    "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:projectslist": "supabase projects list",
+    "supabase:status": "supabase status"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.5.2",
