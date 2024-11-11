@@ -8,6 +8,7 @@ import useSWR from "swr";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import mixpanel from "mixpanel-browser";
+import { useState } from "react";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
@@ -15,22 +16,55 @@ import { useCreateComment } from "@/lib/hooks/useCreateComment";
 import { AddCommentFormValues, addCommentSchema } from "@/lib/schema/addCommentSchema";
 import { CommentsForThisEntityResponse } from "@/app/api/comment/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
-import { isRateLimitError } from "@/lib/errorHandling";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { useUpdateComment } from "@/lib/hooks/useUpdateComment";
+import { EditIcon } from "@/components/icons";
+import { EditCommentModal } from "@/components/EditCommentModal";
 
-type CommentSectionProps = Pick<CommentTable, "entity_type" | "entity_id">;
+type EditingComment = {
+  id: string;
+  content: string;
+} | null;
+
+type CommentSectionProps = { entity_type: "question"; entity_id: string } | { entity_type: "interview_experience"; entity_id: string };
 
 export function CommentSection({ entity_type, entity_id }: CommentSectionProps) {
   const pathname = usePathname();
 
-  const { data: comments = [], error: commentsError, isLoading: commentsLoading } = useSWR<CommentsForThisEntityResponse[]>(API.COMMENT.getAllByThisEntity(entity_id, entity_type), fetcher);
+  const { data: comments, error: commentsError, isLoading: commentsLoading } = useSWR<CommentsForThisEntityResponse>(API.COMMENT.getAllByThisEntity(entity_id, entity_type), fetcher);
+
+  // console.error("comments", comments);
 
   const { createComment, isCreating } = useCreateComment({
     entity_type,
     entity_id,
   });
+
+  const [editingComment, setEditingComment] = useState<EditingComment>(null);
+
+  const { updateComment, isUpdating } = useUpdateComment({
+    entity_type,
+    comment_id: editingComment?.id || "",
+    entity_id,
+  });
+
+  const handleSubmitEditComment = async (content: string) => {
+    try {
+      await updateComment(content);
+      toast.success("Comment updated successfully");
+      setEditingComment(null);
+    } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return;
+      }
+      toast.error("Failed to update comment");
+    }
+  };
 
   const { control, handleSubmit, reset } = useForm<AddCommentFormValues>({
     resolver: zodResolver(addCommentSchema),
@@ -102,10 +136,11 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
 
       <h2 className="mb-4 text-2xl font-semibold">Comments</h2>
 
-      {comments.length === 0 && <p>No comments yet</p>}
+      {comments?.data.length === 0 && <p>No comments yet</p>}
 
-      {comments.length > 0 &&
-        comments.map((comment) => (
+      {comments?.data &&
+        comments.data.length > 0 &&
+        comments.data.map((comment) => (
           <Card key={comment.id} className="mb-4">
             <CardBody>
               <div className="flex items-start space-x-4">
@@ -113,7 +148,17 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
                 <div className="flex-grow">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm text-default-500">{comment.user_data.full_name}</span>
-                    <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
+
+                    <div className="flex items-center gap-2">
+                      {comment.isCurrentUserItem && (
+                        <Button color="primary" size="sm" variant="flat" onPress={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                          Edit Comment
+                          <EditIcon />
+                        </Button>
+                      )}
+
+                      <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
+                    </div>
                   </div>
                   <p className="whitespace-pre-wrap">{comment.content}</p>
                 </div>
@@ -121,6 +166,11 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
             </CardBody>
           </Card>
         ))}
+
+      {/* Edit Modal */}
+      {editingComment && (
+        <EditCommentModal initialContent={editingComment.content} isOpen={!!editingComment} isUpdating={isUpdating} onClose={() => setEditingComment(null)} onSubmit={handleSubmitEditComment} />
+      )}
     </div>
   );
 }

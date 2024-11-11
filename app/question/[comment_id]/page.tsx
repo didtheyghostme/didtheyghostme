@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { CommentSection } from "./CommentSection";
 
@@ -11,12 +13,14 @@ import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
 import { QuestionPageRequest } from "@/app/api/comment/[comment_id]/route";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
-import { ArrowLeftIcon } from "@/components/icons";
-import { isRateLimitError } from "@/lib/errorHandling";
+import { ArrowLeftIcon, EditIcon } from "@/components/icons";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { useUpdateComment } from "@/lib/hooks/useUpdateComment";
+import { EditCommentModal } from "@/components/EditCommentModal";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -24,6 +28,13 @@ export default function QuestionPage() {
   const router = useRouter();
 
   const { data: question, error, isLoading } = useSWR<QuestionPageRequest>(API.COMMENT.getById(comment_id as string), fetcher);
+
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+
+  const { updateComment, isUpdating } = useUpdateComment({
+    entity_type: "job_posting",
+    comment_id: editingCommentId || "",
+  });
 
   if (isLoading) return <LoadingContent />;
   if (error) {
@@ -43,6 +54,21 @@ export default function QuestionPage() {
     router.push(`/job/${question.entity_id}?tab=Questions`);
   };
 
+  const handleSubmitEditComment = async (content: string) => {
+    try {
+      await updateComment(content);
+      toast.success("Question updated successfully");
+      setEditingCommentId(null);
+    } catch (error) {
+      if (isRateLimitError(error)) {
+        toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
+
+        return;
+      }
+      toast.error("Failed to update question");
+    }
+  };
+
   return (
     <div className="">
       <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onClick={handleBackClick}>
@@ -55,13 +81,26 @@ export default function QuestionPage() {
             <div className="flex-grow">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm text-default-500">{question.user_data.full_name}</span>
-                <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
+                <div className="flex items-center gap-2">
+                  {question.isCurrentUserItem && (
+                    <Button color="primary" size="sm" variant="flat" onPress={() => setEditingCommentId(question.id)}>
+                      Edit question
+                      <EditIcon />
+                    </Button>
+                  )}
+                  <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
+                </div>
               </div>
               <p className="mb-4 whitespace-pre-wrap text-lg">{question.content}</p>
             </div>
           </div>
         </CardBody>
       </Card>
+
+      {/* Add Edit Modal */}
+      {editingCommentId && (
+        <EditCommentModal initialContent={question.content} isOpen={!!editingCommentId} isUpdating={isUpdating} onClose={() => setEditingCommentId(null)} onSubmit={handleSubmitEditComment} />
+      )}
 
       <CommentSection entity_id={comment_id as string} entity_type="question" />
     </div>

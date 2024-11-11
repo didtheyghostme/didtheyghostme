@@ -4,19 +4,25 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
+import { processDataOwnershipObject } from "@/lib/processDataOwnership";
 
-export type QuestionPageRequest = Pick<CommentTable, "id" | "content" | "created_at" | "entity_id"> & {
-  [DBTable.USER_DATA]: ClerkUserProfileData;
+type QuestionCommonData = Pick<CommentTable, "id" | "content" | "created_at" | "entity_id"> & JoinedUser;
+
+type QuestionPageSelectData = QuestionCommonData & Pick<CommentTable, "user_id">;
+
+export type QuestionPageRequest = QuestionCommonData & {
+  isCurrentUserItem: boolean;
 };
 
 export async function GET(request: Request, { params }: { params: { comment_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const selectObject: SelectObject<QuestionPageRequest> = {
+  const selectObject: SelectObject<QuestionPageSelectData> = {
     id: true,
     content: true,
     created_at: true,
     entity_id: true,
+    user_id: true,
     [DBTable.USER_DATA]: {
       full_name: true,
       profile_pic_url: true,
@@ -25,7 +31,7 @@ export async function GET(request: Request, { params }: { params: { comment_id: 
 
   const selectString = buildSelectString(selectObject);
 
-  const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("id", params.comment_id).maybeSingle();
+  const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("id", params.comment_id).returns<QuestionPageSelectData>().maybeSingle();
 
   if (error) {
     if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
@@ -39,5 +45,7 @@ export async function GET(request: Request, { params }: { params: { comment_id: 
     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   }
 
-  return NextResponse.json(data);
+  const processedData = processDataOwnershipObject(data);
+
+  return NextResponse.json(processedData);
 }

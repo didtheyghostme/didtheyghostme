@@ -4,12 +4,15 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { SelectObject, buildSelectString } from "@/lib/buildSelectString";
+import { processDataOwnershipArray } from "@/lib/processDataOwnership";
 
 export type QuestionWithReplyCountResponse = CommentTable & {
   reply_count: number;
 } & JoinedUser;
 
-export type CommentsForThisEntityResponse = Pick<CommentTable, "id" | "content" | "created_at"> & JoinedUser;
+type CommentsSelectData = Pick<CommentTable, "id" | "content" | "created_at" | "user_id"> & JoinedUser;
+
+export type CommentsForThisEntityResponse = ProcessedDataArray<CommentsSelectData>;
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -37,10 +40,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } else {
     // For questions or interview experiences, fetch comments without counts
-    const selectObject: SelectObject<CommentsForThisEntityResponse> = {
+    const selectObject: SelectObject<CommentsSelectData> = {
       id: true,
       content: true,
       created_at: true,
+      user_id: true,
       [DBTable.USER_DATA]: {
         full_name: true,
         profile_pic_url: true,
@@ -49,12 +53,19 @@ export async function GET(request: NextRequest) {
 
     const selectString = buildSelectString(selectObject);
 
-    const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("entity_type", entity_type).eq("entity_id", entity_id).order("created_at", { ascending: true });
+    const { data, error } = await supabase
+      .from(DBTable.COMMENT)
+      .select<typeof selectString, CommentsSelectData>(selectString)
+      .eq("entity_type", entity_type)
+      .eq("entity_id", entity_id)
+      .order("created_at", { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    const processedData = processDataOwnershipArray(data || []);
+
+    return NextResponse.json(processedData);
   }
 }
