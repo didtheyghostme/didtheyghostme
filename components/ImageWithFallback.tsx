@@ -88,8 +88,9 @@ export function ImageWithFallback({
       alt="logo"
       src={imgSrc}
       classNames={{
-        img: cn("h-full w-full !object-contain !rounded-large", className, {
+        img: cn("h-full w-full !object-contain", className, {
           "!rounded-full": companyName && COMPANY_ROUNDED_LOGO_LIST.includes(companyName),
+          "!rounded-xl": !(companyName && COMPANY_ROUNDED_LOGO_LIST.includes(companyName)),
         }),
       }}
       onError={handleImageError}
