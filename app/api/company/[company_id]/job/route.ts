@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     job_status: true,
     updated_at: true,
     job_posted_date: true,
+    closed_date: true,
   };
 
   let selectString = buildSelectString(selectObject);

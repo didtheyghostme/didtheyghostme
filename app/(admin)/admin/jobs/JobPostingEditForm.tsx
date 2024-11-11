@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Input, Select, Button, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker } from "@nextui-org/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDate, parseDate } from "@internationalized/date";
+import { CalendarDate, parseDate, getLocalTimeZone, today } from "@internationalized/date";
 
 import { UpdateJobPostingAdminFormValues } from "@/lib/schema/updateJobPostingAdminSchema";
 import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";
@@ -84,7 +84,8 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Posted Date"
-                value={field.value ? parseDate(field.value.split("T")[0]) : undefined}
+                maxValue={today(getLocalTimeZone())}
+                value={field.value ? parseDate(field.value) : null}
                 onChange={(date: CalendarDate) => field.onChange(date.toString())}
               />
             )}
@@ -98,7 +99,8 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
-                value={field.value ? parseDate(field.value.split("T")[0]) : undefined}
+                maxValue={today(getLocalTimeZone())}
+                value={field.value ? parseDate(field.value) : null}
                 onChange={(date: CalendarDate) => field.onChange(date.toString())}
               />
             )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button, Modal, ModalContent } from "@nextui-org/react";
+import { Card, Button, Modal, ModalContent, Link } from "@nextui-org/react";
 
 import { JobPostingEditForm } from "./JobPostingEditForm";
 import { JobPostingHistory } from "./JobPostingHistory";
@@ -42,11 +42,15 @@ export function JobPostingCard({ jobPosting }: { jobPosting: JobPostingTable }) 
             <p>
               Country: <span className="text-default-700">{jobPosting.country}</span>
             </p>
+            <p>
+              Internal URL: <Link href={`/job/${jobPosting.id}`}>View</Link>
+            </p>
+
             {jobPosting.url && (
               <p>
                 URL:{" "}
                 <a className="text-primary hover:underline" href={jobPosting.url} rel="noopener noreferrer" target="_blank">
-                  View
+                  View job portal URL
                 </a>
               </p>
             )}
