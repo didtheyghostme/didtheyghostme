@@ -1,9 +1,10 @@
-import { Card, CardHeader, Chip, Avatar } from "@nextui-org/react";
+import { Card, CardHeader, Avatar } from "@nextui-org/react";
 import { motion } from "framer-motion";
 
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/interview/route";
 import { utilSortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
+import { CustomChip } from "@/components/CustomChip";
 
 export function getStatusColor(status: ApplicationStatus): "primary" | "danger" | "warning" | "success" {
   switch (status) {
@@ -37,9 +38,9 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p className="text-base font-medium text-default-500"> Status: </p>
-              <Chip color={getStatusColor(application.status)} size="sm" variant="flat">
+              <CustomChip color={getStatusColor(application.status)} size="sm" variant="flat">
                 {application.status}
-              </Chip>
+              </CustomChip>
               <div className="self-stretch border-r border-divider" />
               <span className="font-semibold">
                 {application.number_of_rounds} {application.number_of_rounds === 1 ? "round" : "rounds"}
@@ -53,9 +54,9 @@ export function ApplicationCard({ application, onCardClick }: ApplicationCardPro
           {application.interview_tags && (
             <div className="flex flex-wrap gap-2">
               {utilSortInterviewTags(application.interview_tags).map((tag) => (
-                <Chip key={tag} color="secondary" size="sm" variant="flat">
+                <CustomChip key={tag} color="secondary" size="sm" variant="flat">
                   {tag}
-                </Chip>
+                </CustomChip>
               ))}
             </div>
           )}

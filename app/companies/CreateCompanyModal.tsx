@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { ERROR_MESSAGES, getErrorMessage, isRateLimitError } from "@/lib/errorHandling";
 import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
+import { CustomButton } from "@/components/CustomButton";
 
 type CreateCompanyModalProps = {
   isOpen: boolean;
@@ -63,12 +64,12 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
             <Input {...register("company_url")} isClearable isRequired errorMessage={errors.company_url?.message} isInvalid={!!errors.company_url} label="Enter URL (e.g. https://www.google.com)" />
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <CustomButton color="danger" variant="light" onPress={onClose}>
               Cancel
-            </Button>
-            <Button color="primary" isLoading={isCreating} type="submit">
+            </CustomButton>
+            <CustomButton color="primary" isLoading={isCreating} type="submit">
               Create Company
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </form>
       </ModalContent>

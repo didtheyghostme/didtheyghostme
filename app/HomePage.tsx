@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, Card, CardBody, Tabs, Tab, Image, AccordionItem, Accordion, Link } from "@nextui-org/react";
+import { Card, CardBody, Tabs, Tab, Image, AccordionItem, Accordion, Link } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import mixpanel from "mixpanel-browser";
 import { useState } from "react";
+
+import { CustomButton } from "@/components/CustomButton";
 
 // TODO: replace screenshots with actual screenshots
 const features = [
@@ -143,7 +145,7 @@ export function HomePage() {
           <p className="mx-auto max-w-xl text-lg text-default-600">Organize your job applications, share interview experiences, and connect with a community of job seekers.</p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button
+            <CustomButton
               as={Link}
               className="transition ease-in-out hover:scale-[1.02] hover:bg-default-100"
               color="default"
@@ -153,8 +155,8 @@ export function HomePage() {
               onPress={mixpanelTrackFindCompaniesButtonClick}
             >
               Find Companies
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               as={Link}
               className="transition ease-in-out hover:scale-[1.02] hover:bg-primary/20"
               color="primary"
@@ -164,7 +166,7 @@ export function HomePage() {
               onPress={mixpanelTrackFindJobsButtonClick}
             >
               Find Jobs
-            </Button>
+            </CustomButton>
           </div>
         </motion.div>
       </section>

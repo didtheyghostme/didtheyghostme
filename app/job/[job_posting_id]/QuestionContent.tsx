@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import useSWR from "swr";
-import { Card, CardBody, Button, Spacer, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Avatar } from "@nextui-org/react";
+import { Card, CardBody, Spacer, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Avatar } from "@nextui-org/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { CustomButton } from "@/components/CustomButton";
 
 type QuestionContentProps = {
   job_posting_id: string;
@@ -97,11 +98,11 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
     <div className="space-y-4">
       <div className="flex justify-end">
         <SignedIn>
-          <Button onPress={handleAskAQuestion}>Ask a Question</Button>
+          <CustomButton onPress={handleAskAQuestion}>Ask a Question</CustomButton>
         </SignedIn>
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button onPress={mixpanelTrackAskAQuestion}>Ask a Question</Button>
+            <CustomButton onPress={mixpanelTrackAskAQuestion}>Ask a Question</CustomButton>
           </SignInButton>
         </SignedOut>
       </div>
@@ -121,12 +122,12 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
                 />
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={() => setIsModalOpen(false)}>
+                <CustomButton color="danger" variant="light" onPress={() => setIsModalOpen(false)}>
                   Cancel
-                </Button>
-                <Button color="primary" isLoading={isCreating} type="submit">
+                </CustomButton>
+                <CustomButton color="primary" isLoading={isCreating} type="submit">
                   Submit Question
-                </Button>
+                </CustomButton>
               </ModalFooter>
             </form>
           </ModalContent>

@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, RadioGroup, Radio, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, RadioGroup, Radio, Input } from "@nextui-org/react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +7,7 @@ import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { REPORT_LINK_TYPES, reportLinkSchema, type ReportLinkFormValues } from "@/lib/schema/reportLinkSchema";
 import { isRateLimitError } from "@/lib/errorHandling";
 import { ERROR_MESSAGES } from "@/lib/errorHandling";
+import { CustomButton } from "@/components/CustomButton";
 
 type ReportLinkModalProps = {
   isOpen: boolean;
@@ -96,12 +97,12 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
             )}
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <CustomButton color="danger" variant="light" onPress={onClose}>
               Cancel
-            </Button>
-            <Button color="primary" isLoading={isCreating} type="submit">
+            </CustomButton>
+            <CustomButton color="primary" isLoading={isCreating} type="submit">
               Report
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </form>
       </ModalContent>

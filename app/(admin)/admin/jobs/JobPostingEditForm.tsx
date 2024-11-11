@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Input, Select, Button, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker } from "@nextui-org/react";
+import { Input, Select, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker } from "@nextui-org/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarDate, parseDate, getLocalTimeZone, today } from "@internationalized/date";
@@ -10,6 +10,7 @@ import { UpdateJobPostingAdminFormValues } from "@/lib/schema/updateJobPostingAd
 import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";
 import { updateJobPostingAdminSchema } from "@/lib/schema/updateJobPostingAdminSchema";
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
+import { CustomButton } from "@/components/CustomButton";
 
 export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPostingTable; onClose: () => void }) {
   const {
@@ -109,12 +110,12 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
       </ModalBody>
 
       <ModalFooter>
-        <Button className="mr-2" color="danger" variant="light" onPress={onClose}>
+        <CustomButton className="mr-2" color="danger" variant="light" onPress={onClose}>
           Cancel
-        </Button>
-        <Button color="primary" isDisabled={!isDirty} isLoading={isUpdating} type="submit">
+        </CustomButton>
+        <CustomButton color="primary" isDisabled={!isDirty} isLoading={isUpdating} type="submit">
           Save Changes
-        </Button>
+        </CustomButton>
       </ModalFooter>
     </form>
   );

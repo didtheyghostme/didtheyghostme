@@ -2,7 +2,7 @@
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, Button, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@nextui-org/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
@@ -30,6 +30,7 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { CustomButton } from "@/components/CustomButton";
 
 // Define the tab mapping
 const TABS = {
@@ -217,9 +218,9 @@ export default function JobDetailsPage() {
 
   return (
     <div className="">
-      <Button className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
+      <CustomButton className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to {jobDetails.company.company_name}
-      </Button>
+      </CustomButton>
 
       <Card className="mb-8">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -244,7 +245,7 @@ export default function JobDetailsPage() {
               {jobDetails.url && (
                 <>
                   <SignedIn>
-                    <Button
+                    <CustomButton
                       className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
                       color="danger"
                       size="sm"
@@ -253,11 +254,11 @@ export default function JobDetailsPage() {
                       onPress={handleReportLinkModalOpen}
                     >
                       Report Link
-                    </Button>
+                    </CustomButton>
                   </SignedIn>
                   <SignedOut>
                     <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                      <Button
+                      <CustomButton
                         className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
                         color="danger"
                         size="sm"
@@ -266,7 +267,7 @@ export default function JobDetailsPage() {
                         onPress={mixpanelTrackReportLinkClick}
                       >
                         Report Link
-                      </Button>
+                      </CustomButton>
                     </SignInButton>
                   </SignedOut>
                 </>
@@ -275,7 +276,7 @@ export default function JobDetailsPage() {
                 <div className="flex flex-col items-end gap-1">
                   <p className="text-default-500">No job portal link available</p>
                   <SignedIn>
-                    <Button
+                    <CustomButton
                       className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
                       color="primary"
                       size="sm"
@@ -284,11 +285,11 @@ export default function JobDetailsPage() {
                       onPress={handleSuggestLinkClick}
                     >
                       Suggest a job portal link
-                    </Button>
+                    </CustomButton>
                   </SignedIn>
                   <SignedOut>
                     <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                      <Button
+                      <CustomButton
                         className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
                         color="primary"
                         size="sm"
@@ -297,7 +298,7 @@ export default function JobDetailsPage() {
                         onPress={mixpanelTrackSuggestLinkClick}
                       >
                         Suggest a job portal link
-                      </Button>
+                      </CustomButton>
                     </SignInButton>
                   </SignedOut>
                 </div>
@@ -329,7 +330,7 @@ export default function JobDetailsPage() {
                   Job portal
                 </Link>
                 <SignedIn>
-                  <Button
+                  <CustomButton
                     className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
                     color="danger"
                     size="sm"
@@ -338,11 +339,11 @@ export default function JobDetailsPage() {
                     onPress={handleReportLinkModalOpen}
                   >
                     Report Link
-                  </Button>
+                  </CustomButton>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                    <Button
+                    <CustomButton
                       className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
                       color="danger"
                       size="sm"
@@ -351,7 +352,7 @@ export default function JobDetailsPage() {
                       onPress={mixpanelTrackReportLinkClick}
                     >
                       Report Link
-                    </Button>
+                    </CustomButton>
                   </SignInButton>
                 </SignedOut>
               </div>
@@ -360,7 +361,7 @@ export default function JobDetailsPage() {
               <div className="flex flex-col items-end gap-1">
                 <p className="text-center text-default-500">No job portal link available</p>
                 <SignedIn>
-                  <Button
+                  <CustomButton
                     className="gap-0 px-2 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
                     color="primary"
                     size="sm"
@@ -369,11 +370,11 @@ export default function JobDetailsPage() {
                     onPress={handleSuggestLinkClick}
                   >
                     Suggest a job portal link
-                  </Button>
+                  </CustomButton>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                    <Button
+                    <CustomButton
                       className="gap-0 px-2 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
                       color="primary"
                       size="sm"
@@ -382,7 +383,7 @@ export default function JobDetailsPage() {
                       onPress={mixpanelTrackSuggestLinkClick}
                     >
                       Suggest a job portal link
-                    </Button>
+                    </CustomButton>
                   </SignInButton>
                 </SignedOut>
               </div>
@@ -395,16 +396,16 @@ export default function JobDetailsPage() {
         <CardBody>
           <SignedIn>
             {applications.currentUserItemId ? (
-              <Button
+              <CustomButton
                 className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
                 color="success"
                 variant="flat"
                 onPress={() => handleViewMyApplicationClick(applications.currentUserItemId!)}
               >
                 View my application
-              </Button>
+              </CustomButton>
             ) : (
-              <Button
+              <CustomButton
                 className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
                 color="primary"
                 isLoading={isCreating}
@@ -412,20 +413,20 @@ export default function JobDetailsPage() {
                 onPress={handleTrackThisJobClick}
               >
                 Track this job
-              </Button>
+              </CustomButton>
             )}
           </SignedIn>
 
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-              <Button
+              <CustomButton
                 className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
                 color="primary"
                 variant="bordered"
                 onPress={mixpanelTrackSignInToTrackJobClick}
               >
                 Sign in to track this job
-              </Button>
+              </CustomButton>
             </SignInButton>
           </SignedOut>
         </CardBody>

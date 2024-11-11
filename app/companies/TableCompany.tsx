@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import useSWR from "swr";
 import { usePathname } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
@@ -21,6 +21,7 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { GetAllCompaniesResponse } from "@/app/api/company/route";
+import { CustomButton } from "@/components/CustomButton";
 
 type ColumnKey = keyof Pick<GetAllCompaniesResponse, "company_name" | "company_url">;
 
@@ -186,9 +187,9 @@ export function TableCompany() {
           <div className="flex flex-row justify-end gap-3">
             <Dropdown>
               <DropdownTrigger>
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                <CustomButton endContent={<ChevronDownIcon className="text-small" />} variant="flat">
                   Sort by
-                </Button>
+                </CustomButton>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
@@ -203,15 +204,15 @@ export function TableCompany() {
               </DropdownMenu>
             </Dropdown>
             <SignedIn>
-              <Button color="primary" endContent={<PlusIcon />} onPress={handleModalOpen}>
+              <CustomButton color="primary" endContent={<PlusIcon />} onPress={handleModalOpen}>
                 Add New
-              </Button>
+              </CustomButton>
             </SignedIn>
             <SignedOut>
               <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                <Button color="primary" endContent={<PlusIcon />} onPress={mixpanelTrackModalOpen}>
+                <CustomButton color="primary" endContent={<PlusIcon />} onPress={mixpanelTrackModalOpen}>
                   Add New
-                </Button>
+                </CustomButton>
               </SignInButton>
             </SignedOut>
           </div>

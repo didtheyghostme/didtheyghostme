@@ -2,7 +2,7 @@
 
 import React from "react";
 import useSWR from "swr";
-import { Pagination, Card, CardBody, Chip, Link } from "@nextui-org/react";
+import { Pagination, Card, CardBody, Link } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
 
 import { AllJobsPageResponse } from "@/app/api/job/route";
@@ -16,6 +16,7 @@ import { isRateLimitError } from "@/lib/errorHandling";
 import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { CustomChip } from "@/components/CustomChip";
 
 export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -101,9 +102,9 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified }: A
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-base font-semibold text-default-800">{job.title}</p>
                           {job.job_posted_date && isRecentDate(job.job_posted_date) && (
-                            <Chip color="success" size="sm" variant="flat">
+                            <CustomChip color="success" size="sm" variant="flat">
                               New
-                            </Chip>
+                            </CustomChip>
                           )}
                         </div>
                         {/* Posting Time */}

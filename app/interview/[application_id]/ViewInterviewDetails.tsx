@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Divider, Chip } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
@@ -7,6 +7,7 @@ import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CalendarIcon } from "@/components/icons";
+import { CustomChip } from "@/components/CustomChip";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
@@ -36,9 +37,9 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
         <CardBody>
           <div>
             <span>Interview status: </span>
-            <Chip color={getStatusColor(applicationDetails.status)} variant="flat">
+            <CustomChip color={getStatusColor(applicationDetails.status)} variant="flat">
               {applicationDetails.status}
-            </Chip>
+            </CustomChip>
           </div>
           <div className="flex items-center gap-1 text-default-400">
             <CalendarIcon />

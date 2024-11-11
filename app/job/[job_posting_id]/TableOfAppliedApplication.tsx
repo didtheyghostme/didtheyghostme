@@ -1,21 +1,5 @@
 import React from "react";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Chip,
-  Pagination,
-  Selection,
-  ChipProps,
-} from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination, Selection, ChipProps } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
 import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
 import mixpanel from "mixpanel-browser";
@@ -24,6 +8,8 @@ import NextLink from "next/link";
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
+import { CustomChip } from "@/components/CustomChip";
+import { CustomButton } from "@/components/CustomButton";
 
 type ColumnKey = keyof Pick<ProcessedApplication, "status" | "applied_date" | "first_response_date"> | "days_between";
 
@@ -48,7 +34,7 @@ type StatusColorPriority = {
 };
 
 const STATUS_MAP = {
-  [APPLICATION_STATUS.APPLIED]: { color: "primary", priority: 1 },
+  [APPLICATION_STATUS.APPLIED]: { color: "default", priority: 1 },
   [APPLICATION_STATUS.INTERVIEWING]: { color: "primary", priority: 2 },
   [APPLICATION_STATUS.REJECTED]: { color: "danger", priority: 3 },
   [APPLICATION_STATUS.GHOSTED]: { color: "warning", priority: 4 },
@@ -203,9 +189,9 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
         const statusInfo = getStatusColorPriority(application.status);
 
         return (
-          <Chip className="text-center text-xs sm:text-sm" color={statusInfo.color} size="sm" variant="flat">
+          <CustomChip className="text-center text-xs sm:text-sm" color={statusInfo.color} size="sm" variant="flat">
             {application.status}
-          </Chip>
+          </CustomChip>
         );
       default:
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -257,9 +243,9 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
         <div className="flex justify-end gap-2">
           <Dropdown>
             <DropdownTrigger>
-              <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+              <CustomButton endContent={<ChevronDownIcon className="text-small" />} variant="flat">
                 Sort by
-              </Button>
+              </CustomButton>
             </DropdownTrigger>
             <DropdownMenu
               disallowEmptySelection
@@ -275,9 +261,9 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
           </Dropdown>
           <Dropdown>
             <DropdownTrigger>
-              <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+              <CustomButton endContent={<ChevronDownIcon className="text-small" />} variant="flat">
                 Filter status
-              </Button>
+              </CustomButton>
             </DropdownTrigger>
             <DropdownMenu
               disallowEmptySelection
@@ -306,12 +292,12 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
             <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={(newPage) => setQueryStates({ page: newPage })} />
           </div>
           <div className="hidden gap-2 sm:flex">
-            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
+            <CustomButton isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage}>
               Previous
-            </Button>
-            <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
+            </CustomButton>
+            <CustomButton isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage}>
               Next
-            </Button>
+            </CustomButton>
           </div>
         </div>
       </div>

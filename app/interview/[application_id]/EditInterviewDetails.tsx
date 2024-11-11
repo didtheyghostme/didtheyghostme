@@ -1,6 +1,6 @@
 import { FormProvider, useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardBody, CardHeader, Divider, DatePicker, Button, Chip, Select, SelectItem, Textarea, Input } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, DatePicker, Select, SelectItem, Textarea, Input } from "@nextui-org/react";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import { InterviewExperienceCardData, LEETCODE_DIFFICULTY } from "@/lib/sharedTy
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { CustomChip } from "@/components/CustomChip";
+import { CustomButton } from "@/components/CustomButton";
 
 type EditInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
@@ -221,9 +223,9 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
         {hasFirstResponseDate && (
           <>
             <div className="my-4 flex justify-end">
-              <Button type="button" onClick={handleAddNewInterviewRoundClick}>
+              <CustomButton type="button" onClick={handleAddNewInterviewRoundClick}>
                 Add New Round
-              </Button>
+              </CustomButton>
             </div>
 
             {fields.length === 0 && <div className="mb-4 text-2xl font-semibold">There are no interviews yet. Add a new round to start.</div>}
@@ -235,7 +237,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                 <div key={field.id} className="mb-4 rounded-md border p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-lg font-semibold">Round {index + 1}</p>
-                    <Button
+                    <CustomButton
                       color="danger"
                       size="sm"
                       type="button"
@@ -245,7 +247,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                       }}
                     >
                       Remove
-                    </Button>
+                    </CustomButton>
                   </div>
                   <Controller
                     control={methods.control}
@@ -300,13 +302,13 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     name={`interviewRounds.${index}.interview_tags`}
                     render={({ field }) => (
                       <>
-                        <Button className="mt-2" color="secondary" variant="bordered" onPress={() => setOpenModalIndex(index)}>
+                        <CustomButton className="mt-2" color="secondary" variant="bordered" onPress={() => setOpenModalIndex(index)}>
                           Select Interview Tags
-                        </Button>
+                        </CustomButton>
                         {field.value && field.value.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {utilSortInterviewTags(field.value).map((tag) => (
-                              <Chip key={tag}>{tag}</Chip>
+                              <CustomChip key={tag}>{tag}</CustomChip>
                             ))}
                           </div>
                         )}
@@ -333,7 +335,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                       <div className="mt-4">
                         <div className="flex items-center justify-between">
                           <p className="text-md font-semibold">LeetCode Questions</p>
-                          <Button
+                          <CustomButton
                             size="sm"
                             onClick={() => {
                               trackLeetcodeQuestionAdd(index);
@@ -347,7 +349,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                             }}
                           >
                             Add LeetCode Question
-                          </Button>
+                          </CustomButton>
                         </div>
 
                         {field.value &&
@@ -397,7 +399,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                   <SelectItem key={difficulty}>{difficulty}</SelectItem>
                                 ))}
                               </Select>
-                              <Button
+                              <CustomButton
                                 color="danger"
                                 size="sm"
                                 onClick={() => {
@@ -407,7 +409,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 }}
                               >
                                 Remove
-                              </Button>
+                              </CustomButton>
                             </div>
                           ))}
                       </div>

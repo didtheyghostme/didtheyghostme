@@ -1,11 +1,12 @@
 "use client";
 
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Textarea } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea } from "@nextui-org/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { addCommentSchema, AddCommentFormValues } from "@/lib/schema/addCommentSchema";
+import { CustomButton } from "@/components/CustomButton";
 
 type EditCommentModalProps = {
   isOpen: boolean;
@@ -45,12 +46,12 @@ export function EditCommentModal({ isOpen, onClose, onSubmit, isUpdating, initia
             />
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <CustomButton color="danger" variant="light" onPress={onClose}>
               Cancel
-            </Button>
-            <Button color="primary" isLoading={isUpdating} type="submit">
+            </CustomButton>
+            <CustomButton color="primary" isLoading={isUpdating} type="submit">
               Save Changes
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </form>
       </ModalContent>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardHeader, CardBody, Textarea, Button, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Textarea, Select, SelectItem } from "@nextui-org/react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import mixpanel from "mixpanel-browser";
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { contactSchema, type ContactFormValues, CONTACT_TYPES } from "@/lib/schema/contactSchema";
+import { CustomButton } from "@/components/CustomButton";
 
 const CONTACT_PLACEHOLDER_MAP = {
   "Bug Report": "Please describe the issue you encountered, including: \n• Steps to reproduce the problem\n• What you expected to happen\n• What actually happened",
@@ -79,9 +80,9 @@ export default function ContactPage() {
           {isSubmitted ? (
             <div className="text-center">
               <p className="mb-4">Thank you for your message! We will get back to you soon.</p>
-              <Button color="primary" onPress={() => setIsSubmitted(false)}>
+              <CustomButton color="primary" onPress={() => setIsSubmitted(false)}>
                 Send Another Message
-              </Button>
+              </CustomButton>
             </div>
           ) : (
             <form noValidate className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
@@ -113,9 +114,9 @@ export default function ContactPage() {
                   />
                 )}
               />
-              <Button className="self-end" color="primary" isLoading={isCreating} type="submit">
+              <CustomButton className="self-end" color="primary" isLoading={isCreating} type="submit">
                 Send Message
-              </Button>
+              </CustomButton>
             </form>
           )}
         </CardBody>

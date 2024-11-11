@@ -1,4 +1,4 @@
-import { DropdownTrigger, Dropdown, Button, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
+import { DropdownTrigger, Dropdown, DropdownItem, DropdownMenu, Selection } from "@nextui-org/react";
 import useSWR from "swr";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { CustomButton } from "@/components/CustomButton";
 
 type InterviewExperienceContentProps = {
   job_posting_id: string;
@@ -65,9 +66,9 @@ export function InterviewExperienceContent({ job_posting_id }: InterviewExperien
       <div className="flex justify-end gap-2">
         <Dropdown>
           <DropdownTrigger>
-            <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+            <CustomButton endContent={<ChevronDownIcon className="text-small" />} variant="flat">
               Sort by
-            </Button>
+            </CustomButton>
           </DropdownTrigger>
           <DropdownMenu disallowEmptySelection aria-label="Sort options" selectedKeys={new Set([sort])} selectionMode="single" onSelectionChange={handleSortChange}>
             {sortOptions.map((option) => (

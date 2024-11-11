@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button, Modal, ModalContent, Link } from "@nextui-org/react";
+import { Card, Modal, ModalContent, Link } from "@nextui-org/react";
 
 import { JobPostingEditForm } from "./JobPostingEditForm";
 import { JobPostingHistory } from "./JobPostingHistory";
+
+import { CustomButton } from "@/components/CustomButton";
 
 function EditIcon() {
   return (
@@ -58,12 +60,12 @@ export function JobPostingCard({ jobPosting }: { jobPosting: JobPostingTable }) 
         </div>
 
         <div className="flex gap-2">
-          <Button isIconOnly variant="light" onPress={() => setIsEditing(true)}>
+          <CustomButton isIconOnly variant="light" onPress={() => setIsEditing(true)}>
             <EditIcon />
-          </Button>
-          <Button isIconOnly variant="light" onPress={() => setIsViewingHistory(true)}>
+          </CustomButton>
+          <CustomButton isIconOnly variant="light" onPress={() => setIsViewingHistory(true)}>
             <HistoryIcon />
-          </Button>
+          </CustomButton>
         </div>
       </div>
 

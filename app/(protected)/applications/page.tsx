@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardHeader, CardBody, Chip, Button, Link } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Link } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
 
 import { fetcher } from "@/lib/fetcher";
@@ -12,6 +12,8 @@ import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { DBTable } from "@/lib/constants/dbTables";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { CustomChip } from "@/components/CustomChip";
+import { CustomButton } from "@/components/CustomButton";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
   [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title" | "country"> & {
@@ -79,9 +81,9 @@ export default function MyApplicationsPage() {
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <Chip color="primary" variant="flat">
+                <CustomChip color="primary" variant="flat">
                   {application.status}
-                </Chip>
+                </CustomChip>
               </div>
             </CardHeader>
             <CardBody>
@@ -89,12 +91,12 @@ export default function MyApplicationsPage() {
                 <p>Applied on: {formatDateDayMonthYear(application.applied_date)}</p>
                 {application.first_response_date && <p>First response: {formatDateDayMonthYear(application.first_response_date)}</p>}
                 <div className="flex gap-2">
-                  <Button color="secondary" variant="flat" onPress={() => handleViewJob(application.job_posting.id)}>
+                  <CustomButton color="secondary" variant="flat" onPress={() => handleViewJob(application.job_posting.id)}>
                     View Job Post
-                  </Button>
-                  <Button color="primary" variant="flat" onPress={() => handleViewApplication(application.id)}>
+                  </CustomButton>
+                  <CustomButton color="primary" variant="flat" onPress={() => handleViewApplication(application.id)}>
                     View Interview Details
-                  </Button>
+                  </CustomButton>
                 </div>
               </div>
             </CardBody>

@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Button, Spacer } from "@nextui-org/react";
+import { Spacer } from "@nextui-org/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
@@ -24,6 +24,7 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { CustomButton } from "@/components/CustomButton";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams();
@@ -100,26 +101,26 @@ export default function InterviewExperiencePage() {
 
   return (
     <div className="">
-      <Button className="px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
+      <CustomButton className="px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
         Back to job
-      </Button>
+      </CustomButton>
 
       <div className="flex flex-col items-end pb-4">
         {applicationDetails.isCurrentUserItem && (
           <>
             {isEditing ? (
               <div className="flex gap-2">
-                <Button color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdating} type="submit">
+                <CustomButton color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdating} type="submit">
                   Save
-                </Button>
-                <Button color="secondary" onClick={() => setIsEditing(false)}>
+                </CustomButton>
+                <CustomButton color="secondary" onClick={() => setIsEditing(false)}>
                   Cancel
-                </Button>
+                </CustomButton>
               </div>
             ) : (
-              <Button className="self-end sm:self-auto" color="primary" onClick={handleEditInterviewRoundsButtonClick}>
+              <CustomButton className="self-end sm:self-auto" color="primary" onClick={handleEditInterviewRoundsButtonClick}>
                 Edit Interview Rounds
-              </Button>
+              </CustomButton>
             )}
           </>
         )}

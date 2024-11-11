@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, Avatar, Button } from "@nextui-org/react";
+import { Card, CardBody, Avatar } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { useUpdateComment } from "@/lib/hooks/useUpdateComment";
 import { EditCommentModal } from "@/components/EditCommentModal";
+import { CustomButton } from "@/components/CustomButton";
 
 export default function QuestionPage() {
   const { comment_id } = useParams();
@@ -71,9 +72,9 @@ export default function QuestionPage() {
 
   return (
     <div className="">
-      <Button className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onClick={handleBackClick}>
+      <CustomButton className="mb-4" color="primary" startContent={<ArrowLeftIcon />} variant="light" onClick={handleBackClick}>
         Back
-      </Button>
+      </CustomButton>
       <Card className="mb-8">
         <CardBody>
           <div className="flex items-start space-x-4">
@@ -83,10 +84,10 @@ export default function QuestionPage() {
                 <span className="text-sm text-default-500">{question.user_data.full_name}</span>
                 <div className="flex items-center gap-2">
                   {question.isCurrentUserItem && (
-                    <Button color="primary" size="sm" variant="flat" onPress={() => setEditingCommentId(question.id)}>
+                    <CustomButton color="primary" size="sm" variant="flat" onPress={() => setEditingCommentId(question.id)}>
                       Edit question
                       <EditIcon />
-                    </Button>
+                    </CustomButton>
                   )}
                   <span className="text-sm text-gray-500">{formatHowLongAgo(question.created_at)}</span>
                 </div>

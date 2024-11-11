@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from "@nextui-org/react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +7,7 @@ import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { suggestLinkSchema, type SuggestLinkFormValues } from "@/lib/schema/suggestLinkSchema";
 import { ERROR_MESSAGES } from "@/lib/errorHandling";
 import { isRateLimitError } from "@/lib/errorHandling";
+import { CustomButton } from "@/components/CustomButton";
 
 type SuggestLinkModalProps = {
   isOpen: boolean;
@@ -69,12 +70,12 @@ export function SuggestLinkModal({ isOpen, onClose, jobId, jobStatus }: SuggestL
             />
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <CustomButton color="danger" variant="light" onPress={onClose}>
               Cancel
-            </Button>
-            <Button color="primary" isLoading={isCreating} type="submit">
+            </CustomButton>
+            <CustomButton color="primary" isLoading={isCreating} type="submit">
               Submit
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </form>
       </ModalContent>

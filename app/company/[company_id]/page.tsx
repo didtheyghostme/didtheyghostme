@@ -2,7 +2,7 @@
 
 import { useParams, usePathname } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, Link, Chip, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
+import { Card, CardBody, Link, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +23,8 @@ import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { CustomChip } from "@/components/CustomChip";
+import { CustomButton } from "@/components/CustomButton";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
@@ -167,7 +169,7 @@ export default function CompanyDetailsPage() {
       <div className="mb-4 flex items-center justify-between">
         <p className="text-2xl font-semibold">Open Positions</p>
         <SignedIn>
-          <Button
+          <CustomButton
             className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
             color="primary"
             endContent={<PlusIcon />}
@@ -175,11 +177,11 @@ export default function CompanyDetailsPage() {
             onPress={handleOpenModal}
           >
             Add a new job
-          </Button>
+          </CustomButton>
         </SignedIn>
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button
+            <CustomButton
               className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
               color="primary"
               endContent={<PlusIcon />}
@@ -187,7 +189,7 @@ export default function CompanyDetailsPage() {
               onPress={handleOpenModal}
             >
               Add a new job
-            </Button>
+            </CustomButton>
           </SignInButton>
         </SignedOut>
       </div>
@@ -240,12 +242,12 @@ export default function CompanyDetailsPage() {
                 />
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={handleCloseModal}>
+                <CustomButton color="danger" variant="light" onPress={handleCloseModal}>
                   Cancel
-                </Button>
-                <Button color="primary" type="submit">
+                </CustomButton>
+                <CustomButton color="primary" type="submit">
                   Add Job
-                </Button>
+                </CustomButton>
               </ModalFooter>
             </form>
           </ModalContent>
@@ -264,14 +266,14 @@ export default function CompanyDetailsPage() {
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
                   <p className="mb-4 text-default-500">• {formatHowLongAgo(job.updated_at)} </p>
                   {job.job_posted_date && isRecentDate(job.job_posted_date) && (
-                    <Chip className="mb-4" color="secondary" variant="flat">
+                    <CustomChip className="mb-4" color="secondary" variant="flat">
                       New
-                    </Chip>
+                    </CustomChip>
                   )}
                 </div>
-                <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
+                <CustomButton as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
                   View More
-                </Button>
+                </CustomButton>
               </CardBody>
             </Card>
           ))}
@@ -299,9 +301,9 @@ export default function CompanyDetailsPage() {
                       Closed Date: <span className="text-default-700">{formatDateDayMonthYear(job.closed_date)}</span>
                     </p>
                   )}
-                  <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
+                  <CustomButton as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
                     View More
-                  </Button>
+                  </CustomButton>
                 </CardBody>
               </Card>
             ))}

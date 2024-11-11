@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Avatar, Button, Textarea } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Textarea } from "@nextui-org/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { useUpdateComment } from "@/lib/hooks/useUpdateComment";
 import { EditIcon } from "@/components/icons";
 import { EditCommentModal } from "@/components/EditCommentModal";
+import { CustomButton } from "@/components/CustomButton";
 
 type EditingComment = {
   id: string;
@@ -116,9 +117,9 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
             )}
           />
           <div className="flex justify-end">
-            <Button disabled={isCreating} isLoading={isCreating} type="submit">
+            <CustomButton disabled={isCreating} isLoading={isCreating} type="submit">
               {isCreating ? "Commenting..." : "Comment"}
-            </Button>
+            </CustomButton>
           </div>
         </form>
       </SignedIn>
@@ -127,9 +128,9 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
         <div className="mb-8 rounded-lg border border-gray-200 p-4 text-center">
           <p className="mb-2 text-gray-600">Sign in to join the discussion</p>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button color="primary" variant="flat" onPress={mixpanelTrackSignInToAddComment}>
+            <CustomButton color="primary" variant="flat" onPress={mixpanelTrackSignInToAddComment}>
               Sign In
-            </Button>
+            </CustomButton>
           </SignInButton>
         </div>
       </SignedOut>
@@ -151,10 +152,10 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
 
                     <div className="flex items-center gap-2">
                       {comment.isCurrentUserItem && (
-                        <Button color="primary" size="sm" variant="flat" onPress={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                        <CustomButton color="primary" size="sm" variant="flat" onPress={() => setEditingComment({ id: comment.id, content: comment.content })}>
                           Edit Comment
                           <EditIcon />
-                        </Button>
+                        </CustomButton>
                       )}
 
                       <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>

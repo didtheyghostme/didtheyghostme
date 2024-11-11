@@ -43,7 +43,7 @@ export default clerkMiddleware(async (auth, req) => {
 
       return NextResponse.redirect(url);
     }
-    
+
     // Admin users bypass rate limiting
     return NextResponse.next();
   }

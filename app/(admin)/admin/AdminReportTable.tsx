@@ -2,7 +2,7 @@
 
 import { Key, useCallback } from "react";
 import useSWR from "swr";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, User } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User } from "@nextui-org/react";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -10,6 +10,7 @@ import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { AdminReportResponse } from "@/app/api/(admin)/admin/route";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
+import { CustomChip } from "@/components/CustomChip";
 
 type ColumnKey = keyof Pick<AdminReportResponse, "entity_type" | "report_type" | "report_message" | "report_status" | "created_at" | "resolution_notes" | "reporter" | "handler">;
 
@@ -31,7 +32,7 @@ export function AdminReportTable() {
           />
         );
       case "report_status":
-        return <Chip color={report.report_status === "Pending" ? "warning" : report.report_status === "Resolved" ? "success" : "danger"}>{report.report_status}</Chip>;
+        return <CustomChip color={report.report_status === "Pending" ? "warning" : report.report_status === "Resolved" ? "success" : "danger"}>{report.report_status}</CustomChip>;
       case "created_at":
         return formatDateDayMonthYear(report.created_at);
       case "handler":

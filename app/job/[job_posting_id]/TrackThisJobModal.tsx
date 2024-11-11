@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
 import { DatePicker } from "@nextui-org/react";
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+
+import { CustomButton } from "@/components/CustomButton";
 
 type TrackThisJobModalProps = {
   isOpen: boolean;
@@ -25,12 +27,12 @@ export function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobMod
           <DatePicker label="Application Date" maxValue={today(getLocalTimeZone())} value={appliedDate} onChange={(date: CalendarDate) => setAppliedDate(date)} />
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="light" onPress={onClose}>
+          <CustomButton color="danger" variant="light" onPress={onClose}>
             Cancel
-          </Button>
-          <Button color="primary" onPress={handleSubmit}>
+          </CustomButton>
+          <CustomButton color="primary" onPress={handleSubmit}>
             Track Job
-          </Button>
+          </CustomButton>
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -2,7 +2,7 @@
 
 import NextLink from "next/link";
 import clsx from "clsx";
-import { Button, Link, Navbar as NextUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
+import { Link, Navbar as NextUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle } from "@nextui-org/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import { ClerkUserButton } from "./ClerkUserButton";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { CustomButton } from "@/components/CustomButton";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -105,9 +106,9 @@ export const Navbar = () => {
         <ThemeSwitch />
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
+            <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
               Login
-            </Button>
+            </CustomButton>
           </SignInButton>
         </SignedOut>
         <SignedIn>
@@ -123,9 +124,9 @@ export const Navbar = () => {
         <NavbarItem className="hidden md:flex">
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-              <Button className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
+              <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
                 Login
-              </Button>
+              </CustomButton>
             </SignInButton>
           </SignedOut>
           <SignedIn>

@@ -1,7 +1,8 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Checkbox } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Checkbox } from "@nextui-org/react";
 import { useState } from "react";
 
 import { INTERVIEW_TAGS } from "@/lib/schema/updateInterviewRoundSchema";
+import { CustomButton } from "@/components/CustomButton";
 
 export function utilSortInterviewTags(tags: InterviewTag[]) {
   return INTERVIEW_TAGS.filter((tag) => tags.includes(tag));
@@ -52,12 +53,12 @@ export function InterviewTagsModal({ isOpen, onClose, selectedTags, onTagsChange
           ))}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="light" onPress={onClose}>
+          <CustomButton color="danger" variant="light" onPress={onClose}>
             Cancel
-          </Button>
-          <Button color="primary" onPress={handleSave}>
+          </CustomButton>
+          <CustomButton color="primary" onPress={handleSave}>
             Save
-          </Button>
+          </CustomButton>
         </ModalFooter>
       </ModalContent>
     </Modal>
