@@ -81,8 +81,6 @@ export async function POST(req: Request) {
     // Supabase create/update user data
     const supabase = await createSupabaseAdminClient();
 
-    console.log("user.updated userId:", userId);
-
     // Upsert user data into Supabase
     const { error } = await supabase.from(DBTable.USER_DATA).upsert(
       {
@@ -96,7 +94,7 @@ export async function POST(req: Request) {
     );
 
     if (error) {
-      console.error("Error upserting user into Supabase:", error);
+      console.error("Error upserting user:", error);
 
       return new Response("Error creating/updating user in database", { status: 500 });
     }

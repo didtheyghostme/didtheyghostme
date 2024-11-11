@@ -4,6 +4,7 @@ import { Button, Card, CardBody, Tabs, Tab, Image, AccordionItem, Accordion, Lin
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import mixpanel from "mixpanel-browser";
+import { useState } from "react";
 
 // TODO: replace screenshots with actual screenshots
 const features = [
@@ -29,7 +30,7 @@ const features = [
       light: "/screenshots/homefeature1.png",
     }, // Place screenshot in public/screenshots/applications.webp
     details: [
-      "'Applied' tab: view response timelines: Check when you can expect the first response from a company after applying",
+      "'Applied' tab: The first stage, view response timelines: check when you can expect the first response date from a company after applying",
       "Filter by application status: Applied, Interviewing, Rejected, Ghosted, or Offered",
       "'Questions' tab: Engage with other applicants by asking or answering questions about the interview process.",
     ],
@@ -46,7 +47,7 @@ const features = [
 
       `Examples: Take home assignments, HackerRank, LeetCode, HireVue, recorded video questions, etc. (usually not with a human interviewer)`,
 
-      `View interview date and whether / when others received their response`,
+      `View interview date and whether or when others received their response`,
     ],
   },
   {
@@ -68,43 +69,64 @@ const features = [
 const faqs = [
   {
     question: "How do I track a new job application?",
-    answer: `Simply click on any job posting and use the 'Track this job' button. If the job posting or company is not in our database, you can add it. 
-    By contributing, you can monitor the progress of your applications and compare your status with others applying for the same role.
+    answer: `Simply click on any job posting and use the 'Track this job' button. If the job posting or company is not in our database, you can add it.\n
+    By contributing, you can monitor the progress of your applications and compare your status with others applying for the same role.\n
     Our platform is community-driven, so we rely on contributions from users like you to keep our database up-to-date.`,
   },
   {
     question: "How do I figure out what interview rounds / types / questions were asked?",
-    answer: "Share your interview experience and other applicants can see the interview rounds, types, and questions asked.",
+    answer: `In the job posting page, there are 4 tabs: 
+    Applied, Online Assessment, Interview Experience, and Questions.\n
+    • The 'Applied' tab shows when others received their first response.\n
+    • The 'Online Assessment' tab shows interview experiences of applicants who have completed online assessments.\n
+    • The 'Interview Experience' tab shows the detailed interview experiences of other applicants.\n
+    • The 'Questions' tab allows you to ask and start discussions with others about that job posting.`,
   },
   {
     question: "What kind of interview information can I share?",
-    answer: "You can share interview rounds, types (technical, behavioral), LeetCode questions, and general experience. Please avoid sharing confidential or proprietary information.",
+    answer: `You can share interview rounds, types (technical, behavioral), LeetCode questions, and general experience.\n
+    Please avoid sharing confidential or proprietary information.`,
   },
   {
-    question: "How can I find specific company interviews?",
-    answer: "Use the search function or browse companies directly. Each company page shows all related interview experiences and job postings.",
+    question: "How do I know when do companies begin and end their hiring process?",
+    answer: `Under each company's profile on our platform, the current job openings will be listed. \n
+    You can report if the position have been closed and after we have verified, the end date will be that.`,
   },
   {
     question: "Have I been ghosted?",
-    answer: "Use the search function or browse companies directly. Each company page shows all related interview experiences and job postings.",
+    answer: `A good guideline is 1 - 2 weeks if there is no response. A lot of companies won't bother with rejection emails. \n
+    If you suspect you’ve been ghosted, you can use our platform to check if others have received responses from the same employer. \n
+    This information can help you decide whether to follow up with the employer or move on to other opportunities.`,
   },
 ];
 
 export function HomePage() {
   const { theme } = useTheme();
 
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+
   const mixpanelTrackFindJobsButtonClick = () => {
-    mixpanel.track("Home Page", { action: "find_jobs_button_clicked" });
+    mixpanel.track("Find Jobs Button Clicked", { action: "clicked" });
   };
 
   const mixpanelTrackFindCompaniesButtonClick = () => {
-    mixpanel.track("Home Page", { action: "find_companies_button_clicked" });
+    mixpanel.track("Find Companies Button Clicked", { action: "clicked" });
   };
 
   const handleTabChange = (tabName: string) => {
-    mixpanel.track("Home Page", {
-      action: "tab_changed",
+    mixpanel.track("Home Page Features Tab Changed", {
+      action: "changed",
       tab: tabName,
+    });
+  };
+
+  const handleFaqSelectionChange = (faqTitle: string) => {
+    const isOpen = selectedKeys.has(faqTitle);
+
+    mixpanel.track("Home Page FAQ Item Selected", {
+      faq_title: faqTitle,
+      opening_tab: isOpen ? true : false,
+      closing_tab: isOpen ? false : true,
     });
   };
 
@@ -121,10 +143,26 @@ export function HomePage() {
           <p className="mx-auto max-w-xl text-lg text-default-600">Organize your job applications, share interview experiences, and connect with a community of job seekers.</p>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <Button as={Link} className="transition-colors hover:bg-default-100" color="default" href="/companies" size="lg" variant="bordered" onPress={mixpanelTrackFindCompaniesButtonClick}>
+            <Button
+              as={Link}
+              className="transition ease-in-out hover:scale-[1.02] hover:bg-default-100"
+              color="default"
+              href="/companies"
+              size="lg"
+              variant="bordered"
+              onPress={mixpanelTrackFindCompaniesButtonClick}
+            >
               Find Companies
             </Button>
-            <Button as={Link} className="transition-colors hover:bg-primary/20" color="primary" href="/jobs" size="lg" variant="bordered" onPress={mixpanelTrackFindJobsButtonClick}>
+            <Button
+              as={Link}
+              className="transition ease-in-out hover:scale-[1.02] hover:bg-primary/20"
+              color="primary"
+              href="/jobs"
+              size="lg"
+              variant="bordered"
+              onPress={mixpanelTrackFindJobsButtonClick}
+            >
               Find Jobs
             </Button>
           </div>
@@ -174,9 +212,8 @@ export function HomePage() {
       {/* FAQ Section */}
       <section className="w-full max-w-4xl px-6">
         <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
-        {/* TODO: 8 nov add the FAQ content from didtheyghost.me */}
         <motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }}>
-          <Accordion defaultExpandedKeys={["0"]} selectionMode="multiple" variant="bordered">
+          <Accordion selectedKeys={selectedKeys} selectionMode="multiple" variant="bordered" onSelectionChange={(keys) => setSelectedKeys(keys as Set<string>)}>
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
@@ -191,12 +228,13 @@ export function HomePage() {
                     <span className="text-primary">Q</span>
                   </div>
                 }
+                onPress={() => handleFaqSelectionChange(faq.question)}
               >
-                {faq.answer}
+                <p className="whitespace-pre-line">{faq.answer}</p>
               </AccordionItem>
             ))}
           </Accordion>
-        </motion.div>{" "}
+        </motion.div>
       </section>
     </div>
   );
