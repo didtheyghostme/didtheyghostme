@@ -42,7 +42,7 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified }: A
     });
   };
 
-  console.log("jobs", jobs);
+  // console.log("jobs", jobs);
 
   // Handle rate limit error
   if (error) {

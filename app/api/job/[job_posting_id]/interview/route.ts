@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { job_post
     job_posting_id_param: params.job_posting_id,
   });
 
-  console.log("data RPC@@@@@@@", data, error);
+  // console.log("data RPC@@@@@@@", data, error);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

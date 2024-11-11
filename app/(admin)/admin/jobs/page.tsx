@@ -13,7 +13,7 @@ export default function AdminJobsPage() {
   const [search, setSearch] = useState("");
   const { data: jobs, error, isLoading } = useSWR<JobPostingTable[]>(API.ADMIN.getAllJobs, fetcher);
 
-  console.warn("ADMIN job client pages....", jobs, error, isLoading);
+  // console.log("ADMIN job client pages....", jobs, error, isLoading);
 
   if (error) return <div>Failed to load jobs</div>;
   if (isLoading) return <div>Loading...</div>;

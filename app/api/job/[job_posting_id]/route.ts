@@ -25,8 +25,6 @@ export async function GET(request: Request, { params }: { params: { job_posting_
   };
   const selectString = buildSelectString(selectObject);
 
-  console.log("select query is ", selectString);
-
   const { data, error } = await supabase
     .from(DBTable.JOB_POSTING)
     .select(selectString)

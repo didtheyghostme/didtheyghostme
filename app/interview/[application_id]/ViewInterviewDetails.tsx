@@ -14,8 +14,6 @@ type ViewInterviewDetailsProps = {
 };
 
 export function ViewInterviewDetails({ applicationDetails, interviewRounds }: ViewInterviewDetailsProps) {
-  console.warn("interviewRounds", interviewRounds);
-
   return (
     <>
       <Card className="mb-8">

@@ -13,7 +13,7 @@ type OnlineAssessmentCardProps = {
 };
 
 export function OnlineAssessmentCard({ application, onCardClick }: OnlineAssessmentCardProps) {
-  console.log("this online assessment experience", application);
+  // console.log("this online assessment experience", application);
 
   const CardContent = (
     <Card isPressable className="dark:bg-content1-dark w-full border border-gray-200 bg-content1 dark:border-gray-700" onPress={onCardClick}>

@@ -67,7 +67,7 @@ export default function JobDetailsPage() {
 
   const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id as string), fetcher);
 
-  console.log("jobDetails from page", jobDetails);
+  // console.log("jobDetails from page", jobDetails);
 
   // const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(`/api/job/${job_posting_id}`, fetcher);
   const router = useRouter();
@@ -82,7 +82,7 @@ export default function JobDetailsPage() {
     isLoading: applicationsIsLoading,
   } = useSWR<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id as string), fetcher);
 
-  console.warn("applications", applications);
+  // console.warn("applications", applications);
 
   const { createApplication, isCreating } = useCreateApplication(job_posting_id as string);
 
@@ -114,11 +114,11 @@ export default function JobDetailsPage() {
         applied_date: appliedDateString,
       });
 
-      const result = await createApplication(appliedDateString);
+      await createApplication(appliedDateString);
 
       toast.success("Job tracked successfully");
 
-      console.log("Application created", result);
+      // console.log("Application created", result);
     } catch (err: unknown) {
       if (isRateLimitError(err)) {
         toast.error(ERROR_MESSAGES.TOO_MANY_REQUESTS);

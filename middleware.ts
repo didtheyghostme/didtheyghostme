@@ -85,7 +85,7 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.json(createRateLimitResponse("primary"), { status: 429 });
       }
     } catch (error) {
-      console.warn("Upstash rate limiter failed:", error);
+      // console.warn("Upstash rate limiter failed:", error);
 
       await setUpstashFailedStatus();
 
