@@ -53,6 +53,7 @@ type JobPostingChangelogTable = {
   };
   handled_by: string;
   created_at: string;
+  changelog_notes: string | null;
 };
 
 type ApplicationStatus = "Applied" | "Interviewing" | "Rejected" | "Ghosted" | "Offered";

@@ -15,7 +15,7 @@ import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
 import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
-import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
+import { formatDateDayMonthYear, formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { PlusIcon } from "@/components/icons";
 import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
@@ -26,7 +26,7 @@ import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
-export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date">;
+export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date" | "closed_date">;
 
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
@@ -79,8 +79,6 @@ export default function CompanyDetailsPage() {
   const closedJobs = allJobs.filter((job) => job.job_status === "Closed");
 
   const handleAddThisJob = handleSubmit(async (data: AddJobFormData) => {
-    console.log("Form data", data);
-
     // TODO: add this job to the company using server action and mutation
     try {
       await createJob(data);
@@ -103,8 +101,6 @@ export default function CompanyDetailsPage() {
   });
 
   const handleOpenModal = () => {
-    console.warn("Opening modal");
-
     mixpanel.track("Company Details", {
       action: "add_a_new_job_clicked",
       company_id,
@@ -123,7 +119,6 @@ export default function CompanyDetailsPage() {
   };
 
   const mixpanelTrackViewJobCardClick = (job: CompanyDetailsPageAllJobsResponse) => {
-    console.log("Viewing job", job);
     // TODO: implement go to the job page, show all the interview experiences
     // TODO: on job page, have button to "Track this job", which then add to Application table with today date
     // TODO: the button then changes to "View my application", next step is fill in date of when the first contact -> round 0 = applied, round 1 = contacted
@@ -294,6 +289,16 @@ export default function CompanyDetailsPage() {
                 <CardBody className="flex h-full flex-col">
                   <p className="mb-2 text-xl font-semibold">{job.title}</p>
                   <p className="mb-4 text-default-500">• {formatHowLongAgo(job.updated_at)} </p>
+                  {job.job_posted_date && (
+                    <p>
+                      Posted Date: <span className="text-default-700">{formatDateDayMonthYear(job.job_posted_date)}</span>
+                    </p>
+                  )}
+                  {job.closed_date && (
+                    <p>
+                      Closed Date: <span className="text-default-700">{formatDateDayMonthYear(job.closed_date)}</span>
+                    </p>
+                  )}
                   <Button as="span" className="mt-auto w-full" size="sm" variant="flat" onPress={() => mixpanelTrackViewMoreButtonClick(job)}>
                     View More
                   </Button>

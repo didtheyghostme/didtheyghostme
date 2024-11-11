@@ -105,7 +105,7 @@ export const Navbar = () => {
         <ThemeSwitch />
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <Button className="bg-default-100 text-sm font-normal text-default-600" variant="flat" onClick={() => handleLoginClick()}>
+            <Button className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
               Login
             </Button>
           </SignInButton>
@@ -123,7 +123,7 @@ export const Navbar = () => {
         <NavbarItem className="hidden md:flex">
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-              <Button className="bg-default-100 text-sm font-normal text-default-600" variant="flat" onClick={() => handleLoginClick()}>
+              <Button className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={() => handleLoginClick()}>
                 Login
               </Button>
             </SignInButton>
