@@ -42,7 +42,7 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
           </div>
           <div className="flex items-center gap-1 text-default-400">
             <CalendarIcon />
-            <p>Applied on: {applicationDetails.applied_date}</p>
+            <p>Applied on: {formatDateDayMonthYear(applicationDetails.applied_date)}</p>
           </div>
 
           {applicationDetails.first_response_date && (
