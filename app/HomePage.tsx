@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, Tabs, Tab, AccordionItem, Accordion, Link, Spinner } from "@nextui-org/react";
+import { Card, CardBody, Tabs, Tab, AccordionItem, Accordion, Link, Spinner, Skeleton } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import mixpanel from "mixpanel-browser";
@@ -182,15 +182,27 @@ function LoomFeature({ feature, isMobile }: { feature: LoomFeature; isMobile: bo
 }
 
 function ScreenshotFeature({ feature, isMobile, theme }: { feature: ScreenshotFeature; isMobile: boolean; theme: string | undefined }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setTimeout(() => {
+      setImageLoaded(true);
+    }, 150);
+  };
+
   return (
     <div className="relative w-full max-w-[600px]">
-      <Image
-        alt={feature.title}
-        className="h-auto w-full rounded-lg object-contain shadow-lg"
-        height={400}
-        src={feature.screenshot[isMobile ? "mobile" : "desktop"][theme === "dark" ? "dark" : "light"]}
-        width={600}
-      />
+      <Skeleton className="rounded-lg" isLoaded={imageLoaded}>
+        <Image
+          alt={feature.title}
+          className="h-auto w-full rounded-lg object-contain shadow-lg"
+          height={400}
+          loading="lazy"
+          src={feature.screenshot[isMobile ? "mobile" : "desktop"][theme === "dark" ? "dark" : "light"]}
+          width={600}
+          onLoad={handleImageLoad}
+        />
+      </Skeleton>
     </div>
   );
 }
