@@ -24,7 +24,7 @@ export function ClerkSWRToastProvider({ children }: { children: React.ReactNode 
           transition ease-in-out
           hover:scale-105
           `,
-          card: "bg-background",
+          card: "bg-[#18181B]",
           headerTitle: "text-foreground",
           headerSubtitle: "text-default-500",
           formField: "text-foreground",

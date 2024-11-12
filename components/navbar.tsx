@@ -52,6 +52,10 @@ export const Navbar = () => {
       // classNames={{
       //   menu: "max-h-fit",
       // }}
+      classNames={{
+        wrapper: "px-4", // Add consistent padding
+        content: "gap-4", // Reduce gap between content
+      }}
       onMenuOpenChange={handleMenuToggle}
     >
       {/* Left side: Menu Toggle, Logo and Nav Items */}
@@ -79,13 +83,13 @@ export const Navbar = () => {
           </div>
         </NavbarMenu>
 
-        <div className="flex w-full items-center gap-4 sm:gap-12">
+        <div className="flex w-full items-center gap-1.5 sm:gap-12">
           {/* Nav Items - Always visible on mobile and desktop */}
           <NextLink href="/" onClick={() => handleNavBarClick("Home")}>
             <p className="hidden text-inherit sm:flex">didtheyghost.me</p>
           </NextLink>
 
-          <ul className="flex items-center gap-8">
+          <ul className="flex items-center gap-6 sm:gap-8">
             {siteConfig.navItems.map((item) => (
               <NavbarItem key={item.href}>
                 <NextLink
@@ -102,7 +106,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       {/* Right side: Theme Switch + Login + Mobile Menu Toggle */}
-      <NavbarContent className="basis-1 pl-4 sm:hidden" justify="end">
+      <NavbarContent className="gap-2 sm:hidden" justify="end">
         <ThemeSwitch />
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">

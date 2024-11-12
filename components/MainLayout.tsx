@@ -21,11 +21,11 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <Navbar />
-      <main className="container mx-auto max-w-7xl flex-grow px-6 pt-16">{children}</main>
+      <main className="container mx-auto w-full max-w-7xl flex-grow px-4 pt-8 sm:px-6 sm:pt-16">{children}</main>
       {shouldShowLogoCredit && (
-        <div className="container mx-auto max-w-7xl px-6 py-4">
+        <div className="container mx-auto w-full max-w-7xl px-6 py-4">
           <div className="text-end">
             <a className="text-xs text-default-400" href="https://logo.dev" rel="noreferrer" target="_blank">
               Logos provided by Logo.dev
