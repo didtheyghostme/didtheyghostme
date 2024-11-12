@@ -178,10 +178,10 @@ export default function CompanyDetailsPage() {
 
       {/* Open Positions with modal */}
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-2xl font-semibold">Open Positions</p>
+        <p className="text-lg font-semibold sm:text-2xl">Open Positions</p>
         <SignedIn>
           <CustomButton
-            className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
+            className="gap-0 bg-primary px-3 py-2 text-sm text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90 sm:px-4 sm:py-2.5 sm:text-base"
             color="primary"
             endContent={<PlusIcon />}
             variant="solid"
@@ -193,7 +193,7 @@ export default function CompanyDetailsPage() {
         <SignedOut>
           <SignInButton fallbackRedirectUrl={pathname} mode="modal">
             <CustomButton
-              className="bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90"
+              className="gap-0 bg-primary px-3 py-2 text-sm text-primary-foreground shadow-lg transition-all duration-200 hover:opacity-90 sm:px-4 sm:py-2.5 sm:text-base"
               color="primary"
               endContent={<PlusIcon />}
               variant="solid"
@@ -206,10 +206,10 @@ export default function CompanyDetailsPage() {
       </div>
 
       <SignedIn>
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <Modal isOpen={isModalOpen} placement="center" onClose={handleCloseModal}>
           <ModalContent>
             <form onSubmit={handleAddThisJob}>
-              <ModalHeader className="flex flex-col gap-1">Add New Job</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1 pb-0 pt-4 sm:py-4">Add New Job</ModalHeader>
               <ModalBody>
                 <Controller
                   control={control}
@@ -252,7 +252,7 @@ export default function CompanyDetailsPage() {
                   )}
                 />
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="">
                 <CustomButton color="danger" variant="light" onPress={handleCloseModal}>
                   Cancel
                 </CustomButton>
