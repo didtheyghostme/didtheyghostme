@@ -1,10 +1,12 @@
 "use client";
 
-import { Card, CardBody, Tabs, Tab, Image, AccordionItem, Accordion, Link } from "@nextui-org/react";
+import { Card, CardBody, Tabs, Tab, AccordionItem, Accordion, Link, Spinner } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import mixpanel from "mixpanel-browser";
 import { useState } from "react";
+import Image from "next/image";
+import { Key } from "@react-types/shared";
 
 import { CustomButton } from "@/components/CustomButton";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
@@ -158,9 +160,46 @@ const FAQS: readonly Faq[] = [
   },
 ];
 
+function LoomFeature({ feature, isMobile }: { feature: LoomFeature; isMobile: boolean }) {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-lg shadow-lg"
+      style={{
+        paddingBottom: isMobile ? "75%" : "60%",
+        height: 0,
+      }}
+    >
+      {!iframeLoaded && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-default-100/50">
+          <Spinner color="primary" />
+        </div>
+      )}
+      <iframe allowFullScreen className="absolute left-0 top-0 h-full w-full border-0" src={feature.loomEmbed} title={feature.title} onLoad={() => setIframeLoaded(true)} />
+    </div>
+  );
+}
+
+function ScreenshotFeature({ feature, isMobile, theme }: { feature: ScreenshotFeature; isMobile: boolean; theme: string | undefined }) {
+  return (
+    <div className="relative w-full max-w-[600px]">
+      <Image
+        alt={feature.title}
+        className="h-auto w-full rounded-lg object-contain shadow-lg"
+        height={400}
+        src={feature.screenshot[isMobile ? "mobile" : "desktop"][theme === "dark" ? "dark" : "light"]}
+        width={600}
+      />
+    </div>
+  );
+}
+
 export function HomePage() {
   const { theme } = useTheme();
   const isMobile = useIsMobile();
+
+  const [selectedTab, setSelectedTab] = useState<Key>("Track Applications");
 
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
@@ -172,7 +211,8 @@ export function HomePage() {
     mixpanel.track("Find Companies Button Clicked", { action: "clicked" });
   };
 
-  const handleTabChange = (tabName: string) => {
+  const handleTabChange = (tabName: Key) => {
+    setSelectedTab(tabName);
     mixpanel.track("Home Page Features Tab Changed", {
       action: "changed",
       tab: tabName,
@@ -231,9 +271,9 @@ export function HomePage() {
       {/* Features with Screenshots Section */}
       <section className="w-full max-w-7xl">
         <h2 className="mb-8 text-center text-3xl font-bold">Platform Features</h2>
-        <Tabs aria-label="Features" className="flex w-full flex-col" color="primary" variant="bordered">
+        <Tabs aria-label="Features" className="flex w-full flex-col" color="primary" selectedKey={selectedTab} variant="bordered" onSelectionChange={handleTabChange}>
           {FEATURES.map((feature) => (
-            <Tab key={feature.title} title={feature.title} onClick={() => handleTabChange(feature.title)}>
+            <Tab key={feature.title} title={feature.title}>
               <Card className="mt-4">
                 <CardBody className="flex flex-col-reverse gap-8 lg:flex-row">
                   <div className="flex-1">
@@ -249,23 +289,7 @@ export function HomePage() {
                     </ul>
                   </div>
                   <div className="w-full flex-1">
-                    {feature.type === "loom" ? (
-                      <div className="relative overflow-hidden rounded-lg shadow-lg" style={{ paddingBottom: "56.25%", height: 0 }}>
-                        <iframe allowFullScreen className="absolute left-0 top-0 h-full w-full border-0" src={feature.loomEmbed} title={feature.title} />
-                      </div>
-                    ) : (
-                      <Image
-                        alt={feature.title}
-                        className="rounded-lg object-cover shadow-lg"
-                        height={400}
-                        src={feature.screenshot[isMobile ? "mobile" : "desktop"][theme === "dark" ? "dark" : "light"]}
-                        width={600}
-                        classNames={{
-                          wrapper: "w-full !max-w-none",
-                          img: "w-full object-cover",
-                        }}
-                      />
-                    )}
+                    {feature.type === "loom" ? <LoomFeature feature={feature} isMobile={isMobile} /> : <ScreenshotFeature feature={feature} isMobile={isMobile} theme={theme} />}
                   </div>
                 </CardBody>
               </Card>
