@@ -1,15 +1,16 @@
 import React from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination, Selection, ChipProps } from "@nextui-org/react";
+import { DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination, Selection, ChipProps } from "@nextui-org/react";
 import { parseDate } from "@internationalized/date";
 import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
 import mixpanel from "mixpanel-browser";
-import NextLink from "next/link";
+import Link from "next/link";
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
+import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 
 type ColumnKey = keyof Pick<ProcessedApplication, "status" | "applied_date" | "first_response_date"> | "days_between";
 
@@ -104,9 +105,9 @@ function generateMockApplications(count: number): ProcessedApplication[] {
   return Array.from({ length: count }, (_, index) => generateMockApplication(index + 1));
 }
 
-// const applications = generateMockApplications(100);
+const applications = generateMockApplications(100);
 
-export function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
+export function TableOfAppliedApplication({}: TableOfAppliedApplicationProps) {
   const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
     status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]),
     sort: parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("applied_date_asc"),
@@ -175,32 +176,6 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
     return sortedItems.slice(start, end);
   }, [page, sortedItems]);
 
-  const renderCell = React.useCallback((application: ProcessedApplication, columnKey: ColumnKey) => {
-    switch (columnKey) {
-      case "applied_date":
-        return <p>{formatDateDayMonthYear(application.applied_date)}</p>;
-      case "first_response_date":
-        return <p>{application.first_response_date ? formatDateDayMonthYear(application.first_response_date) : "N/A"}</p>;
-      case "days_between":
-        const days = calculateDaysBetween(application.applied_date, application.first_response_date);
-
-        return <p>{application.first_response_date ? days : "N/A"}</p>;
-      case "status":
-        const statusInfo = getStatusColorPriority(application.status);
-
-        return (
-          <CustomChip className="text-center text-xs sm:text-sm" color={statusInfo.color} size="sm" variant="flat">
-            {application.status}
-          </CustomChip>
-        );
-      default:
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _exhaustiveCheck: never = columnKey;
-
-        throw new Error(`Unhandled column key: ${_exhaustiveCheck}`);
-    }
-  }, []);
-
   const onNextPage = React.useCallback(() => {
     if (page < pages) {
       setQueryStates({ page: page + 1 });
@@ -239,7 +214,7 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
 
   const topContent = React.useMemo(() => {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pb-4">
         <div className="flex justify-end gap-2">
           <Dropdown>
             <DropdownTrigger>
@@ -285,7 +260,7 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
 
   const bottomContent = React.useMemo(() => {
     return (
-      <div className="flex flex-col-reverse gap-4 px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col-reverse gap-4 px-2 py-4 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-center text-small text-default-400 sm:text-left"> {filteredItems.length} applicants </span>
         <div className="flex flex-col items-center gap-4 sm:flex-1 sm:flex-row">
           <div className="flex w-full items-center justify-center sm:flex-1">
@@ -304,58 +279,101 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
     );
   }, [filteredItems.length, page, pages, onPreviousPage, onNextPage]);
 
+  function ApplicationHeader() {
+    return (
+      <div className="mb-2 hidden px-4 py-2.5 text-xs font-medium text-default-400 sm:flex sm:items-center">
+        <div className="flex flex-1 gap-4">
+          <div className="w-[100px] text-right">{columns[0].displayName}</div>
+          <div className="w-[140px] text-right">{columns[1].displayName}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-[80px] text-right">{columns[2].displayName}</div>
+          <div className="w-[90px] text-right">{columns[3].displayName}</div>
+        </div>
+      </div>
+    );
+  }
+
+  function ApplicationRow({ application }: { application: ProcessedApplication }) {
+    return (
+      <Link
+        className="group block w-full rounded-md border border-default-200 bg-content1 px-4 py-2.5 transition-all hover:border-default-400 hover:bg-default-100/50"
+        href={`/interview/${application.id}`}
+        onContextMenu={() => mixpanelTrackOnRowClick(application.id, "right_clicked")} // Add this to capture right-click events
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey) {
+            mixpanelTrackOnRowClick(application.id, "cmd_clicked");
+          } else {
+            mixpanelTrackOnRowClick(application.id, "row_clicked");
+          }
+        }}
+        onMouseDown={(e) => {
+          if (e.button === 1) {
+            mixpanelTrackOnRowClick(application.id, "middle_clicked");
+          }
+        }}
+      >
+        <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center">
+          {/* Mobile View - 3 Column Grid */}
+          <div className="grid w-full grid-cols-[90px_minmax(100px,1fr)_100px] gap-y-1 sm:hidden">
+            {/* Row 1 */}
+            <span className="text-xs text-default-400">{columns[2].mobileDisplayName}:</span>
+            <span className="text-right">{application.first_response_date ? calculateDaysBetween(application.applied_date, application.first_response_date) : "—"}</span>
+            <div className="flex justify-end">
+              <CustomChip className="w-[90px] justify-center text-xs" color={getStatusColorPriority(application.status).color} size="sm" variant="flat">
+                {application.status}
+              </CustomChip>
+            </div>
+
+            {/* Row 2 */}
+            <span className="whitespace-nowrap text-xs text-default-400">{columns[0].mobileDisplayName}:</span>
+            <span className="text-right">{formatDateDayMonthYear(application.applied_date)}</span>
+            <div className="w-full" />
+
+            {/* Row 3 */}
+            <span className="whitespace-nowrap text-xs text-default-400">{columns[1].mobileDisplayName}:</span>
+            <span className="text-right">{application.first_response_date ? formatDateDayMonthYear(application.first_response_date) : "—"}</span>
+            <div className="w-full" />
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden sm:flex sm:w-full sm:items-center sm:justify-between">
+            <div className="flex flex-1 gap-4">
+              <span className="w-[120px] text-right">{formatDateDayMonthYear(application.applied_date)}</span>
+              <span className="w-[120px] text-right">{application.first_response_date ? formatDateDayMonthYear(application.first_response_date) : "—"}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="w-[60px] text-right">{application.first_response_date ? calculateDaysBetween(application.applied_date, application.first_response_date) : "—"}</span>
+              <div className="flex w-[90px] justify-end">
+                <CustomChip className="w-[90px] justify-center text-xs" color={getStatusColorPriority(application.status).color} size="sm" variant="flat">
+                  {application.status}
+                </CustomChip>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Table of applied applications"
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      selectionMode="single"
-      topContent={topContent}
-      topContentPlacement="outside"
-      classNames={{
-        wrapper: "max-h-[500px]",
-        th: "text-center py-2 px-1 sm:px-2 sm:text-sm",
-        td: "text-center py-2 px-1 sm:px-2",
-      }}
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn key={column.name} align="center">
-            <span className="hidden sm:inline">{column.displayName}</span>
-            <span className="sm:hidden">{column.mobileDisplayName}</span>
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody emptyContent={"No applications found"} items={paginatedItems}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>
-                <NextLink
-                  className="block h-full w-full text-foreground hover:opacity-70"
-                  href={`/interview/${item.id}`}
-                  onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")} // Add this to capture right-click events
-                  onClick={(e) => {
-                    if (e.metaKey || e.ctrlKey) {
-                      mixpanelTrackOnRowClick(item.id, "cmd_clicked");
-                    } else {
-                      mixpanelTrackOnRowClick(item.id, "row_clicked");
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    if (e.button === 1) {
-                      mixpanelTrackOnRowClick(item.id, "middle_clicked");
-                    }
-                  }}
-                >
-                  {renderCell(item, columnKey as ColumnKey)}
-                </NextLink>
-              </TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+    <div className="flex flex-col">
+      {paginatedItems.length === 0 && <DataNotFoundMessage message="No one has applied to this job yet" title="No applications yet" />}
+
+      {paginatedItems.length > 0 && (
+        <>
+          {topContent}
+
+          <ApplicationHeader />
+          <div className="flex flex-col gap-1">
+            {paginatedItems.map((application) => (
+              <ApplicationRow key={application.id} application={application} />
+            ))}
+          </div>
+          {/* Pagination */}
+          {bottomContent}
+        </>
+      )}
+    </div>
   );
 }
