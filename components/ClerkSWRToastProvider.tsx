@@ -24,15 +24,15 @@ export function ClerkSWRToastProvider({ children }: { children: React.ReactNode 
           transition ease-in-out
           hover:scale-105
           `,
-          card: "bg-[#212126] [background-image:linear-gradient(rgba(255,255,255,0.03),rgba(255,255,255,0.03))]",
           headerTitle: "text-foreground",
           headerSubtitle: "text-default-500",
           formField: "text-foreground",
+          card: theme === "dark" && "bg-[#212126] [background-image:linear-gradient(rgba(255,255,255,0.03),rgba(255,255,255,0.03))]",
           // Only apply background color to all children
-          footer: "[&_*]:!bg-[#1a1a1d]",
+          footer: theme === "dark" && "[&_*]:!bg-[#1a1a1d]",
           footerAction: "w-full items-center justify-center",
           footerActionText: "text-default-500",
-          footerActionLink: "text-[#cbcbd0]",
+          footerActionLink: theme === "dark" && "text-[#cbcbd0]",
           dividerLine: "bg-default-200",
           dividerText: "text-default-500",
         },
