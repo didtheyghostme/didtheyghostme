@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { Input, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import useSWR from "swr";
 import { usePathname } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
@@ -9,7 +9,7 @@ import { SignedOut } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import mixpanel from "mixpanel-browser";
-import NextLink from "next/link";
+import Link from "next/link";
 
 import { CreateCompanyModal } from "./CreateCompanyModal";
 
@@ -22,18 +22,6 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { GetAllCompaniesResponse } from "@/app/api/company/route";
 import { CustomButton } from "@/components/CustomButton";
-
-type ColumnKey = keyof Pick<GetAllCompaniesResponse, "company_name" | "company_url">;
-
-type Column = {
-  name: ColumnKey;
-  displayName: string;
-};
-
-const columns: Column[] = [
-  { name: "company_name", displayName: "Company Name" },
-  { name: "company_url", displayName: "Company URL" },
-];
 
 const sortOptions = [
   { key: "name_asc", label: "Company Name: A to Z", column: "company_name", direction: "ascending" },
@@ -75,7 +63,7 @@ export function TableCompany() {
     });
   }, [companies, filterValue, currentSort]);
 
-  const pages = Math.ceil(sortedAndFilteredItems.length / ROWS_PER_PAGE);
+  const pages = Math.max(1, Math.ceil(sortedAndFilteredItems.length / ROWS_PER_PAGE));
 
   const paginatedItems = React.useMemo(() => {
     const start = (page - 1) * ROWS_PER_PAGE;
@@ -83,23 +71,6 @@ export function TableCompany() {
 
     return sortedAndFilteredItems.slice(start, end);
   }, [page, sortedAndFilteredItems]);
-
-  const renderCell = React.useCallback((company: GetAllCompaniesResponse, columnKey: ColumnKey) => {
-    const cellValue = company[columnKey];
-
-    switch (columnKey) {
-      case "company_name":
-        return <p className="text-bold text-small capitalize">{company.company_name}</p>;
-      case "company_url":
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small text-default-400">{company.company_url}</p>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, []);
 
   const onSearchChange = React.useCallback((value: string) => {
     if (value) {
@@ -225,12 +196,16 @@ export function TableCompany() {
   }, [filterValue, companies.length, onSearchChange, currentSort]);
 
   const bottomContent = React.useMemo(() => {
+    if (sortedAndFilteredItems.length === 0) {
+      return null;
+    }
+
     return (
       <div className="flex items-center justify-center px-2 py-2">
         <Pagination isCompact showControls showShadow color="primary" page={page} total={pages} onChange={handlePageChange} />
       </div>
     );
-  }, [page, pages]);
+  }, [page, pages, sortedAndFilteredItems.length]);
 
   // Handle rate limit error
   if (error) {
@@ -247,57 +222,55 @@ export function TableCompany() {
 
   return (
     <>
-      <Table
-        isHeaderSticky
-        aria-label="Companies table"
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        selectionMode="single"
-        topContent={topContent}
-        topContentPlacement="outside"
-        classNames={{
-          wrapper: "max-h-[500px]",
-        }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.name} align="start">
-              {column.displayName}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody emptyContent={"No companies found"} items={paginatedItems}>
-          {(item) => (
-            <TableRow key={item.id}>
-              {(columnKey) => (
-                <TableCell>
-                  <NextLink
-                    className="block h-full w-full hover:opacity-70"
-                    href={`/company/${item.id}`}
-                    onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")} // Add this to capture right-click events
-                    onClick={(e) => {
-                      if (e.metaKey || e.ctrlKey) {
-                        mixpanelTrackOnRowClick(item.id, "cmd_clicked");
-                      } else {
-                        mixpanelTrackOnRowClick(item.id, "row_clicked");
-                      }
-                    }}
-                    onMouseDown={(e) => {
-                      if (e.button === 1) {
-                        mixpanelTrackOnRowClick(item.id, "middle_clicked");
-                      }
-                    }}
-                  >
-                    {renderCell(item, columnKey as ColumnKey)}
-                  </NextLink>
-                </TableCell>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <div className="flex flex-col gap-4">
+        {/* Top Content */}
+        {topContent}
 
-      <CreateCompanyModal isOpen={isModalOpen} onClose={handleModalClose} />
+        {/* Company List */}
+        <div className="flex flex-col gap-2">
+          {/* Header - Visible on all devices */}
+          <div className="grid grid-cols-2 border-b border-divider pb-2">
+            <div className="text-small font-semibold text-default-600">Company Name</div>
+            <div className="text-small font-semibold text-default-600">Company URL</div>
+          </div>
+
+          {/* Company Rows */}
+          {paginatedItems.length === 0 ? (
+            <div className="py-8 text-center text-default-400">No companies found</div>
+          ) : (
+            paginatedItems.map((item) => (
+              <Link
+                key={item.id}
+                className="group rounded-medium border border-transparent bg-content1 transition-colors hover:border-primary hover:bg-content2"
+                href={`/company/${item.id}`}
+                onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey) {
+                    mixpanelTrackOnRowClick(item.id, "cmd_clicked");
+                  } else {
+                    mixpanelTrackOnRowClick(item.id, "row_clicked");
+                  }
+                }}
+                onMouseDown={(e) => {
+                  if (e.button === 1) {
+                    mixpanelTrackOnRowClick(item.id, "middle_clicked");
+                  }
+                }}
+              >
+                <div className="grid grid-cols-2 gap-2 p-4">
+                  <div className="break-words text-small capitalize text-foreground">{item.company_name}</div>
+                  <div className="break-words text-small text-default-400">{item.company_url}</div>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+        {/* Bottom Pagination */}
+        {bottomContent}
+
+        {/* Modal */}
+        <CreateCompanyModal isOpen={isModalOpen} onClose={handleModalClose} />
+      </div>
     </>
   );
 }

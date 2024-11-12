@@ -2,6 +2,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { ERROR_MESSAGES, getErrorMessage, isRateLimitError } from "@/lib/errorHandling";
@@ -21,9 +22,16 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
     handleSubmit,
     formState: { errors },
     reset,
+    setFocus,
   } = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      setFocus("company_name");
+    }
+  }, [isOpen, setFocus]);
 
   const onSubmit = async (data: CompanyFormData) => {
     try {
