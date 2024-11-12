@@ -36,14 +36,16 @@ export function OnlineAssessmentCard({ application, onCardClick }: OnlineAssessm
                 <span className="w-fit">Interview date: {formatDateDayMonthYear(application.interview_date)}</span>
               </Tooltip>
             </div>
-            {application.response_date && (
-              <div className="flex items-center gap-1">
-                <CalendarIcon />
+            <div className="flex items-center gap-1 text-default-400">
+              <CalendarIcon />
+              {application.response_date ? (
                 <Tooltip content={formatHowLongAgo(application.response_date)}>
                   <span className="w-fit">Receive response: {formatDateDayMonthYear(application.response_date)}</span>
                 </Tooltip>
-              </div>
-            )}
+              ) : (
+                <span>No response date yet</span>
+              )}
+            </div>
           </div>
 
           <InterviewTagsAndLeetcodeChips interview_tags={application.interview_tags} leetcode_questions={application.leetcode_questions} />

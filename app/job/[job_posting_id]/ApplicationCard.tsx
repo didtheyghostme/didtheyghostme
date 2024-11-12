@@ -6,9 +6,10 @@ import { JobPostPageInterviewData } from "@/app/api/job/[job_posting_id]/intervi
 import { utilSortInterviewTags } from "@/app/interview/[application_id]/InterviewTagsModal";
 import { CustomChip } from "@/components/CustomChip";
 
-export function getStatusColor(status: ApplicationStatus): "primary" | "danger" | "warning" | "success" {
+export function getStatusColor(status: ApplicationStatus): "primary" | "danger" | "warning" | "success" | "default" {
   switch (status) {
     case "Applied":
+      return "default";
     case "Interviewing":
       return "primary";
     case "Rejected":

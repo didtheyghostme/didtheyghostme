@@ -7,30 +7,46 @@ import mixpanel from "mixpanel-browser";
 import { useState } from "react";
 
 import { CustomButton } from "@/components/CustomButton";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
+
+type Screenshot = {
+  desktop: {
+    dark: string;
+    light: string;
+  };
+  mobile: {
+    dark: string;
+    light: string;
+  };
+};
+
+type BaseFeature = {
+  title: string;
+  description: string;
+  details: string[];
+};
+
+type LoomFeature = BaseFeature & {
+  type: "loom";
+  loomEmbed: string;
+  screenshot?: never;
+};
+
+type ScreenshotFeature = BaseFeature & {
+  type: "screenshot";
+  screenshot: Screenshot;
+  loomEmbed?: never;
+};
+
+type Feature = LoomFeature | ScreenshotFeature;
 
 // TODO: replace screenshots with actual screenshots
-const features = [
+const FEATURES: readonly Feature[] = [
   {
-    title: "Browse jobs",
-    description: "Discover and explore job opportunities that are currently available",
-    screenshot: {
-      dark: "/screenshots/homefeature1.png",
-      light: "/screenshots/homefeature1.png",
-    }, // Place screenshot in public/screenshots/applications.webp
-    details: [
-      "Updated daily with the latest tech internship roles",
-      "Open positions sourced from the community and curated by the platform",
-      "See job postings shared by others in the community, making it easier to find hidden opportunities",
-      "View when jobs were posted with 'New' tags for recent listings",
-    ],
-  },
-  {
+    type: "loom",
     title: "Track Applications",
     description: "Keep track of your job applications with detailed insights for each stage of the hiring process",
-    screenshot: {
-      dark: "/screenshots/homefeature1.png",
-      light: "/screenshots/homefeature1.png",
-    }, // Place screenshot in public/screenshots/applications.webp
+    loomEmbed: `https://www.loom.com/embed/31d70974d4cc4a45a4ec11d76cc40e61?sid=120ee916-e8e4-46fa-995f-dc80d69d3f62`,
     details: [
       "'Applied' tab: The first stage, view response timelines: check when you can expect the first response date from a company after applying",
       "Filter by application status: Applied, Interviewing, Rejected, Ghosted, or Offered",
@@ -38,11 +54,18 @@ const features = [
     ],
   },
   {
+    type: "screenshot",
     title: "Online Assessment / Recorded Interview",
     description: "Share and learn from online assessment experiences to help others prepare",
     screenshot: {
-      dark: "/screenshots/homefeature1.png",
-      light: "/screenshots/homefeature1.png",
+      desktop: {
+        dark: "/screenshots/homefeature1_desktopdark.png",
+        light: "/screenshots/homefeature1_desktoplight.png",
+      },
+      mobile: {
+        dark: "/screenshots/homefeature1_mobiledark.png",
+        light: "/screenshots/homefeature1_mobilelight.png",
+      },
     }, // Place screenshot in public/screenshots/interviews.webp
     details: [
       `'Online Assessment' tab: View interview experience of applicants who have completed online assessments`,
@@ -53,11 +76,18 @@ const features = [
     ],
   },
   {
+    type: "screenshot",
     title: "Interview Experiences",
     description: "Get insights into the interview processes shared by the community",
     screenshot: {
-      dark: "/screenshots/homefeature1.png",
-      light: "/screenshots/homefeature1.png",
+      desktop: {
+        dark: "/screenshots/homefeature2_desktopdark.png",
+        light: "/screenshots/homefeature2_desktoplight.png",
+      },
+      mobile: {
+        dark: "/screenshots/homefeature2_mobiledark.png",
+        light: "/screenshots/homefeature2_mobilelight.png",
+      },
     }, // Place screenshot in public/screenshots/company.webp
     details: [
       "Share and learn from interview experiences across different companies and roles",
@@ -66,9 +96,35 @@ const features = [
       "Track company response timelines",
     ],
   },
+  {
+    type: "screenshot",
+    title: "Browse jobs",
+    description: "Discover and explore job opportunities that are currently available",
+    screenshot: {
+      desktop: {
+        dark: "/screenshots/homefeature3_desktopdark.png",
+        light: "/screenshots/homefeature3_desktoplight.png",
+      },
+      mobile: {
+        dark: "/screenshots/homefeature3_mobiledark.png",
+        light: "/screenshots/homefeature3_mobilelight.png",
+      },
+    }, // Place screenshot in public/screenshots/applications.webp
+    details: [
+      "Updated daily with the latest tech internship roles",
+      "Open positions sourced from the community and curated by the platform",
+      "See job postings shared by others in the community, making it easier to find hidden opportunities",
+      "View when jobs were posted with 'New' tags for recent listings",
+    ],
+  },
 ];
 
-const faqs = [
+type Faq = {
+  question: string;
+  answer: string;
+};
+
+const FAQS: readonly Faq[] = [
   {
     question: "How do I track a new job application?",
     answer: `Simply click on any job posting and use the 'Track this job' button. If the job posting or company is not in our database, you can add it.\n
@@ -104,6 +160,7 @@ const faqs = [
 
 export function HomePage() {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
@@ -172,10 +229,10 @@ export function HomePage() {
       </section>
 
       {/* Features with Screenshots Section */}
-      <section className="w-full max-w-7xl px-6">
+      <section className="w-full max-w-7xl">
         <h2 className="mb-8 text-center text-3xl font-bold">Platform Features</h2>
         <Tabs aria-label="Features" className="flex w-full flex-col" color="primary" variant="bordered">
-          {features.map((feature) => (
+          {FEATURES.map((feature) => (
             <Tab key={feature.title} title={feature.title} onClick={() => handleTabChange(feature.title)}>
               <Card className="mt-4">
                 <CardBody className="flex flex-col-reverse gap-8 lg:flex-row">
@@ -191,18 +248,24 @@ export function HomePage() {
                       ))}
                     </ul>
                   </div>
-                  <div className="flex-1">
-                    <Image
-                      alt={feature.title}
-                      className="rounded-lg object-cover shadow-lg"
-                      height={400}
-                      src={feature.screenshot[theme === "dark" ? "dark" : "light"]}
-                      width={600}
-                      classNames={{
-                        wrapper: "w-full",
-                        img: "w-full object-cover",
-                      }}
-                    />
+                  <div className="w-full flex-1">
+                    {feature.type === "loom" ? (
+                      <div className="relative overflow-hidden rounded-lg shadow-lg" style={{ paddingBottom: "56.25%", height: 0 }}>
+                        <iframe allowFullScreen className="absolute left-0 top-0 h-full w-full border-0" src={feature.loomEmbed} title={feature.title} />
+                      </div>
+                    ) : (
+                      <Image
+                        alt={feature.title}
+                        className="rounded-lg object-cover shadow-lg"
+                        height={400}
+                        src={feature.screenshot[isMobile ? "mobile" : "desktop"][theme === "dark" ? "dark" : "light"]}
+                        width={600}
+                        classNames={{
+                          wrapper: "w-full !max-w-none",
+                          img: "w-full object-cover",
+                        }}
+                      />
+                    )}
                   </div>
                 </CardBody>
               </Card>
@@ -212,11 +275,11 @@ export function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="w-full max-w-4xl px-6">
+      <section className="w-full max-w-4xl">
         <h2 className="mb-8 text-center text-3xl font-bold">Frequently Asked Questions</h2>
         <motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }}>
           <Accordion selectedKeys={selectedKeys} selectionMode="multiple" variant="bordered" onSelectionChange={(keys) => setSelectedKeys(keys as Set<string>)}>
-            {faqs.map((faq, index) => (
+            {FAQS.map((faq, index) => (
               <AccordionItem
                 key={index}
                 aria-label={faq.question}

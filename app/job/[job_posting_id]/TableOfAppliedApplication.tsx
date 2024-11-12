@@ -78,36 +78,36 @@ interface TableOfAppliedApplicationProps {
   applications: ProcessedApplication[];
 }
 
-function generateMockApplication(id: number): ProcessedApplication {
-  const statuses = Object.values(APPLICATION_STATUS);
-  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-  const appliedDate = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
-  const firstResponseDate = Math.random() > 0.3 ? new Date(appliedDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null;
+// function generateMockApplication(id: number): ProcessedApplication {
+//   const statuses = Object.values(APPLICATION_STATUS);
+//   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+//   const appliedDate = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
+//   const firstResponseDate = Math.random() > 0.3 ? new Date(appliedDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000) : null;
 
-  return {
-    id: id.toString(),
-    applied_date: appliedDate.toISOString().split("T")[0],
-    first_response_date: firstResponseDate ? firstResponseDate.toISOString().split("T")[0] : null,
-    status: randomStatus,
-    created_at: appliedDate.toISOString(),
-    updated_at: appliedDate.toISOString(),
-    job_posting_id: "1",
-    isCurrentUserItem: false,
-    user_data: {
-      full_name: "John Doe",
-      profile_pic_url: "https://example.com/profile.jpg",
-    },
-  };
-}
+//   return {
+//     id: id.toString(),
+//     applied_date: appliedDate.toISOString().split("T")[0],
+//     first_response_date: firstResponseDate ? firstResponseDate.toISOString().split("T")[0] : null,
+//     status: randomStatus,
+//     created_at: appliedDate.toISOString(),
+//     updated_at: appliedDate.toISOString(),
+//     job_posting_id: "1",
+//     isCurrentUserItem: false,
+//     user_data: {
+//       full_name: "John Doe",
+//       profile_pic_url: "https://example.com/profile.jpg",
+//     },
+//   };
+// }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function generateMockApplications(count: number): ProcessedApplication[] {
-  return Array.from({ length: count }, (_, index) => generateMockApplication(index + 1));
-}
+// function generateMockApplications(count: number): ProcessedApplication[] {
+//   return Array.from({ length: count }, (_, index) => generateMockApplication(index + 1));
+// }
 
-const applications = generateMockApplications(100);
+// const applications = generateMockApplications(100);
 
-export function TableOfAppliedApplication({}: TableOfAppliedApplicationProps) {
+export function TableOfAppliedApplication({ applications }: TableOfAppliedApplicationProps) {
   const [{ status: statusFilter, sort: currentSort, page }, setQueryStates] = useQueryStates({
     status: parseAsArrayOf(parseAsStringLiteral(statusFilterOptions)).withDefault(["all"]),
     sort: parseAsStringLiteral(sortOptions.map((option) => option.key)).withDefault("applied_date_asc"),

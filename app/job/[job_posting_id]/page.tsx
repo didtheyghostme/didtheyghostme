@@ -8,6 +8,7 @@ import { Key } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import mixpanel from "mixpanel-browser";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 import { ReportLinkModal } from "./ReportLinkModal";
 import { TrackThisJobModal } from "./TrackThisJobModal";
@@ -62,6 +63,7 @@ export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url
 
 export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
+  const { theme } = useTheme();
 
   const { job_posting_id } = useParams();
   const [selectedTab, setSelectedTab] = useQueryState("tab", parseAsStringLiteral(tabKeys).withDefault("Applied"));
@@ -434,7 +436,7 @@ export default function JobDetailsPage() {
 
       {/* Vertical tab */}
       <div className="flex w-full flex-col">
-        <Tabs aria-label="Options" selectedKey={selectedTab} onSelectionChange={handleTabChange}>
+        <Tabs aria-label="Options" color={theme === "light" ? "primary" : "default"} selectedKey={selectedTab} onSelectionChange={handleTabChange}>
           {tabKeys.map((key) => (
             <Tab key={key} title={TABS[key].title}>
               {key === "Applied" ? TABS[key].content(applications.data) : TABS[key].content(job_posting_id as string)}
