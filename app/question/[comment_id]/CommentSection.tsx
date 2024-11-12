@@ -24,6 +24,7 @@ import { useUpdateComment } from "@/lib/hooks/useUpdateComment";
 import { EditIcon } from "@/components/icons";
 import { EditCommentModal } from "@/components/EditCommentModal";
 import { CustomButton } from "@/components/CustomButton";
+import { EmptyContent } from "@/components/EmptyContent";
 
 type EditingComment = {
   id: string;
@@ -137,7 +138,7 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
 
       <h2 className="mb-4 text-2xl font-semibold">Comments</h2>
 
-      {comments?.data.length === 0 && <p>No comments yet</p>}
+      {comments?.data.length === 0 && <EmptyContent heading="No comments yet" message="Be the first to comment" padding="py-4 sm:py-8" />}
 
       {comments?.data &&
         comments.data.length > 0 &&
@@ -150,17 +151,16 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm text-default-500">{comment.user_data.full_name}</span>
 
-                    <div className="flex items-center gap-2">
-                      {comment.isCurrentUserItem && (
-                        <CustomButton color="primary" size="sm" variant="flat" onPress={() => setEditingComment({ id: comment.id, content: comment.content })}>
-                          Edit Comment
-                          <EditIcon />
-                        </CustomButton>
-                      )}
-
-                      <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
-                    </div>
+                    <span className="text-sm text-gray-500">{formatHowLongAgo(comment.created_at)}</span>
                   </div>
+                  {comment.isCurrentUserItem && (
+                    <div className="flex justify-end">
+                      <CustomButton color="primary" size="sm" variant="flat" onPress={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                        Edit Comment
+                        <EditIcon />
+                      </CustomButton>
+                    </div>
+                  )}
                   <p className="whitespace-pre-wrap">{comment.content}</p>
                 </div>
               </div>

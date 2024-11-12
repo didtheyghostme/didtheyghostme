@@ -16,6 +16,13 @@ export function VerifiedJobsToggle() {
 
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
+  const handleTooltipToggle = () => {
+    mixpanel.track("Verified Jobs toggle clicked", {
+      is_open: isTooltipOpen,
+    });
+    setIsTooltipOpen(!isTooltipOpen);
+  };
+
   const handleVerifiedToggle = (isSelected: boolean) => {
     mixpanel.track("All Jobs Action", {
       action: "verified_jobs_toggled",
@@ -28,14 +35,19 @@ export function VerifiedJobsToggle() {
 
   return (
     <div className="flex items-center">
-      <Tooltip content="Only show jobs that have a verified valid link" isDisabled={!isTooltipOpen} isOpen={isTooltipOpen} placement="top" onOpenChange={(open) => setIsTooltipOpen(open)}>
-        <CustomButton isIconOnly className="p-0 text-sm text-default-400" radius="full" size="sm" variant="light" onPress={() => setIsTooltipOpen(!isTooltipOpen)}>
-          ?
-        </CustomButton>
-      </Tooltip>
-
       <div className="flex items-center gap-2">
-        <span className="text-sm text-default-500">Verified Jobs</span>
+        <Tooltip content="Only show jobs that have a verified valid link" isDisabled={!isTooltipOpen} isOpen={isTooltipOpen} placement="top" onOpenChange={(open) => setIsTooltipOpen(open)}>
+          <CustomButton
+            className="h-auto min-w-0 !gap-1 p-0 text-sm text-default-500 transition-all hover:border-default-300 hover:bg-default-100/50 hover:text-default-600 dark:border-default-100"
+            radius="full"
+            size="sm"
+            variant="light"
+            onPress={handleTooltipToggle}
+          >
+            <span className="text-default-400">?</span>
+            Verified
+          </CustomButton>
+        </Tooltip>
         <Switch color="success" isSelected={isVerified} size="sm" onValueChange={handleVerifiedToggle} />
       </div>
     </div>

@@ -119,6 +119,7 @@ export default function JobDetailsPage() {
 
       toast.success("Job tracked successfully");
 
+      onTrackModalClose();
       // console.log("Application created", result);
     } catch (err: unknown) {
       if (isRateLimitError(err)) {
@@ -408,7 +409,6 @@ export default function JobDetailsPage() {
               <CustomButton
                 className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
                 color="primary"
-                isLoading={isCreating}
                 variant="bordered"
                 onPress={handleTrackThisJobClick}
               >
@@ -452,7 +452,7 @@ export default function JobDetailsPage() {
 
       <ReportLinkModal isOpen={isReportModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onReportModalClose} />
 
-      <TrackThisJobModal isOpen={isTrackModalOpen} onClose={onTrackModalClose} onSubmit={handleTrackJobSubmit} />
+      <TrackThisJobModal isLoading={isCreating} isOpen={isTrackModalOpen} onClose={onTrackModalClose} onSubmit={handleTrackJobSubmit} />
 
       <SuggestLinkModal isOpen={isSuggestModalOpen} jobId={jobDetails.id} jobStatus={jobDetails.job_status} onClose={onSuggestModalClose} />
     </div>

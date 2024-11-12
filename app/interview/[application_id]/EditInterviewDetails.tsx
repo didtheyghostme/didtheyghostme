@@ -15,6 +15,7 @@ import { GetApplicationByIdResponse } from "@/app/api/application/[application_i
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
+import { EmptyContent } from "@/components/EmptyContent";
 
 type EditInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
@@ -112,7 +113,6 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
       round_number: index + 1,
       total_rounds: fields.length,
     });
-    remove(index);
   };
 
   const trackTagsChange = (index: number, tags: string[]) => {
@@ -228,7 +228,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
               </CustomButton>
             </div>
 
-            {fields.length === 0 && <div className="mb-4 text-2xl font-semibold">There are no interviews yet. Add a new round to start.</div>}
+            {fields.length === 0 && <EmptyContent heading="No interview rounds yet" message="Add a new round to start tracking your interview process" />}
 
             {fields.map((field, index) => {
               const isLastRound = index === fields.length - 1;
@@ -302,13 +302,17 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     name={`interviewRounds.${index}.interview_tags`}
                     render={({ field }) => (
                       <>
-                        <CustomButton className="mt-2" color="secondary" variant="bordered" onPress={() => setOpenModalIndex(index)}>
-                          Select Interview Tags
-                        </CustomButton>
+                        <div className="mt-4 flex justify-end">
+                          <CustomButton color="secondary" variant="bordered" onPress={() => setOpenModalIndex(index)}>
+                            Select Interview Tags
+                          </CustomButton>
+                        </div>
                         {field.value && field.value.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {utilSortInterviewTags(field.value).map((tag) => (
-                              <CustomChip key={tag}>{tag}</CustomChip>
+                              <CustomChip key={tag} color="secondary" variant="flat">
+                                {tag}
+                              </CustomChip>
                             ))}
                           </div>
                         )}
@@ -333,10 +337,11 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     name={`interviewRounds.${index}.leetcode_questions`}
                     render={({ field }) => (
                       <div className="mt-4">
-                        <div className="flex items-center justify-between">
-                          <p className="text-md font-semibold">LeetCode Questions</p>
+                        <div className="flex justify-end">
                           <CustomButton
+                            color="primary"
                             size="sm"
+                            variant="bordered"
                             onClick={() => {
                               trackLeetcodeQuestionAdd(index);
                               field.onChange([
@@ -354,9 +359,10 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
 
                         {field.value &&
                           field.value.map((question, qIndex) => (
-                            <div key={qIndex} className="mt-2 flex items-center gap-4">
+                            <div key={qIndex} className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
                               <Input
                                 isRequired
+                                className="flex-1"
                                 errorMessage={methods.formState.errors?.interviewRounds?.[index]?.leetcode_questions?.[qIndex]?.question_number?.message}
                                 isInvalid={!!methods.formState.errors?.interviewRounds?.[index]?.leetcode_questions?.[qIndex]?.question_number}
                                 label="Question Number"
@@ -383,6 +389,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 }}
                               />
                               <Select
+                                className="flex-1"
                                 label="Difficulty"
                                 selectedKeys={[question.difficulty]}
                                 onChange={(e) => {
@@ -400,6 +407,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 ))}
                               </Select>
                               <CustomButton
+                                className="w-full sm:w-auto"
                                 color="danger"
                                 size="sm"
                                 onClick={() => {

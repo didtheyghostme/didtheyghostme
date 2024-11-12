@@ -41,7 +41,7 @@ export default function CompanyDetailsPage() {
 
   // console.warn("jobs", allJobs);
 
-  const { createJob } = useCreateJob(company_id as string);
+  const { createJob, isCreating } = useCreateJob(company_id as string);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -82,8 +82,18 @@ export default function CompanyDetailsPage() {
 
   const handleAddThisJob = handleSubmit(async (data: AddJobFormData) => {
     // TODO: add this job to the company using server action and mutation
+    if (isCreating) return;
+
     try {
       await createJob(data);
+
+      mixpanel.track("Job Added", {
+        company_name: company.company_name,
+        company_id,
+        job_title: data.title,
+      });
+      toast.success("Job added successfully");
+
       handleCloseModal();
     } catch (err) {
       console.error("Error adding job:", err);
@@ -99,6 +109,7 @@ export default function CompanyDetailsPage() {
         job_title: data.title,
         error: err instanceof Error ? err.message : "Unknown error occurred",
       });
+      toast.error("Error adding job");
     }
   });
 
@@ -245,7 +256,7 @@ export default function CompanyDetailsPage() {
                 <CustomButton color="danger" variant="light" onPress={handleCloseModal}>
                   Cancel
                 </CustomButton>
-                <CustomButton color="primary" type="submit">
+                <CustomButton color="primary" isLoading={isCreating} type="submit">
                   Add Job
                 </CustomButton>
               </ModalFooter>
@@ -254,7 +265,7 @@ export default function CompanyDetailsPage() {
         </Modal>
       </SignedIn>
 
-      {openJobs.length === 0 && <div>No open jobs yet</div>}
+      {openJobs.length === 0 && <DataNotFoundMessage message="No one has posted any open positions yet" title="No open jobs yet" />}
 
       {/* Job Cards open */}
       {openJobs.length > 0 && (

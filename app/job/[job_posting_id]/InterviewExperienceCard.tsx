@@ -37,14 +37,17 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
                 <span className="w-fit">Interviewed: {formatDateDayMonthYear(interviewExperience.interview_date)}</span>
               </Tooltip>
             </div>
-            {interviewExperience.response_date && (
-              <div className="flex items-center gap-1">
-                <CalendarIcon />
+
+            <div className="flex items-center gap-1 text-default-400">
+              <CalendarIcon />
+              {interviewExperience.response_date ? (
                 <Tooltip content={formatHowLongAgo(interviewExperience.response_date)}>
                   <span className="w-fit">Receive response: {formatDateDayMonthYear(interviewExperience.response_date)}</span>
                 </Tooltip>
-              </div>
-            )}
+              ) : (
+                <span>No response date yet</span>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>

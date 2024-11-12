@@ -1,13 +1,14 @@
-import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Divider, Tooltip } from "@nextui-org/react";
 
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
-import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
+import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
 import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { CalendarIcon } from "@/components/icons";
 import { CustomChip } from "@/components/CustomChip";
+import { EmptyContent } from "@/components/EmptyContent";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
@@ -41,28 +42,28 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
               {applicationDetails.status}
             </CustomChip>
           </div>
+
           <div className="flex items-center gap-1 text-default-400">
             <CalendarIcon />
-            <p>Applied on: {formatDateDayMonthYear(applicationDetails.applied_date)}</p>
+            <Tooltip content={formatHowLongAgo(applicationDetails.applied_date)}>
+              <span>Applied on: {formatDateDayMonthYear(applicationDetails.applied_date)}</span>
+            </Tooltip>
           </div>
 
-          {applicationDetails.first_response_date && (
-            <div className="flex items-center gap-1 text-default-400">
-              <CalendarIcon />
-              <p>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</p>
-            </div>
-          )}
-
-          {!applicationDetails.first_response_date && (
-            <div className="flex items-center gap-1 text-default-400">
-              <CalendarIcon />
-              <p> No first response date yet</p>
-            </div>
-          )}
+          <div className="flex items-center gap-1 text-default-400">
+            <CalendarIcon />
+            {applicationDetails.first_response_date ? (
+              <Tooltip content={formatHowLongAgo(applicationDetails.first_response_date)}>
+                <span>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</span>
+              </Tooltip>
+            ) : (
+              <span>No first response date yet</span>
+            )}
+          </div>
         </CardBody>
       </Card>
 
-      {interviewRounds.length === 0 && <p className="text-center text-default-500">There are no interviews yet</p>}
+      {interviewRounds.length === 0 && <EmptyContent heading="No interview rounds yet" />}
 
       {interviewRounds.length > 0 && (
         <div className="flex flex-col gap-4">

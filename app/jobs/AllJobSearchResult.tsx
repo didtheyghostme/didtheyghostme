@@ -89,35 +89,30 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified }: A
                 }}
               >
                 <CardBody className="p-4">
-                  <div className="flex gap-4">
-                    {/* Company Logo */}
-                    <div className="h-14 w-14 flex-shrink-0">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    {/* Company Logo - Make it smaller on mobile */}
+                    <div className="h-12 w-12 flex-shrink-0 sm:h-14 sm:w-14">
                       <ImageWithFallback alt={job.company.company_name} companyName={job.company.company_name} src={job.company.logo_url} />
                     </div>
 
                     {/* Job Details */}
-                    <div className="flex flex-1 flex-col justify-center gap-2">
-                      {/* Title Row with New Badge and Time */}
-                      <div className="flex items-start justify-between gap-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-base font-semibold text-default-800">{job.title}</p>
-                          {job.job_posted_date && isRecentDate(job.job_posted_date) && (
-                            <CustomChip color="success" size="sm" variant="flat">
-                              New
-                            </CustomChip>
-                          )}
-                        </div>
-                        {/* Posting Time */}
-                        <div className="flex items-center gap-1 whitespace-nowrap text-small text-default-500">
-                          {/* <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                          </svg> */}
-                          <span>{formatHowLongAgo(job.updated_at)}</span>
-                        </div>
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                      {/* added min-w-0 to handle text overflow */}
+                      {/* Company Name and Time */}
+                      <div className="flex justify-between gap-1">
+                        <p className="break-words text-small font-medium text-default-500 sm:text-medium">{job.company.company_name}</p>
+                        <span className="flex-shrink-0 whitespace-nowrap text-tiny text-default-400 sm:text-small">{formatHowLongAgo(job.updated_at)}</span>
                       </div>
-
-                      {/* Company Name */}
-                      <p className="text-medium font-normal text-default-500">{job.company.company_name}</p>
+                      {/* Job Title - Allow it to wrap naturally */}
+                      <p className="text-base font-semibold leading-tight text-default-800 sm:text-lg">{job.title}</p>
+                      {/* Badges Row */}
+                      {job.job_posted_date && isRecentDate(job.job_posted_date) && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <CustomChip color="success" size="sm" variant="flat">
+                            New
+                          </CustomChip>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardBody>

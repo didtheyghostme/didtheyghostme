@@ -7,16 +7,18 @@ import { CustomButton } from "@/components/CustomButton";
 
 type TrackThisJobModalProps = {
   isOpen: boolean;
+  isLoading: boolean;
   onClose: () => void;
   onSubmit: (appliedDate: string) => void;
 };
 
-export function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobModalProps) {
+export function TrackThisJobModal({ isOpen, isLoading, onClose, onSubmit }: TrackThisJobModalProps) {
   const [appliedDate, setAppliedDate] = useState<CalendarDate>(today(getLocalTimeZone()));
 
   const handleSubmit = () => {
+    if (isLoading) return;
+
     onSubmit(appliedDate.toString());
-    onClose();
   };
 
   return (
@@ -30,7 +32,7 @@ export function TrackThisJobModal({ isOpen, onClose, onSubmit }: TrackThisJobMod
           <CustomButton color="danger" variant="light" onPress={onClose}>
             Cancel
           </CustomButton>
-          <CustomButton color="primary" onPress={handleSubmit}>
+          <CustomButton color="primary" isLoading={isLoading} onPress={handleSubmit}>
             Track Job
           </CustomButton>
         </ModalFooter>
