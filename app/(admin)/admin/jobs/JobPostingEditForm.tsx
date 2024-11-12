@@ -100,7 +100,6 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
-                maxValue={today(getLocalTimeZone())}
                 value={field.value ? parseDate(field.value) : null}
                 onChange={(date: CalendarDate) => field.onChange(date.toString())}
               />

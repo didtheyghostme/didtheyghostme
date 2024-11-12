@@ -8,10 +8,11 @@ import { JobPostingCard } from "./JobPostingCard";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
+import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 
 export default function AdminJobsPage() {
   const [search, setSearch] = useState("");
-  const { data: jobs, error, isLoading } = useSWR<JobPostingTable[]>(API.ADMIN.getAllJobs, fetcher);
+  const { data: jobs, error, isLoading } = useSWR<AllJobPostingWithCompany[]>(API.ADMIN.getAllJobs, fetcher);
 
   // console.log("ADMIN job client pages....", jobs, error, isLoading);
 

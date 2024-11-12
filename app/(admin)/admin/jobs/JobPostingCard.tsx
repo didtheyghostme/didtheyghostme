@@ -7,6 +7,7 @@ import { JobPostingEditForm } from "./JobPostingEditForm";
 import { JobPostingHistory } from "./JobPostingHistory";
 
 import { CustomButton } from "@/components/CustomButton";
+import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 
 function EditIcon() {
   return (
@@ -28,7 +29,7 @@ function HistoryIcon() {
   );
 }
 
-export function JobPostingCard({ jobPosting }: { jobPosting: JobPostingTable }) {
+export function JobPostingCard({ jobPosting }: { jobPosting: AllJobPostingWithCompany }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingHistory, setIsViewingHistory] = useState(false);
 
@@ -43,6 +44,9 @@ export function JobPostingCard({ jobPosting }: { jobPosting: JobPostingTable }) 
             </p>
             <p>
               Country: <span className="text-default-700">{jobPosting.country}</span>
+            </p>
+            <p>
+              Company: <span className="text-default-700">{jobPosting.company.company_name}</span>
             </p>
             <p>
               Internal URL: <Link href={`/job/${jobPosting.id}`}>View</Link>
