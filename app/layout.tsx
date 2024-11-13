@@ -29,6 +29,19 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true") {
+    return (
+      <html lang="en">
+        <body>
+          <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+            <h1 className="mb-4 text-4xl font-bold">Under Maintenance</h1>
+            <p className="text-gray-600">We are currently performing some updates. Please check back soon.</p>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html suppressHydrationWarning lang="en">
       <head />
