@@ -20,12 +20,16 @@ export default function AdminJobsPage() {
   if (isLoading) return <div>Loading...</div>;
   if (!jobs) return <div>No jobs found</div>;
 
-  const filteredJobs = jobs.filter((job) => job.title.toLowerCase().includes(search.toLowerCase()));
+  const filteredJobs = jobs.filter((job) => {
+    const searchTerm = search.toLowerCase();
+
+    return job.title.toLowerCase().includes(searchTerm) || job.company.company_name.toLowerCase().includes(searchTerm);
+  });
 
   return (
     <div className="mx-auto max-w-7xl p-4">
       <div className="mb-4">
-        <Input placeholder="Search jobs..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder="Search jobs by job title or company name" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

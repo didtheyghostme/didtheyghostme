@@ -8,7 +8,7 @@ const EMPTY_PLACEHOLDER_URL = "https://placehold.co/56?text=?";
 const LOGO_DEV_URL = "https://img.logo.dev/";
 const LOGO_DEV_TOKEN = "?token=pk_DxrQtA58T7qDKnpL24nlww";
 
-const COMPANY_ROUNDED_LOGO_LIST = ["TikTok"];
+const COMPANY_ROUNDED_LOGO_LIST = process.env.NEXT_PUBLIC_ROUNDED_LOGOS ? JSON.parse(process.env.NEXT_PUBLIC_ROUNDED_LOGOS) : ["TikTok"];
 
 function cleanCompanyName(name: string): string {
   // Remove special characters, spaces, and convert to lowercase
