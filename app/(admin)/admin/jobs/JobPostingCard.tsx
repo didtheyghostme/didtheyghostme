@@ -38,16 +38,17 @@ export function JobPostingCard({ jobPosting }: { jobPosting: AllJobPostingWithCo
       <div className="flex justify-between">
         <div>
           <h3 className="text-lg font-medium">{jobPosting.title}</h3>
+          <p className="text-success">Company: {jobPosting.company.company_name}</p>
+
           <div className="mt-2 space-y-1 text-sm text-default-500">
             <p>
               Status: <span className="text-default-700">{jobPosting.job_status}</span>
             </p>
+
             <p>
               Country: <span className="text-default-700">{jobPosting.country}</span>
             </p>
-            <p>
-              Company: <span className="text-default-700">{jobPosting.company.company_name}</span>
-            </p>
+
             <p>
               Internal URL: <Link href={`/job/${jobPosting.id}`}>View</Link>
             </p>

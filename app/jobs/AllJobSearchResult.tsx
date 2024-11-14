@@ -18,7 +18,7 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomChip } from "@/components/CustomChip";
 
-export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date"> & {
+export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date" | "closed_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
 };
 
@@ -103,14 +103,23 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified }: A
                         <p className="break-words text-small font-medium text-default-500 sm:text-medium">{job.company.company_name}</p>
                         <span className="flex-shrink-0 whitespace-nowrap text-tiny text-default-400 sm:text-small">{formatHowLongAgo(job.updated_at)}</span>
                       </div>
+
                       {/* Job Title - Allow it to wrap naturally */}
                       <p className="text-base font-semibold leading-tight text-default-800 sm:text-lg">{job.title}</p>
-                      {/* Badges Row */}
-                      {job.job_posted_date && isRecentDate(job.job_posted_date) && (
+
+                      {/* Badges Row - Only render if there are badges to show */}
+                      {((job.job_posted_date && isRecentDate(job.job_posted_date)) || job.closed_date) && (
                         <div className="flex flex-wrap items-center gap-2">
-                          <CustomChip color="success" size="sm" variant="flat">
-                            New
-                          </CustomChip>
+                          {job.job_posted_date && isRecentDate(job.job_posted_date) && (
+                            <CustomChip color="success" size="sm" variant="flat">
+                              New
+                            </CustomChip>
+                          )}
+                          {job.closed_date && (
+                            <CustomChip color="warning" size="sm" variant="flat">
+                              Closing {formatHowLongAgo(job.closed_date)}
+                            </CustomChip>
+                          )}
                         </div>
                       )}
                     </div>

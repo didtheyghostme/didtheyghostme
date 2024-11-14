@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     country: true,
     updated_at: true,
     job_posted_date: true,
+    closed_date: true,
     [DBTable.COMPANY]: {
       company_name: true,
       logo_url: true,
