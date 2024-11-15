@@ -35,7 +35,7 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
         entity_type: "job_posting",
         entity_id: jobId,
         report_type: data.report_type,
-        report_message: `status_${jobStatus}: ${data.url || "http://localhost:3000/job/" + jobId}`,
+        report_message: data.report_type === "Other" ? `status_${jobStatus}: ${data.report_message}` : `status_${jobStatus}: ${data.url || "http://localhost:3000/job/" + jobId}`,
       });
       toast.success("Report submitted successfully");
       reset();
@@ -69,10 +69,10 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
                 <RadioGroup {...field} label="What's wrong with the link?" orientation="vertical">
                   <Radio value={REPORT_LINK_TYPES["Link Expired"]}>Link is expired</Radio>
                   <Radio value={REPORT_LINK_TYPES["Invalid Link"]}>Link is invalid</Radio>
+                  <Radio value={REPORT_LINK_TYPES["Other"]}>Other issue</Radio>
                 </RadioGroup>
               )}
             />
-
             {reportType === "Invalid Link" && (
               <Controller
                 control={control}
@@ -90,6 +90,27 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
                       const value = e.target.value.trim();
 
                       field.onChange(value === "" ? null : value);
+                    }}
+                  />
+                )}
+              />
+            )}
+
+            {reportType === "Other" && (
+              <Controller
+                control={control}
+                name="report_message"
+                render={({ field, fieldState }) => (
+                  <Input
+                    {...field}
+                    errorMessage={fieldState.error?.message}
+                    isInvalid={!!fieldState.error}
+                    label="Description"
+                    placeholder="e.g. job title/company name incorrect etc."
+                    value={field.value ?? ""}
+                    variant="bordered"
+                    onChange={(e) => {
+                      field.onChange(e.target.value.trim());
                     }}
                   />
                 )}

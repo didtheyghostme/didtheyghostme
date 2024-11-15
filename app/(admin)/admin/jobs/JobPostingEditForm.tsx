@@ -97,6 +97,7 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
             name="closed_date"
             render={({ field, fieldState }) => (
               <DatePicker
+                description="Leave blank if the job is still open"
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
