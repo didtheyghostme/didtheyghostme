@@ -30,6 +30,7 @@ export const API = {
     getJobChangelog: (job_posting_id: string) => `/api/admin/job/${job_posting_id}/changelog`, // return changelog for a job
   },
   COUNTRY: "/api/country", // return all countries
+  EXPERIENCE_LEVEL: "/api/experience-level", // return all experience levels
 } as const;
 
 export const DB_RPC = {

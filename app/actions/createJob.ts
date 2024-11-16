@@ -26,6 +26,7 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
         p_company_id: company_id,
         p_user_id: user_id,
         p_country_ids: validatedData.countries,
+        p_experience_level_id: validatedData.experience_level_id,
       });
 
       if (error) {

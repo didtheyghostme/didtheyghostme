@@ -52,6 +52,20 @@ type JobPostingCountryTable = {
   created_at: string;
 };
 
+type ExperienceLevel = "Internship" | "New Grad" | "Junior" | "Mid Level" | "Senior";
+
+type ExperienceLevelTable = {
+  id: string;
+  experience_level: ExperienceLevel;
+  created_at: string;
+};
+
+type JobPostingExperienceLevelTable = {
+  id: string;
+  job_posting_id: string;
+  experience_level_id: string;
+  created_at: string;
+};
 
 type StrictOmit<T, K extends keyof T> = Omit<T, K>;
 
