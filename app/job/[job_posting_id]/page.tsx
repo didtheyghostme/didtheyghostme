@@ -22,7 +22,6 @@ import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon, PlusIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
-import { DBTable } from "@/lib/constants/dbTables";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
 import { GetAllApplicationsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/application/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";

@@ -10,6 +10,8 @@ export const DBTable = {
   INTERVIEW_TAG_MAPPING: "interview_tag_mapping",
   COUNTRY: "country",
   JOB_POSTING_COUNTRY: "job_posting_country",
+  EXPERIENCE_LEVEL: "experience_level",
+  JOB_POSTING_EXPERIENCE_LEVEL: "job_posting_experience_level",
   // Add other table names here
 } as const;
 

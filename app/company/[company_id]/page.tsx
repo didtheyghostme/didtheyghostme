@@ -26,11 +26,18 @@ import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 import { CompanyDetailsPageAllJobsResponse } from "@/app/api/company/[company_id]/job/route";
 import { CompanyDetailsPageCompanyResponse } from "@/app/api/company/[company_id]/route";
+import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 
 function findSingaporeId(countries: CountryTable[]) {
   const singapore = countries?.find((country) => country.country_name === "Singapore");
 
   return singapore?.id;
+}
+
+function findInternshipId(experienceLevels: ExperienceLevelSelect[]) {
+  const internship = experienceLevels?.find((level) => level.experience_level === "Internship");
+
+  return internship?.id;
 }
 
 export default function CompanyDetailsPage() {
@@ -44,6 +51,8 @@ export default function CompanyDetailsPage() {
 
   const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY, fetcher);
 
+  const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL, fetcher);
+
   // console.warn("jobs", allJobs);
 
   const { createJob, isCreating } = useCreateJob(company_id as string);
@@ -55,6 +64,7 @@ export default function CompanyDetailsPage() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
     setFocus,
   } = useForm<AddJobFormData>({
     resolver: zodResolver(addJobSchema),
@@ -62,6 +72,7 @@ export default function CompanyDetailsPage() {
       title: "",
       countries: [],
       url: null,
+      experience_level_id: "",
     },
   });
 
@@ -71,24 +82,28 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  // Add this useEffect to set Singapore as default once countries are loaded
+  // Add this useEffect to set ["SingaporeID"] as default once countries are loaded and "Internship" as default once experience levels are loaded
   useEffect(() => {
     if (countries?.length) {
       const singaporeId = findSingaporeId(countries);
 
       if (singaporeId) {
-        reset({
-          title: "",
-          countries: [singaporeId],
-          url: null,
-        });
+        setValue("countries", [singaporeId]);
       }
     }
-  }, [countries, reset]);
 
-  if (isLoading || jobIsLoading || countriesLoading) return <LoadingContent />;
-  if (error || jobError || countriesError) {
-    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError)) {
+    if (experienceLevels?.length) {
+      const internshipId = findInternshipId(experienceLevels);
+
+      if (internshipId) {
+        setValue("experience_level_id", internshipId);
+      }
+    }
+  }, [countries, experienceLevels, setValue]);
+
+  if (isLoading || jobIsLoading || countriesLoading || experienceLevelsLoading) return <LoadingContent />;
+  if (error || jobError || countriesError || experienceLevelsError) {
+    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError) || isRateLimitError(experienceLevelsError)) {
       return <RateLimitErrorMessage />;
     }
 
@@ -148,7 +163,13 @@ export default function CompanyDetailsPage() {
       company_id,
     });
     setIsModalOpen(false);
-    reset();
+
+    reset({
+      title: "",
+      url: null,
+      countries: findSingaporeId(countries) ? [findSingaporeId(countries)] : [],
+      experience_level_id: findInternshipId(experienceLevels) || "",
+    });
   };
 
   const mixpanelTrackViewJobCardClick = (job: CompanyDetailsPageAllJobsResponse) => {
@@ -228,7 +249,7 @@ export default function CompanyDetailsPage() {
       <SignedIn>
         <Modal isOpen={isModalOpen} placement="center" onClose={handleCloseModal}>
           <ModalContent>
-            <form onSubmit={handleAddThisJob}>
+            <form noValidate onSubmit={handleAddThisJob}>
               <ModalHeader className="flex flex-col gap-1 pb-0 pt-4 sm:py-4">Add New Job</ModalHeader>
               <ModalBody>
                 <Controller
@@ -258,6 +279,31 @@ export default function CompanyDetailsPage() {
                     />
                   )}
                 />
+
+                <Controller
+                  control={control}
+                  name="experience_level_id"
+                  render={({ field }) => (
+                    <Select
+                      isRequired
+                      errorMessage={errors.experience_level_id?.message}
+                      isInvalid={!!errors.experience_level_id}
+                      items={experienceLevels ?? []}
+                      label="Experience Level"
+                      placeholder="Select experience level"
+                      selectedKeys={[field.value]}
+                      selectionMode="single"
+                      onChange={field.onChange}
+                    >
+                      {(level) => (
+                        <SelectItem key={level.id} value={level.id}>
+                          {level.experience_level}
+                        </SelectItem>
+                      )}
+                    </Select>
+                  )}
+                />
+
                 {/* TODO: countries */}
                 <Controller
                   control={control}
