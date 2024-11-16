@@ -8,6 +8,8 @@ export const DBTable = {
   REPORT_ADMIN: "report_admin",
   INTERVIEW_TAG: "interview_tag",
   INTERVIEW_TAG_MAPPING: "interview_tag_mapping",
+  COUNTRY: "country",
+  JOB_POSTING_COUNTRY: "job_posting_country",
   // Add other table names here
 } as const;
 

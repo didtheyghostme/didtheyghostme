@@ -4,10 +4,15 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString } from "@/lib/buildSelectString";
 import { SelectObject } from "@/lib/buildSelectString";
-import { CompanyDetailsPageAllJobsResponse } from "@/app/company/[company_id]/page";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // Select all the jobs from job_posting table for a company on the specific company page
+
+export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date" | "closed_date"> & {
+  [DBTable.JOB_POSTING_COUNTRY]: {
+    [DBTable.COUNTRY]: Pick<CountryTable, "country_name">;
+  };
+};
 
 export async function GET(request: Request, { params }: { params: { company_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -19,6 +24,12 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     updated_at: true,
     job_posted_date: true,
     closed_date: true,
+    [DBTable.JOB_POSTING_COUNTRY]: {
+      __isLeftJoin: true,
+      [DBTable.COUNTRY]: {
+        country_name: true,
+      },
+    },
   };
 
   let selectString = buildSelectString(selectObject);

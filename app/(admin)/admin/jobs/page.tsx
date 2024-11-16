@@ -15,9 +15,10 @@ export default function AdminJobsPage() {
   const { data: jobs, error, isLoading } = useSWR<AllJobPostingWithCompany[]>(API.ADMIN.getAllJobs, fetcher);
 
   // console.log("ADMIN job client pages....", jobs, error, isLoading);
+  const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY, fetcher);
 
-  if (error) return <div>Failed to load jobs</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (error || countriesError) return <div>Failed to load jobs</div>;
+  if (isLoading || countriesLoading) return <div>Loading...</div>;
   if (!jobs) return <div>No jobs found</div>;
 
   const filteredJobs = jobs.filter((job) => {
@@ -34,7 +35,7 @@ export default function AdminJobsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredJobs.map((job) => (
-          <JobPostingCard key={job.id} jobPosting={job} />
+          <JobPostingCard key={job.id} countries={countries} jobPosting={job} />
         ))}
       </div>
     </div>

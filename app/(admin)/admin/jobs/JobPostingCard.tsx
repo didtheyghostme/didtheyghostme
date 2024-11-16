@@ -29,7 +29,7 @@ function HistoryIcon() {
   );
 }
 
-export function JobPostingCard({ jobPosting }: { jobPosting: AllJobPostingWithCompany }) {
+export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[] }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingHistory, setIsViewingHistory] = useState(false);
 
@@ -75,7 +75,7 @@ export function JobPostingCard({ jobPosting }: { jobPosting: AllJobPostingWithCo
       </div>
 
       <Modal isOpen={isEditing} onOpenChange={(open) => setIsEditing(open)}>
-        <ModalContent>{(onClose) => <JobPostingEditForm jobPosting={jobPosting} onClose={onClose} />}</ModalContent>
+        <ModalContent>{(onClose) => <JobPostingEditForm jobPosting={jobPosting} countries={countries} onClose={onClose} />}</ModalContent>
       </Modal>
 
       <Modal isOpen={isViewingHistory} size="2xl" onOpenChange={(open) => setIsViewingHistory(open)}>

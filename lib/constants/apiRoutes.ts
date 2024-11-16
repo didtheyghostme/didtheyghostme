@@ -29,6 +29,7 @@ export const API = {
     getAllJobs: "/api/admin/job", // return all jobs
     getJobChangelog: (job_posting_id: string) => `/api/admin/job/${job_posting_id}/changelog`, // return changelog for a job
   },
+  COUNTRY: "/api/country", // return all countries
 } as const;
 
 export const DB_RPC = {
@@ -37,4 +38,5 @@ export const DB_RPC = {
   GET_APPLICATIONS_WITH_INTERVIEW_STATS: "get_applications_with_interview_stats",
   GET_INTERVIEW_ROUNDS_WITH_TAG_NAMES: "get_interview_rounds_with_tag_names",
   GET_ONLINE_ASSESSMENTS_BY_JOB_POSTING_ID: "get_online_assessments_by_job_posting_id",
+  INSERT_JOB_WITH_COUNTRIES: "insert_job_with_countries",
 } as const;

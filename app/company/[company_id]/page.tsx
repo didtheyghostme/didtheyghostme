@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { fetcher } from "@/lib/fetcher";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { useCreateJob } from "@/lib/hooks/useCreateJob";
-import COUNTRIES from "@/lib/constants/countries";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear, formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -25,10 +24,14 @@ import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
+import { CompanyDetailsPageAllJobsResponse } from "@/app/api/company/[company_id]/job/route";
+import { CompanyDetailsPageCompanyResponse } from "@/app/api/company/[company_id]/route";
 
-export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
+function findSingaporeId(countries: CountryTable[]) {
+  const singapore = countries?.find((country) => country.country_name === "Singapore");
 
-export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date" | "closed_date">;
+  return singapore?.id;
+}
 
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
@@ -38,6 +41,8 @@ export default function CompanyDetailsPage() {
   const { data: company, error, isLoading } = useSWR<CompanyDetailsPageCompanyResponse>(API.COMPANY.getById(company_id as string), fetcher);
 
   const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
+
+  const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY, fetcher);
 
   // console.warn("jobs", allJobs);
 
@@ -55,7 +60,7 @@ export default function CompanyDetailsPage() {
     resolver: zodResolver(addJobSchema),
     defaultValues: {
       title: "",
-      country: "Singapore",
+      countries: [],
       url: null,
     },
   });
@@ -66,9 +71,24 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  if (isLoading || jobIsLoading) return <LoadingContent />;
-  if (error || jobError) {
-    if (isRateLimitError(error) || isRateLimitError(jobError)) {
+  // Add this useEffect to set Singapore as default once countries are loaded
+  useEffect(() => {
+    if (countries?.length) {
+      const singaporeId = findSingaporeId(countries);
+
+      if (singaporeId) {
+        reset({
+          title: "",
+          countries: [singaporeId],
+          url: null,
+        });
+      }
+    }
+  }, [countries, reset]);
+
+  if (isLoading || jobIsLoading || countriesLoading) return <LoadingContent />;
+  if (error || jobError || countriesError) {
+    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError)) {
       return <RateLimitErrorMessage />;
     }
 
@@ -238,16 +258,27 @@ export default function CompanyDetailsPage() {
                     />
                   )}
                 />
+                {/* TODO: countries */}
                 <Controller
                   control={control}
-                  name="country"
+                  name="countries"
                   render={({ field }) => (
-                    <Select defaultSelectedKeys={[field.value]} errorMessage={errors.country?.message} label="Country" placeholder="Select a country">
-                      {COUNTRIES.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
+                    <Select
+                      isRequired
+                      errorMessage={errors.countries?.message}
+                      isInvalid={!!errors.countries}
+                      items={countries ?? []}
+                      label="Countries"
+                      placeholder="Select countries"
+                      selectedKeys={field.value}
+                      selectionMode="multiple"
+                      onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                    >
+                      {(country) => (
+                        <SelectItem key={country.id} value={country.id}>
+                          {country.country_name}
                         </SelectItem>
-                      ))}
+                      )}
                     </Select>
                   )}
                 />

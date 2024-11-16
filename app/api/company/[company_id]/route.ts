@@ -4,10 +4,11 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString } from "@/lib/buildSelectString";
 import { SelectObject } from "@/lib/buildSelectString";
-import { CompanyDetailsPageCompanyResponse } from "@/app/company/[company_id]/page";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // TODO 5 nov: select only required fields, get positions statistics in future / remove the statisics for now?
+
+export type CompanyDetailsPageCompanyResponse = Pick<CompanyTable, "company_name" | "company_url" | "logo_url">;
 
 export async function GET(request: Request, { params }: { params: { company_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();

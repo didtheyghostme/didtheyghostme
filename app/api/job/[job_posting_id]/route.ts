@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { JobDetails } from "@/app/job/[job_posting_id]/page";
 import { SelectObject, buildSelectString } from "@/lib/buildSelectString";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // TODO: on this job specific page, select all the applications for this job
+
+export type JobDetails = Pick<JobPostingTable, "id" | "title" | "url" | "job_status" | "updated_at" | "job_posted_date" | "closed_date"> & {
+  [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
+  [DBTable.JOB_POSTING_COUNTRY]: Pick<JobPostingCountryTable, "country_id"> & {
+    [DBTable.COUNTRY]: Pick<CountryTable, "country_name">;
+  };
+};
 
 export async function GET(request: Request, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -14,13 +20,22 @@ export async function GET(request: Request, { params }: { params: { job_posting_
   const selectObject: SelectObject<JobDetails> = {
     id: true,
     title: true,
-    country: true,
     url: true,
     job_status: true,
+    updated_at: true,
+    job_posted_date: true,
+    closed_date: true,
     [DBTable.COMPANY]: {
       id: true,
       company_name: true,
       logo_url: true,
+    },
+    [DBTable.JOB_POSTING_COUNTRY]: {
+      __isLeftJoin: true,
+      country_id: true,
+      [DBTable.COUNTRY]: {
+        country_name: true,
+      },
     },
   };
   const selectString = buildSelectString(selectObject);

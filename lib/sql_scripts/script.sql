@@ -403,7 +403,43 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- 7) function to insert job with countries
+create or replace function insert_job_with_countries(
+  p_title text,
+  p_url text,
+  p_company_id uuid,
+  p_user_id text,
+  p_country_ids uuid[]
+) returns void as $$
+declare
+  v_job_id uuid;
+begin
+  -- Insert the job posting and get just the ID
+  insert into job_posting (
+    title,
+    url,
+    company_id,
+    user_id,
+    job_status
+  ) values (
+    p_title,
+    p_url,
+    p_company_id,
+    p_user_id,
+    case when p_url is null then 'No URL' else 'Pending' end
+  ) returning id into v_job_id;
 
+  -- Insert the country relationships
+  insert into job_posting_country (
+    job_posting_id,
+    country_id
+  )
+  select 
+    v_job_id,
+    unnest(p_country_ids)
+  where array_length(p_country_ids, 1) > 0;
+end;
+$$ language plpgsql;
 
 
 -- TRIGGERS
