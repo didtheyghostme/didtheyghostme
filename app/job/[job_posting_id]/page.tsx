@@ -192,13 +192,12 @@ export default function JobDetailsPage() {
   // };
 
   // Track application view
-  const handleViewMyApplicationClick = (applicationId: string) => {
+  const trackViewMyApplicationClick = (applicationId: string) => {
     mixpanel.track("Job Posting Page", {
       action: "view_my_application_clicked",
       job_id: job_posting_id,
       application_id: applicationId,
     });
-    router.push(`/interview/${applicationId}`);
   };
 
   // Track tab changes
@@ -256,7 +255,7 @@ export default function JobDetailsPage() {
                       variant="flat"
                       onPress={handleReportLinkModalOpen}
                     >
-                      Report Link
+                      Report job
                     </CustomButton>
                   </SignedIn>
                   <SignedOut>
@@ -269,7 +268,7 @@ export default function JobDetailsPage() {
                         variant="flat"
                         onPress={mixpanelTrackReportLinkClick}
                       >
-                        Report Link
+                        Report job
                       </CustomButton>
                     </SignInButton>
                   </SignedOut>
@@ -341,7 +340,7 @@ export default function JobDetailsPage() {
                     variant="flat"
                     onPress={handleReportLinkModalOpen}
                   >
-                    Report Link
+                    Report job
                   </CustomButton>
                 </SignedIn>
                 <SignedOut>
@@ -354,7 +353,7 @@ export default function JobDetailsPage() {
                       variant="flat"
                       onPress={mixpanelTrackReportLinkClick}
                     >
-                      Report Link
+                      Report job
                     </CustomButton>
                   </SignInButton>
                 </SignedOut>
@@ -400,10 +399,12 @@ export default function JobDetailsPage() {
           <SignedIn>
             {applications.currentUserItemId ? (
               <CustomButton
+                as={Link}
                 className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
                 color="success"
+                href={`/interview/${applications.currentUserItemId}`}
                 variant="flat"
-                onPress={() => handleViewMyApplicationClick(applications.currentUserItemId!)}
+                onPress={() => trackViewMyApplicationClick(applications.currentUserItemId!)}
               >
                 View my application
               </CustomButton>

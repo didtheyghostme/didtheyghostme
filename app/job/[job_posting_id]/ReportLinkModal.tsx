@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, RadioGroup, Radio, Input } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, RadioGroup, Radio, Input, Textarea } from "@nextui-org/react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,7 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
     defaultValues: {
       report_type: "Link Expired",
       url: null,
+      report_message: null,
     },
   });
 
@@ -60,13 +61,13 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Report Link Issue</ModalHeader>
+          <ModalHeader>Report job issue</ModalHeader>
           <ModalBody className="gap-4">
             <Controller
               control={control}
               name="report_type"
               render={({ field }) => (
-                <RadioGroup {...field} label="What's wrong with the link?" orientation="vertical">
+                <RadioGroup {...field} label="What's wrong with the job posting?" orientation="vertical">
                   <Radio value={REPORT_LINK_TYPES["Link Expired"]}>Link is expired</Radio>
                   <Radio value={REPORT_LINK_TYPES["Invalid Link"]}>Link is invalid</Radio>
                   <Radio value={REPORT_LINK_TYPES["Other"]}>Other issue</Radio>
@@ -82,8 +83,8 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
                     {...field}
                     errorMessage={fieldState.error?.message}
                     isInvalid={!!fieldState.error}
-                    label="Valid URL (optional)"
-                    placeholder="Enter the correct job posting URL if you know it"
+                    label="Correct job posting URL (optional)"
+                    placeholder="e.g. https://www.google.com"
                     value={field.value ?? ""}
                     variant="bordered"
                     onChange={(e) => {
@@ -101,8 +102,9 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
                 control={control}
                 name="report_message"
                 render={({ field, fieldState }) => (
-                  <Input
+                  <Textarea
                     {...field}
+                    isRequired
                     errorMessage={fieldState.error?.message}
                     isInvalid={!!fieldState.error}
                     label="Description"
@@ -110,7 +112,9 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
                     value={field.value ?? ""}
                     variant="bordered"
                     onChange={(e) => {
-                      field.onChange(e.target.value.trim());
+                      const value = e.target.value;
+
+                      field.onChange(value === "" ? null : value);
                     }}
                   />
                 )}
