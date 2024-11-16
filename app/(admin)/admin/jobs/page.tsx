@@ -15,6 +15,7 @@ export default function AdminJobsPage() {
   const { data: jobs, error, isLoading } = useSWR<AllJobPostingWithCompany[]>(API.ADMIN.getAllJobs, fetcher);
 
   // console.log("ADMIN job client pages....", jobs, error, isLoading);
+
   const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY, fetcher);
 
   if (error || countriesError) return <div>Failed to load jobs</div>;

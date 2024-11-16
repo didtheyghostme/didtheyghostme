@@ -5,20 +5,21 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { SelectObject } from "@/lib/buildSelectString";
 import { buildSelectString } from "@/lib/buildSelectString";
 
-export type AllJobPostingWithCompany = JobPostingTable & {
+type AllJobPostingWithCompanySelect = JobPostingTable & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
-};
+} & JobPostingCountry;
+
+export type AllJobPostingWithCompany = StrictOmit<AllJobPostingWithCompanySelect, "job_posting_country"> & JobPostingCountryJoined;
 
 export async function GET() {
   const supabase = await createClerkSupabaseClientSsr();
 
-  const selectObject: SelectObject<AllJobPostingWithCompany> = {
+  const selectObject: SelectObject<AllJobPostingWithCompanySelect> = {
     id: true,
     title: true,
     created_at: true,
     updated_at: true,
     job_status: true,
-    country: true,
     url: true,
     closed_date: true,
     company_id: true,
@@ -28,6 +29,13 @@ export async function GET() {
       id: true,
       company_name: true,
       logo_url: true,
+    },
+    [DBTable.JOB_POSTING_COUNTRY]: {
+      __isLeftJoin: true,
+      [DBTable.COUNTRY]: {
+        id: true,
+        country_name: true,
+      },
     },
   };
 

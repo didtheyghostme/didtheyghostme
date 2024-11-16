@@ -18,9 +18,11 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomChip } from "@/components/CustomChip";
 
-export type AllJobsPageData = Pick<JobPostingTable, "id" | "title" | "country" | "updated_at" | "job_posted_date" | "closed_date"> & {
+export type AllJobsPageDataSelect = Pick<JobPostingTable, "id" | "title" | "updated_at" | "job_posted_date" | "closed_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
-};
+} & JobPostingCountry;
+
+export type AllJobsPageData = StrictOmit<AllJobsPageDataSelect, "job_posting_country"> & JobPostingCountryJoined;
 
 type AllJobSearchResultProps = {
   search: string;

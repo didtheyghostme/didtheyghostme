@@ -46,7 +46,7 @@ export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPo
             </p>
 
             <p>
-              Country: <span className="text-default-700">{jobPosting.country}</span>
+              Countries: <span className="text-default-700">{jobPosting.job_posting_country.map((jpc) => jpc.country.country_name).join(", ")}</span>
             </p>
 
             <p>
@@ -75,7 +75,7 @@ export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPo
       </div>
 
       <Modal isOpen={isEditing} onOpenChange={(open) => setIsEditing(open)}>
-        <ModalContent>{(onClose) => <JobPostingEditForm jobPosting={jobPosting} countries={countries} onClose={onClose} />}</ModalContent>
+        <ModalContent>{(onClose) => <JobPostingEditForm countries={countries} jobPosting={jobPosting} onClose={onClose} />}</ModalContent>
       </Modal>
 
       <Modal isOpen={isViewingHistory} size="2xl" onOpenChange={(open) => setIsViewingHistory(open)}>

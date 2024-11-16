@@ -30,7 +30,7 @@ type JobStatus = "Pending" | "Verified" | "Closed" | "Rejected" | "No URL"; // d
 type JobPostingTable = {
   id: string;
   title: string;
-  country: string;
+  // country: string;
   url: string | null;
   closed_date: string | null;
   company_id: string;
@@ -199,3 +199,15 @@ type ProcessedApplications = ProcessedDataArray<JoinedApplication>;
 type Company = CompanyTable;
 
 type JobPosting = JobPostingTable;
+
+type JobPostingCountryItem = {
+  country: Pick<CountryTable, "id" | "country_name">;
+};
+
+type JobPostingCountry = {
+  job_posting_country: JobPostingCountryItem;
+};
+
+type JobPostingCountryJoined = {
+  job_posting_country: JobPostingCountryItem[];
+};

@@ -23,7 +23,6 @@ export async function GET() {
     [DBTable.JOB_POSTING]: {
       id: true,
       title: true,
-      country: true,
       [DBTable.COMPANY]: {
         id: true,
         company_name: true,

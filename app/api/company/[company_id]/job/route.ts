@@ -8,11 +8,7 @@ import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 // Select all the jobs from job_posting table for a company on the specific company page
 
-export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date" | "closed_date"> & {
-  [DBTable.JOB_POSTING_COUNTRY]: {
-    [DBTable.COUNTRY]: Pick<CountryTable, "country_name">;
-  };
-};
+export type CompanyDetailsPageAllJobsResponse = Pick<JobPostingTable, "id" | "title" | "job_status" | "updated_at" | "job_posted_date" | "closed_date"> & JobPostingCountry;
 
 export async function GET(request: Request, { params }: { params: { company_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -27,6 +23,7 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     [DBTable.JOB_POSTING_COUNTRY]: {
       __isLeftJoin: true,
       [DBTable.COUNTRY]: {
+        id: false,
         country_name: true,
       },
     },

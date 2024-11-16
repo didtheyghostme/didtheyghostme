@@ -11,8 +11,9 @@ import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";
 import { updateJobPostingAdminSchema } from "@/lib/schema/updateJobPostingAdminSchema";
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 import { CustomButton } from "@/components/CustomButton";
+import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 
-export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPostingTable; onClose: () => void }) {
+export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[]; onClose: () => void }) {
   const {
     control,
     handleSubmit,
@@ -21,8 +22,8 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
     resolver: zodResolver(updateJobPostingAdminSchema),
     defaultValues: {
       title: jobPosting.title,
-      country: jobPosting.country,
       url: jobPosting.url,
+      countries: jobPosting.job_posting_country.map((jpc) => jpc.country.id),
       closed_date: jobPosting.closed_date,
       job_status: jobPosting.job_status,
       job_posted_date: jobPosting.job_posted_date,
@@ -53,10 +54,26 @@ export function JobPostingEditForm({ jobPosting, onClose }: { jobPosting: JobPos
 
           <Controller
             control={control}
-            name="country"
-            render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="Country" />}
+            name="countries"
+            render={({ field, fieldState }) => (
+              <Select
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                items={countries}
+                label="Countries"
+                placeholder="Select countries"
+                selectedKeys={field.value}
+                selectionMode="multiple"
+                onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+              >
+                {(country) => (
+                  <SelectItem key={country.id} value={country.id}>
+                    {country.country_name}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
           />
-
           <Controller
             control={control}
             name="url"

@@ -9,10 +9,7 @@ import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 export type JobDetails = Pick<JobPostingTable, "id" | "title" | "url" | "job_status" | "updated_at" | "job_posted_date" | "closed_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
-  [DBTable.JOB_POSTING_COUNTRY]: Pick<JobPostingCountryTable, "country_id"> & {
-    [DBTable.COUNTRY]: Pick<CountryTable, "country_name">;
-  };
-};
+} & JobPostingCountry;
 
 export async function GET(request: Request, { params }: { params: { job_posting_id: string } }) {
   const supabase = await createClerkSupabaseClientSsr();
@@ -32,8 +29,8 @@ export async function GET(request: Request, { params }: { params: { job_posting_
     },
     [DBTable.JOB_POSTING_COUNTRY]: {
       __isLeftJoin: true,
-      country_id: true,
       [DBTable.COUNTRY]: {
+        id: false,
         country_name: true,
       },
     },

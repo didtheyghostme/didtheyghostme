@@ -16,7 +16,7 @@ import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
-  [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title" | "country"> & {
+  [DBTable.JOB_POSTING]: Pick<JobPostingTable, "id" | "title"> & {
     [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
   };
 };

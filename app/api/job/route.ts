@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString, SelectObject } from "@/lib/buildSelectString";
-import { AllJobsPageData } from "@/app/jobs/AllJobSearchResult";
+import { AllJobsPageData, AllJobsPageDataSelect } from "@/app/jobs/AllJobSearchResult";
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 
 export type AllJobsPageResponse = {
@@ -21,16 +21,22 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClerkSupabaseClientSsr();
 
-  const selectObject: SelectObject<AllJobsPageData> = {
+  const selectObject: SelectObject<AllJobsPageDataSelect> = {
     id: true,
     title: true,
-    country: true,
     updated_at: true,
     job_posted_date: true,
     closed_date: true,
     [DBTable.COMPANY]: {
       company_name: true,
       logo_url: true,
+    },
+    [DBTable.JOB_POSTING_COUNTRY]: {
+      __isLeftJoin: true,
+      [DBTable.COUNTRY]: {
+        id: false,
+        country_name: true,
+      },
     },
   };
 
@@ -53,6 +59,8 @@ export async function GET(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  // console.warn("data", data, "select", selectString);
 
   return NextResponse.json({
     data,
