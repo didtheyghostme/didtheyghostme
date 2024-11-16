@@ -223,88 +223,86 @@ export default function JobDetailsPage() {
       <Card className="mb-8">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Mobile Layout */}
-          <div className="flex w-full flex-col gap-1 sm:hidden">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-4">
-                <div className="h-12 w-12 flex-shrink-0">
-                  <ImageWithFallback alt={jobDetails.company.company_name} companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
-                </div>
-
-                {/* Job Portal Link - Now next to image */}
-                {jobDetails.url && (
-                  <Link isExternal className="flex items-center gap-1 hover:underline" href={jobDetails.url} onPress={mixpanelTrackJobPortalClick}>
-                    <LinkIcon />
-                    Job portal
-                  </Link>
-                )}
-              </div>
-
-              {/* Report Link | Suggest Link Button - Stays on right */}
+          <div className="flex w-full flex-col gap-4 sm:hidden">
+            {/* Top Action Buttons */}
+            <div className="flex justify-end gap-2">
               {jobDetails.url && (
-                <>
-                  <SignedIn>
-                    <CustomButton
-                      className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
-                      color="danger"
-                      size="sm"
-                      startContent={<FlagIcon />}
-                      variant="flat"
-                      onPress={handleReportLinkModalOpen}
-                    >
-                      Report job
-                    </CustomButton>
-                  </SignedIn>
-                  <SignedOut>
-                    <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                      <CustomButton
-                        className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
-                        color="danger"
-                        size="sm"
-                        startContent={<FlagIcon />}
-                        variant="flat"
-                        onPress={mixpanelTrackReportLinkClick}
-                      >
-                        Report job
-                      </CustomButton>
-                    </SignInButton>
-                  </SignedOut>
-                </>
+                <Link isExternal className="flex items-center gap-1 text-primary hover:underline" href={jobDetails.url} onPress={mixpanelTrackJobPortalClick}>
+                  <LinkIcon />
+                  Job portal
+                </Link>
               )}
-              {!jobDetails.url && (
-                <div className="flex flex-col items-end gap-1">
-                  <p className="text-default-500">No job portal link available</p>
-                  <SignedIn>
+
+              <SignedIn>
+                <CustomButton
+                  className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                  color="danger"
+                  size="sm"
+                  startContent={<FlagIcon />}
+                  variant="flat"
+                  onPress={handleReportLinkModalOpen}
+                >
+                  Report job
+                </CustomButton>
+              </SignedIn>
+              <SignedOut>
+                <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                  <CustomButton
+                    className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                    color="danger"
+                    size="sm"
+                    startContent={<FlagIcon />}
+                    variant="flat"
+                    onPress={mixpanelTrackReportLinkClick}
+                  >
+                    Report job
+                  </CustomButton>
+                </SignInButton>
+              </SignedOut>
+            </div>
+
+            {/* If no job portal link available */}
+            {!jobDetails.url && (
+              <div className="flex flex-col gap-1">
+                <p className="text-default-500">No job portal link available</p>
+                <SignedIn>
+                  <CustomButton
+                    className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
+                    color="primary"
+                    size="sm"
+                    startContent={<PlusIcon />}
+                    variant="flat"
+                    onPress={handleSuggestLinkClick}
+                  >
+                    Suggest a job portal link
+                  </CustomButton>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton fallbackRedirectUrl={pathname} mode="modal">
                     <CustomButton
                       className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
                       color="primary"
                       size="sm"
                       startContent={<PlusIcon />}
                       variant="flat"
-                      onPress={handleSuggestLinkClick}
+                      onPress={mixpanelTrackSuggestLinkClick}
                     >
                       Suggest a job portal link
                     </CustomButton>
-                  </SignedIn>
-                  <SignedOut>
-                    <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-                      <CustomButton
-                        className="gap-0 px-1 transition-all duration-200 hover:bg-primary/70 hover:text-primary-foreground"
-                        color="primary"
-                        size="sm"
-                        startContent={<PlusIcon />}
-                        variant="flat"
-                        onPress={mixpanelTrackSuggestLinkClick}
-                      >
-                        Suggest a job portal link
-                      </CustomButton>
-                    </SignInButton>
-                  </SignedOut>
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-lg font-normal">{jobDetails.title}</p>
-              <p className="text-default-500">{jobDetails.company.company_name}</p>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            )}
+
+            {/* Logo and Title Row */}
+            <div className="flex gap-3">
+              <div className="h-12 w-12 flex-shrink-0">
+                <ImageWithFallback alt={jobDetails.company.company_name} companyName={jobDetails.company.company_name} src={jobDetails.company.logo_url} />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-default-500">{jobDetails.company.company_name}</p>
+                <p className="text-lg font-normal">{jobDetails.title}</p>
+              </div>
             </div>
           </div>
 
