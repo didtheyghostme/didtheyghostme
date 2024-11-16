@@ -32,6 +32,7 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
+import { JobDetails } from "@/app/api/job/[job_posting_id]/route";
 
 // Define the tab mapping
 const TABS = {
@@ -56,10 +57,6 @@ const TABS = {
 type TabKey = keyof typeof TABS;
 
 const tabKeys = Object.keys(TABS) as TabKey[];
-
-export type JobDetails = Pick<JobPostingTable, "id" | "title" | "country" | "url" | "job_status"> & {
-  [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
-};
 
 export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
