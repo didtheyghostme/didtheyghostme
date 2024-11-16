@@ -442,6 +442,53 @@ end;
 $$ language plpgsql;
 
 
+-- 8) function to update job with countries for ADMIN
+create or replace function update_job_with_countries(
+  p_job_posting_id uuid,
+  p_title text,
+  p_url text,
+  p_country_ids uuid[],
+  p_closed_date DATE,
+  p_job_status text,
+  p_job_posted_date DATE
+) returns void as $$
+begin
+  -- Update job_posting
+  update job_posting set
+    title = p_title,
+    url = p_url,
+    closed_date = p_closed_date,
+    job_status = p_job_status,
+    job_posted_date = p_job_posted_date,
+    updated_at = case 
+      when job_status = 'No URL' and p_job_status = 'Verified' 
+      then now() 
+      else updated_at 
+    end
+  where id = p_job_posting_id;
+
+  -- Delete country relationships that are no longer needed
+  delete from job_posting_country
+  where job_posting_id = p_job_posting_id
+  and country_id NOT IN (
+    select unnest(p_country_ids)
+  );
+
+  -- Insert/Update country relationships
+  insert into job_posting_country (
+    job_posting_id,
+    country_id
+  )
+  select 
+    p_job_posting_id,
+    unnest(p_country_ids)
+  where array_length(p_country_ids, 1) > 0
+  on conflict (job_posting_id, country_id) do nothing;
+
+end;
+$$ language plpgsql;
+
+
 -- TRIGGERS
 
 DROP TRIGGER IF EXISTS after_trigger_job_posting_changelog ON job_posting;

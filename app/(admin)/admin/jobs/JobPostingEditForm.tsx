@@ -34,7 +34,7 @@ export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPost
 
   const onSubmit = async (data: UpdateJobPostingAdminFormValues) => {
     try {
-      await updateJobPosting(data, jobPosting.job_status);
+      await updateJobPosting(data);
       toast.success("Job posting updated successfully");
       onClose();
     } catch (error) {

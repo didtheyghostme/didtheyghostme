@@ -3,12 +3,11 @@
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { checkRole } from "@/lib/clerkRoles";
 import { updateJobPostingAdminSchema, UpdateJobPostingAdminFormValues } from "@/lib/schema/updateJobPostingAdminSchema";
-import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
+import { DB_RPC } from "@/lib/constants/apiRoutes";
 
 type UpdateJobPostingAdminArgs = {
   job_posting_id: string;
   updates: UpdateJobPostingAdminFormValues;
-  oldJobStatus: JobStatus;
 };
 
 const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJobPostingAdminArgs }) => {
@@ -17,20 +16,20 @@ const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJo
   }
 
   const supabase = await createClerkSupabaseClientSsr();
-  const { job_posting_id, updates, oldJobStatus } = arg;
+  const { job_posting_id, updates } = arg;
 
   try {
     const validatedData = updateJobPostingAdminSchema.parse(updates);
 
-    // Check if status is changing from "No URL" to Verified
-    const shouldUpdateTimestamp = oldJobStatus === JOB_STATUS["No URL"] && validatedData.job_status === JOB_STATUS.Verified;
-
-    const updateData = {
-      ...validatedData,
-      ...(shouldUpdateTimestamp && { updated_at: new Date().toISOString() }),
-    };
-
-    const { error } = await supabase.from("job_posting").update(updateData).eq("id", job_posting_id);
+    const { error } = await supabase.rpc(DB_RPC.UPDATE_JOB_WITH_COUNTRIES, {
+      p_job_posting_id: job_posting_id,
+      p_title: validatedData.title,
+      p_url: validatedData.url,
+      p_country_ids: validatedData.countries,
+      p_closed_date: validatedData.closed_date,
+      p_job_status: validatedData.job_status,
+      p_job_posted_date: validatedData.job_posted_date,
+    });
 
     if (error) throw error;
   } catch (err) {

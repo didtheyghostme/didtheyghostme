@@ -39,4 +39,5 @@ export const DB_RPC = {
   GET_INTERVIEW_ROUNDS_WITH_TAG_NAMES: "get_interview_rounds_with_tag_names",
   GET_ONLINE_ASSESSMENTS_BY_JOB_POSTING_ID: "get_online_assessments_by_job_posting_id",
   INSERT_JOB_WITH_COUNTRIES: "insert_job_with_countries",
+  UPDATE_JOB_WITH_COUNTRIES: "update_job_with_countries",
 } as const;

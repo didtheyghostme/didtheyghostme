@@ -8,12 +8,11 @@ export const useUpdateJobPostingAdmin = (job_posting_id: string) => {
   const { trigger, isMutating } = useSWRMutation(API.ADMIN.getAllJobs, actionUpdateJobPostingAdmin);
 
   return {
-    updateJobPosting: async (updates: UpdateJobPostingAdminFormValues, oldJobStatus: JobStatus) => {
+    updateJobPosting: async (updates: UpdateJobPostingAdminFormValues) => {
       try {
         await trigger({
           job_posting_id,
           updates,
-          oldJobStatus,
         });
       } catch (err) {
         console.error("Error updating job posting:", err);
