@@ -30,7 +30,6 @@ type JobStatus = "Pending" | "Verified" | "Closed" | "Rejected" | "No URL"; // d
 type JobPostingTable = {
   id: string;
   title: string;
-  // country: string;
   url: string | null;
   closed_date: string | null;
   company_id: string;
