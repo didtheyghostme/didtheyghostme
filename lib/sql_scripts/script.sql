@@ -514,10 +514,20 @@ DECLARE
   v_limit int := 10;
   v_offset int;
   v_total_count int;
+  v_default_experience_level_id uuid;
+  v_default_country_id uuid;
 BEGIN
   v_offset := (p_page - 1) * v_limit;
 
-  -- Uses INNER JOINs because every job must have a company, country, and experience level
+  -- Get default IDs once at the start
+  SELECT id INTO v_default_experience_level_id
+  FROM experience_level
+  WHERE experience_level = 'Internship';
+
+  SELECT id INTO v_default_country_id
+  FROM country
+  WHERE country_name = 'Singapore';
+
   -- Count query
   SELECT COUNT(DISTINCT jp.id) INTO v_total_count
   FROM job_posting jp
@@ -536,15 +546,19 @@ BEGIN
       OR jp.title ILIKE '%' || p_search || '%'
       OR c.company_name ILIKE '%' || p_search || '%'
     )
-    -- Filter by selected countries (if any)
+    -- Filter by selected countries (if any), else = Singapore
     AND (
-      p_country_ids IS NULL 
-      OR jpc.country_id = ANY(p_country_ids)
+      CASE
+        WHEN p_country_ids IS NOT NULL THEN jpc.country_id = ANY(p_country_ids)
+        ELSE jpc.country_id = v_default_country_id
+      END
     )
-    -- Filter by experience level (if selected)
+    -- Filter by experience level (if selected), else = Internship
     AND (
-      p_experience_level_id IS NULL 
-      OR jpel.experience_level_id = p_experience_level_id
+      CASE
+        WHEN p_experience_level_id IS NOT NULL THEN jpel.experience_level_id = p_experience_level_id
+        ELSE jpel.experience_level_id = v_default_experience_level_id
+      END
     );
 
   -- Return JSON object containing data and pagination info
@@ -586,7 +600,7 @@ BEGIN
           INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
           INNER JOIN experience_level el ON jpel.experience_level_id = el.id
           WHERE 
-            CASE 
+            CASE
               WHEN p_is_verified THEN jp.job_status = 'Verified'
               ELSE jp.job_status IN ('Pending', 'Verified')
             END
@@ -596,12 +610,16 @@ BEGIN
               OR c.company_name ILIKE '%' || p_search || '%'
             )
             AND (
-              p_country_ids IS NULL 
-              OR jpc.country_id = ANY(p_country_ids)
+              CASE
+                WHEN p_country_ids IS NOT NULL THEN jpc.country_id = ANY(p_country_ids)
+                ELSE jpc.country_id = v_default_country_id
+              END
             )
             AND (
-              p_experience_level_id IS NULL 
-              OR jpel.experience_level_id = p_experience_level_id
+              CASE
+                WHEN p_experience_level_id IS NOT NULL THEN jpel.experience_level_id = p_experience_level_id
+                ELSE jpel.experience_level_id = v_default_experience_level_id
+              END
             )
           GROUP BY 
             jp.id, 
@@ -619,7 +637,7 @@ BEGIN
           OFFSET v_offset
         ) t
       ),
-      '[]'::json -- Return an empty array if no data is found
+      '[]'::json -- Return empty array if no data found
     ),
     -- Calculate total pages (minimum 1 page)
     'totalPages', GREATEST(1, CEIL(v_total_count::float / v_limit))
