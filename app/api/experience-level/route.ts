@@ -16,7 +16,7 @@ export async function GET() {
 
   const selectString = buildSelectString(selectObject);
 
-  const { data: experienceLevels, error } = await supabase.from(DBTable.EXPERIENCE_LEVEL).select(selectString).order("experience_level", { ascending: true });
+  const { data: experienceLevels, error } = await supabase.from(DBTable.EXPERIENCE_LEVEL).select(selectString).order("created_at", { ascending: true });
 
   if (error) {
     console.error("Error fetching experience levels:", error);
