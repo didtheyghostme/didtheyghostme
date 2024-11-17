@@ -1,13 +1,14 @@
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, DropdownItem, DropdownMenu, DropdownTrigger, Dropdown } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, SelectItem, Select } from "@nextui-org/react";
 import { useState } from "react";
 
 import { CountryFilter } from "./CountryFilter";
 import { VerifiedJobsToggle } from "./VerifiedJobsToggle";
-import { JobSortOrderKey } from "./AllJobSearch";
+import { JobSortOrderKey } from "./AllJobSearchInput";
+import { ExperienceLevelFilter } from "./ExperienceLevelFilter";
 
 import { CustomButton } from "@/components/CustomButton";
 import { AvailableCountry } from "@/app/api/country/available/route";
-import { ChevronDownIcon } from "@/components/icons";
+import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 
 const sortOptions = [
   { key: "DESC", label: "Posted Date: Newest to Oldest" },
@@ -20,11 +21,15 @@ type JobFiltersModalProps = {
   selectedCountries: string[];
   onCountriesChange: (countries: string[]) => void;
   availableCountries: AvailableCountry[];
-  isLoading: boolean;
+  countriesLoading: boolean;
+  experienceLevelsLoading: boolean;
   isVerified: boolean;
   onVerifiedChange: (isVerified: boolean) => void;
   sortOrder: JobSortOrderKey;
   onSortChange: (newOrder: JobSortOrderKey) => void;
+  selectedExperienceLevelId: string;
+  onExperienceLevelChange: (experienceLevelId: string) => void;
+  experienceLevels: ExperienceLevelSelect[];
 };
 
 export function JobFiltersModal({
@@ -33,24 +38,28 @@ export function JobFiltersModal({
   selectedCountries: initialCountries,
   onCountriesChange,
   availableCountries,
-  isLoading,
+  countriesLoading,
+  experienceLevelsLoading,
   isVerified: initialVerified,
   onVerifiedChange,
   sortOrder: initialSortOrder,
   onSortChange,
+  selectedExperienceLevelId: initialExperienceLevelId,
+  onExperienceLevelChange,
+  experienceLevels,
 }: JobFiltersModalProps) {
   // Local state for temporary changes
   const [tempCountries, setTempCountries] = useState(initialCountries);
   const [tempVerified, setTempVerified] = useState(initialVerified);
   const [tempSortOrder, setTempSortOrder] = useState(initialSortOrder);
-
-  const isApplyDisabled = tempCountries.length === 0;
+  const [tempExperienceLevelId, setTempExperienceLevelId] = useState(initialExperienceLevelId);
 
   const handleClose = () => {
     // Reset to initial values when closing without applying
     setTempCountries(initialCountries);
     setTempVerified(initialVerified);
     setTempSortOrder(initialSortOrder);
+    setTempExperienceLevelId(initialExperienceLevelId);
     onClose();
   };
 
@@ -58,10 +67,9 @@ export function JobFiltersModal({
   const handleDone = () => {
     onCountriesChange(tempCountries);
     onVerifiedChange(tempVerified);
+    onSortChange(tempSortOrder);
+    onExperienceLevelChange(tempExperienceLevelId);
 
-    if (tempSortOrder !== initialSortOrder) {
-      onSortChange(tempSortOrder);
-    }
     onClose();
   };
 
@@ -80,7 +88,7 @@ export function JobFiltersModal({
             <ModalBody className="gap-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium">Countries</p>
-                <CountryFilter availableCountries={availableCountries} isLoading={isLoading} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
+                <CountryFilter availableCountries={availableCountries} countriesLoading={countriesLoading} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
               </div>
 
               <div className="space-y-2">
@@ -90,36 +98,44 @@ export function JobFiltersModal({
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Sort By</p>
-                <Dropdown>
-                  <DropdownTrigger>
-                    <CustomButton className="w-full justify-between" endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                      {sortOptions.find((option) => option.key === tempSortOrder)?.label || "Sort by"}
-                    </CustomButton>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    disallowEmptySelection
-                    aria-label="Sort options"
-                    selectedKeys={new Set([tempSortOrder])}
-                    selectionMode="single"
-                    onSelectionChange={(keys) => {
-                      const selectedKey = Array.from(keys)[0] as JobSortOrderKey;
+                <Select
+                  disallowEmptySelection
+                  className="w-full"
+                  items={sortOptions}
+                  label="Sort by"
+                  placeholder="Select sort order"
+                  selectedKeys={[tempSortOrder]}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => {
+                    const selectedKey = Array.from(keys)[0] as JobSortOrderKey;
 
-                      setTempSortOrder(selectedKey);
-                    }}
-                  >
-                    {sortOptions.map((option) => (
-                      <DropdownItem key={option.key}>{option.label}</DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
+                    setTempSortOrder(selectedKey);
+                  }}
+                >
+                  {(option) => (
+                    <SelectItem key={option.key} value={option.key}>
+                      {option.label}
+                    </SelectItem>
+                  )}
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Experience Level</p>
+                <ExperienceLevelFilter
+                  experienceLevels={experienceLevels}
+                  experienceLevelsLoading={experienceLevelsLoading}
+                  selectedExperienceLevelId={tempExperienceLevelId}
+                  onExperienceLevelChange={setTempExperienceLevelId}
+                />
               </div>
             </ModalBody>
             <ModalFooter>
               <CustomButton className="mr-2" variant="flat" onPress={onClose}>
                 Cancel
               </CustomButton>
-              <CustomButton color="primary" isDisabled={isApplyDisabled} onPress={handleDone}>
-                {isApplyDisabled ? "Select at least one country" : "Apply Filters"}
+              <CustomButton color="primary" onPress={handleDone}>
+                Apply Filters
               </CustomButton>
             </ModalFooter>
           </>

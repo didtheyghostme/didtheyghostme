@@ -3,9 +3,10 @@
 import React from "react";
 import useSWR from "swr";
 import { Pagination, Card, CardBody, Link } from "@nextui-org/react";
+import { parseAsInteger, parseAsString, parseAsBoolean, parseAsArrayOf, parseAsStringLiteral, useQueryStates } from "nuqs";
 import mixpanel from "mixpanel-browser";
 
-import { JobSortOrderKey } from "./AllJobSearch";
+import { SORT_ORDER_OPTIONS } from "./AllJobSearchInput";
 
 import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
@@ -26,28 +27,49 @@ export type AllJobsPageDataSelect = Pick<JobPostingTable, "id" | "title" | "upda
 
 export type AllJobsPageData = StrictOmit<AllJobsPageDataSelect, "job_posting_country"> & JobPostingCountryJoined;
 
-type AllJobSearchResultProps = {
-  search: string;
-  page: number;
-  onPageChange: (newPage: number) => void;
-  isVerified: boolean;
-  selectedCountries: string[];
-  sortOrder: JobSortOrderKey;
-};
-
 const DEFAULT_RESPONSE: AllJobsPageResponse = {
   data: [],
   totalPages: 1,
 };
 
-export function AllJobSearchResult({ search, page, onPageChange, isVerified, selectedCountries, sortOrder }: AllJobSearchResultProps) {
+export function AllJobSearchResult() {
+  const [{ page, search, isVerified, countries, sortOrder, experienceLevelId }, setQueryStates] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    search: parseAsString.withDefault(""),
+    isVerified: parseAsBoolean.withDefault(false),
+    countries: parseAsArrayOf(parseAsString).withDefault([]),
+    sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
+    experienceLevelId: parseAsString.withDefault(""),
+  });
+
   const debouncedSearch = useDebounce(search);
 
-  const { data: apiResponse, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified, selectedCountries, sortOrder }), fetcher);
+  const {
+    data: apiResponse,
+    error,
+    isLoading,
+  } = useSWR<AllJobsPageResponse>(
+    API.JOB_POSTING.getAll({
+      page,
+      search: debouncedSearch,
+      isVerified,
+      selectedCountries: countries,
+      sortOrder,
+      experienceLevelId,
+    }),
+    fetcher,
+  );
 
-  // console.warn("apiResponse", apiResponse);
-  // const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
   const { data: jobs = [], totalPages = 1 } = apiResponse ?? DEFAULT_RESPONSE;
+
+  const handlePageChange = (newPage: number) => {
+    mixpanel.track("All Jobs Action", {
+      action: "page_changed",
+      previous_page: page,
+      page_number: newPage,
+    });
+    setQueryStates({ page: newPage });
+  };
 
   const mixpanelTrackJobClick = (job_id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
     mixpanel.track("All Jobs Card Click", {
@@ -144,7 +166,7 @@ export function AllJobSearchResult({ search, page, onPageChange, isVerified, sel
 
           {/* Pagination */}
           <div className="mt-4 flex justify-center">
-            <Pagination showControls initialPage={1} page={page} total={totalPages} onChange={onPageChange} />
+            <Pagination showControls initialPage={1} page={page} total={totalPages} onChange={handlePageChange} />
           </div>
         </>
       )}

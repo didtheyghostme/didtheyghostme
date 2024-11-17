@@ -506,6 +506,7 @@ CREATE OR REPLACE FUNCTION get_all_search_jobs(
   p_search text,
   p_is_verified boolean,
   p_country_ids uuid[],
+  p_experience_level_id uuid,
   p_sort_order text DEFAULT 'DESC'
 )
 RETURNS json AS $$
@@ -516,25 +517,37 @@ DECLARE
 BEGIN
   v_offset := (p_page - 1) * v_limit;
 
+  -- Uses INNER JOINs because every job must have a company, country, and experience level
+  -- Count query
   SELECT COUNT(DISTINCT jp.id) INTO v_total_count
   FROM job_posting jp
-  INNER JOIN company c ON jp.company_id = c.id  -- Add company join
-  LEFT JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
+  INNER JOIN company c ON jp.company_id = c.id
+  INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
+  INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
   WHERE 
-    CASE 
+    -- Filter by job status (Verified only or both Pending and Verified)
+    CASE
       WHEN p_is_verified THEN jp.job_status = 'Verified'
       ELSE jp.job_status IN ('Pending', 'Verified')
     END
+    -- Search in job title or company name (if search text provided)
     AND (
       p_search = '' 
       OR jp.title ILIKE '%' || p_search || '%'
-      OR c.company_name ILIKE '%' || p_search || '%'  -- Add company name search
+      OR c.company_name ILIKE '%' || p_search || '%'
     )
+    -- Filter by selected countries (if any)
     AND (
       p_country_ids IS NULL 
       OR jpc.country_id = ANY(p_country_ids)
+    )
+    -- Filter by experience level (if selected)
+    AND (
+      p_experience_level_id IS NULL 
+      OR jpel.experience_level_id = p_experience_level_id
     );
 
+  -- Return JSON object containing data and pagination info
   RETURN json_build_object(
     'data', COALESCE(
       (
@@ -550,25 +563,28 @@ BEGIN
               'company_name', c.company_name,
               'logo_url', c.logo_url
             ) as company,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'country', json_build_object(
-                      'country_name', co.country_name
-                    )
+            -- Subquery to get all countries for each job
+            (
+              SELECT json_agg(
+                json_build_object(
+                  'country', json_build_object(
+                    'country_name', co.country_name
                   )
                 )
-                FROM job_posting_country jpc2
-                LEFT JOIN country co ON jpc2.country_id = co.id
-                WHERE jpc2.job_posting_id = jp.id
-              ),
-              '[]'::json
-            ) as job_posting_country
+              )
+              FROM job_posting_country jpc2
+              INNER JOIN country co ON jpc2.country_id = co.id
+              WHERE jpc2.job_posting_id = jp.id
+            ) as job_posting_country,
+            json_build_object(
+              'experience_level', el.experience_level
+            ) as experience_level
           FROM job_posting jp
           INNER JOIN company c ON jp.company_id = c.id
-          LEFT JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
+          INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
           INNER JOIN country co ON jpc.country_id = co.id
+          INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
+          INNER JOIN experience_level el ON jpel.experience_level_id = el.id
           WHERE 
             CASE 
               WHEN p_is_verified THEN jp.job_status = 'Verified'
@@ -577,11 +593,15 @@ BEGIN
             AND (
               p_search = '' 
               OR jp.title ILIKE '%' || p_search || '%'
-              OR c.company_name ILIKE '%' || p_search || '%'  -- Add company name search
+              OR c.company_name ILIKE '%' || p_search || '%'
             )
             AND (
               p_country_ids IS NULL 
               OR jpc.country_id = ANY(p_country_ids)
+            )
+            AND (
+              p_experience_level_id IS NULL 
+              OR jpel.experience_level_id = p_experience_level_id
             )
           GROUP BY 
             jp.id, 
@@ -590,7 +610,8 @@ BEGIN
             jp.job_posted_date, 
             jp.closed_date,
             c.company_name, 
-            c.logo_url
+            c.logo_url,
+            el.experience_level
           ORDER BY 
             CASE WHEN p_sort_order = 'ASC' THEN jp.updated_at END ASC,
             CASE WHEN p_sort_order = 'DESC' THEN jp.updated_at END DESC
@@ -598,8 +619,9 @@ BEGIN
           OFFSET v_offset
         ) t
       ),
-      '[]'::json
+      '[]'::json -- Return an empty array if no data is found
     ),
+    -- Calculate total pages (minimum 1 page)
     'totalPages', GREATEST(1, CEIL(v_total_count::float / v_limit))
   );
 END;

@@ -3,23 +3,33 @@
 import { Select, SelectItem } from "@nextui-org/react";
 
 import { AvailableCountry } from "@/app/api/country/available/route";
+import { LoadingContent } from "@/components/LoadingContent";
 
 type CountryFilterProps = {
   onCountriesChange: (countries: string[]) => void;
   selectedCountries: string[];
   availableCountries: AvailableCountry[];
-  isLoading: boolean;
+  countriesLoading: boolean;
 };
 
-export function CountryFilter({ onCountriesChange, selectedCountries, availableCountries, isLoading }: CountryFilterProps) {
+export function CountryFilter({ onCountriesChange, selectedCountries, availableCountries, countriesLoading }: CountryFilterProps) {
+  if (countriesLoading) return <LoadingContent />;
+
+  const singaporeId = availableCountries.find((country) => country.country_name === "Singapore")?.id;
+
+  const hasValidSelection = selectedCountries.some((id) => id.trim().length > 0); // to handle [""] as availableCountries.length > 0 will be true
+
+  const defaultKeys = hasValidSelection ? selectedCountries : singaporeId ? [singaporeId] : [];
+
   return (
     <Select
-      className="max-w-xs"
-      isLoading={isLoading}
+      disallowEmptySelection
+      isMultiline
+      className="w-full"
       items={availableCountries}
       label="Filter by countries"
       placeholder="Select countries"
-      selectedKeys={selectedCountries}
+      selectedKeys={defaultKeys}
       selectionMode="multiple"
       onSelectionChange={(keys) => onCountriesChange(Array.from(keys) as string[])}
     >

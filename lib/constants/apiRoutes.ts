@@ -4,8 +4,21 @@ export const API = {
     getById: (company_id: string) => `/api/company/${company_id}`,
   },
   JOB_POSTING: {
-    getAll: ({ page, search, isVerified, selectedCountries, sortOrder }: { page: number; search: string; isVerified: boolean; selectedCountries: string[]; sortOrder: "ASC" | "DESC" }) =>
-      `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}&sortOrder=${sortOrder}`,
+    getAll: ({
+      page,
+      search,
+      isVerified,
+      selectedCountries,
+      sortOrder,
+      experienceLevelId,
+    }: {
+      page: number;
+      search: string;
+      isVerified: boolean;
+      selectedCountries: string[];
+      sortOrder: "ASC" | "DESC";
+      experienceLevelId: string;
+    }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}&sortOrder=${sortOrder}&experienceLevelId=${experienceLevelId}`,
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },

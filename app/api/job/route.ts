@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
   const countriesParam = searchParams.get("countries");
   const countries = countriesParam ? countriesParam.split(",").filter(Boolean) : null;
 
+  const experienceLevelIdParams = searchParams.get("experienceLevelId");
+  const experienceLevelId = experienceLevelIdParams && experienceLevelIdParams !== "" ? experienceLevelIdParams : null;
+
   const supabase = await createClerkSupabaseClientSsr();
 
   const { data, error } = await supabase.rpc(DB_RPC.GET_ALL_SEARCH_JOBS, {
@@ -28,6 +31,7 @@ export async function GET(request: NextRequest) {
     p_is_verified: isVerified,
     p_country_ids: countries,
     p_sort_order: sortOrder,
+    p_experience_level_id: experienceLevelId,
   });
 
   if (error) {
