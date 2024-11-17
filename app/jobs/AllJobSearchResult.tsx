@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { Pagination, Card, CardBody, Link } from "@nextui-org/react";
 import mixpanel from "mixpanel-browser";
 
+import { JobSortOrderKey } from "./AllJobSearch";
+
 import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -30,6 +32,7 @@ type AllJobSearchResultProps = {
   onPageChange: (newPage: number) => void;
   isVerified: boolean;
   selectedCountries: string[];
+  sortOrder: JobSortOrderKey;
 };
 
 const DEFAULT_RESPONSE: AllJobsPageResponse = {
@@ -37,10 +40,10 @@ const DEFAULT_RESPONSE: AllJobsPageResponse = {
   totalPages: 1,
 };
 
-export function AllJobSearchResult({ search, page, onPageChange, isVerified, selectedCountries }: AllJobSearchResultProps) {
+export function AllJobSearchResult({ search, page, onPageChange, isVerified, selectedCountries, sortOrder }: AllJobSearchResultProps) {
   const debouncedSearch = useDebounce(search);
 
-  const { data: apiResponse, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified, selectedCountries }), fetcher);
+  const { data: apiResponse, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified, selectedCountries, sortOrder }), fetcher);
 
   // console.warn("apiResponse", apiResponse);
   // const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};

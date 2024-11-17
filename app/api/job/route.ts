@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const search = searchParams.get("search") ?? "";
   const isVerified = searchParams.get("isVerified") === "true";
+  const sortOrder = (searchParams.get("sortOrder") ?? "DESC") as "ASC" | "DESC";
 
   // Fix: Split any comma-separated values into separate array elements
   const countriesParam = searchParams.get("countries");
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     p_search: search,
     p_is_verified: isVerified,
     p_country_ids: countries,
+    p_sort_order: sortOrder,
   });
 
   if (error) {

@@ -96,7 +96,7 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end pt-4">
         <SignedIn>
           <CustomButton onPress={handleAskAQuestion}>Ask a Question</CustomButton>
         </SignedIn>

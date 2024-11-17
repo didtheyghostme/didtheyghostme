@@ -505,7 +505,8 @@ CREATE OR REPLACE FUNCTION get_all_search_jobs(
   p_page int,
   p_search text,
   p_is_verified boolean,
-  p_country_ids uuid[]
+  p_country_ids uuid[],
+  p_sort_order text DEFAULT 'DESC'
 )
 RETURNS json AS $$
 DECLARE
@@ -590,7 +591,9 @@ BEGIN
             jp.closed_date,
             c.company_name, 
             c.logo_url
-          ORDER BY jp.updated_at DESC
+          ORDER BY 
+            CASE WHEN p_sort_order = 'ASC' THEN jp.updated_at END ASC,
+            CASE WHEN p_sort_order = 'DESC' THEN jp.updated_at END DESC
           LIMIT v_limit
           OFFSET v_offset
         ) t
