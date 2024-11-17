@@ -122,7 +122,7 @@ export default function CompanyDetailsPage() {
     try {
       await createJob(data);
 
-      mixpanel.track("Job Added", {
+      mixpanel.track("Job Added Success", {
         company_name: company.company_name,
         company_id,
         job_title: data.title,
@@ -138,7 +138,7 @@ export default function CompanyDetailsPage() {
         return; // Return early to avoid showing generic error
       }
 
-      mixpanel.track("Company Details", {
+      mixpanel.track("Job Added Error", {
         action: "job_creation_error",
         company_id,
         job_title: data.title,

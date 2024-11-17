@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import mixpanel from "mixpanel-browser";
 
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { ERROR_MESSAGES, getErrorMessage, isRateLimitError } from "@/lib/errorHandling";
@@ -36,7 +37,14 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
   const onSubmit = async (data: CompanyFormData) => {
     try {
       await createCompany(data);
+
+      mixpanel.track("Company Added Success", {
+        company_name: data.company_name,
+        company_url: data.company_url,
+      });
+
       toast.success("Company created successfully");
+
       reset();
       onClose();
     } catch (error) {
@@ -47,6 +55,12 @@ export function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps)
 
         return; // Return early to avoid showing generic error
       }
+
+      mixpanel.track("Company Added Error", {
+        company_name: data.company_name,
+        company_url: data.company_url,
+        error: getErrorMessage(error),
+      });
 
       toast.error("Error creating company", {
         description: getErrorMessage(error),
