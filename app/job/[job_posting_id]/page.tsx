@@ -225,45 +225,45 @@ export default function JobDetailsPage() {
           {/* Mobile Layout */}
           <div className="flex w-full flex-col gap-4 sm:hidden">
             {/* Top Action Buttons */}
-            <div className="flex justify-end gap-2">
-              {jobDetails.url && (
+            {jobDetails.url && (
+              <div className="flex justify-end gap-2">
                 <Link isExternal className="flex items-center gap-1 text-primary hover:underline" href={jobDetails.url} onPress={mixpanelTrackJobPortalClick}>
                   <LinkIcon />
                   Job portal
                 </Link>
-              )}
 
-              <SignedIn>
-                <CustomButton
-                  className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
-                  color="danger"
-                  size="sm"
-                  startContent={<FlagIcon />}
-                  variant="flat"
-                  onPress={handleReportLinkModalOpen}
-                >
-                  Report job
-                </CustomButton>
-              </SignedIn>
-              <SignedOut>
-                <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                <SignedIn>
                   <CustomButton
                     className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
                     color="danger"
                     size="sm"
                     startContent={<FlagIcon />}
                     variant="flat"
-                    onPress={mixpanelTrackReportLinkClick}
+                    onPress={handleReportLinkModalOpen}
                   >
                     Report job
                   </CustomButton>
-                </SignInButton>
-              </SignedOut>
-            </div>
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton fallbackRedirectUrl={pathname} mode="modal">
+                    <CustomButton
+                      className="transition-all duration-200 hover:bg-danger/40 hover:text-danger-foreground"
+                      color="danger"
+                      size="sm"
+                      startContent={<FlagIcon />}
+                      variant="flat"
+                      onPress={mixpanelTrackReportLinkClick}
+                    >
+                      Report job
+                    </CustomButton>
+                  </SignInButton>
+                </SignedOut>
+              </div>
+            )}
 
             {/* If no job portal link available */}
             {!jobDetails.url && (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col items-end gap-1">
                 <p className="text-default-500">No job portal link available</p>
                 <SignedIn>
                   <CustomButton
