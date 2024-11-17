@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { createRateLimitResponse } from "@/lib/errorHandling";
-import { jobLimiters, othersLimiters, companyLimiters, createFallbackRateLimiters } from "@/lib/rateLimit";
+import { jobLimiters, othersLimiters, companyLimiters, countryLimiters, createFallbackRateLimiters, experienceLevelLimiters } from "@/lib/rateLimit";
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
 import { getUpstashFailedStatus, setUpstashFailedStatus } from "@/lib/rateLimitFallbackRedis";
 
@@ -14,6 +14,8 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isJobRoutes = createRouteMatcher(["/api/job(.*)"]);
 const isCompanyRoutes = createRouteMatcher(["/api/company(.*)"]);
 const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(.*)"]);
+const isCountryRoutes = createRouteMatcher(["/api/country(.*)"]);
+const isExperienceLevelRoutes = createRouteMatcher(["/api/experience-level(.*)"]);
 
 async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; ip: string }): Promise<boolean> {
   const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({
@@ -53,6 +55,8 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (isJobRoutes(req)) limiters = jobLimiters;
   else if (isCompanyRoutes(req)) limiters = companyLimiters;
+  else if (isCountryRoutes(req)) limiters = countryLimiters;
+  else if (isExperienceLevelRoutes(req)) limiters = experienceLevelLimiters;
   else if (isOtherRoutes(req)) limiters = othersLimiters;
 
   if (limiters) {

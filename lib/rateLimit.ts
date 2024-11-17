@@ -69,6 +69,19 @@ export const othersLimiters = {
   sustainedWrite: limiters["others-sustained-write"],
 };
 
+export const countryLimiters = {
+  burstRead: limiters["country-burst-read"],
+  burstWrite: limiters["country-burst-write"],
+  sustainedRead: limiters["country-sustained-read"],
+  sustainedWrite: limiters["country-sustained-write"],
+};
+export const experienceLevelLimiters = {
+  burstRead: limiters["experience-level-burst-read"],
+  burstWrite: limiters["experience-level-burst-write"],
+  sustainedRead: limiters["experience-level-sustained-read"],
+  sustainedWrite: limiters["experience-level-sustained-write"],
+};
+
 // Type guard for Upstash errors
 export function isUpstashDailyLimitError(error: unknown): boolean {
   return error instanceof UpstashErrors.UpstashError && error.message.includes("max daily request limit exceeded");
