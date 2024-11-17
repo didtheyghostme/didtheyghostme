@@ -190,3 +190,13 @@ export const AlertCircleIcon = ({ size = 24, width, height, className = "", ...p
     <path d="M12 16H12.01" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
   </svg>
 );
+
+export function FilterIcon(props: { size?: number; className?: string }) {
+  return (
+    <svg className={props.className} fill="none" height={props.size || 24} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" width={props.size || 24}>
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="7" x2="17" y1="12" y2="12" />
+      <line x1="10" x2="14" y1="18" y2="18" />
+    </svg>
+  );
+}

@@ -29,14 +29,22 @@ type AllJobSearchResultProps = {
   page: number;
   onPageChange: (newPage: number) => void;
   isVerified: boolean;
+  selectedCountries: string[];
 };
 
-export function AllJobSearchResult({ search, page, onPageChange, isVerified }: AllJobSearchResultProps) {
+const DEFAULT_RESPONSE: AllJobsPageResponse = {
+  data: [],
+  totalPages: 1,
+};
+
+export function AllJobSearchResult({ search, page, onPageChange, isVerified, selectedCountries }: AllJobSearchResultProps) {
   const debouncedSearch = useDebounce(search);
 
-  const { data, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified }), fetcher);
+  const { data: apiResponse, error, isLoading } = useSWR<AllJobsPageResponse>(API.JOB_POSTING.getAll({ page, search: debouncedSearch, isVerified, selectedCountries }), fetcher);
 
-  const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
+  // console.warn("apiResponse", apiResponse);
+  // const { data: jobs = [] as AllJobsPageData[], totalPages = 1 } = data || {};
+  const { data: jobs = [], totalPages = 1 } = apiResponse ?? DEFAULT_RESPONSE;
 
   const mixpanelTrackJobClick = (job_id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
     mixpanel.track("All Jobs Card Click", {

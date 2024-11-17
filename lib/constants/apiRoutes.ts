@@ -4,7 +4,8 @@ export const API = {
     getById: (company_id: string) => `/api/company/${company_id}`,
   },
   JOB_POSTING: {
-    getAll: ({ page, search, isVerified }: { page: number; search: string; isVerified: boolean }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}`,
+    getAll: ({ page, search, isVerified, selectedCountries }: { page: number; search: string; isVerified: boolean; selectedCountries: string[] }) =>
+      `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}`,
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },
@@ -33,7 +34,9 @@ export const API = {
     getAll: "/api/country", // return all countries
     getAvailable: "/api/country/available", // return all available countries
   },
-  EXPERIENCE_LEVEL: "/api/experience-level", // return all experience levels
+  EXPERIENCE_LEVEL: {
+    getAll: "/api/experience-level", // return all experience levels
+  },
 } as const;
 
 export const DB_RPC = {
@@ -44,4 +47,5 @@ export const DB_RPC = {
   GET_ONLINE_ASSESSMENTS_BY_JOB_POSTING_ID: "get_online_assessments_by_job_posting_id",
   INSERT_JOB_WITH_COUNTRIES: "insert_job_with_countries",
   UPDATE_JOB_WITH_COUNTRIES: "update_job_with_countries",
+  GET_ALL_SEARCH_JOBS: "get_all_search_jobs",
 } as const;
