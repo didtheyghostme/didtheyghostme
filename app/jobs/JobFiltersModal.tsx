@@ -12,7 +12,7 @@ import { ChevronDownIcon } from "@/components/icons";
 const sortOptions = [
   { key: "DESC", label: "Posted Date: Newest to Oldest" },
   { key: "ASC", label: "Posted Date: Oldest to Newest" },
-] as const satisfies { key: JobSortOrderKey; label: string }[];
+] satisfies { key: JobSortOrderKey; label: string }[];
 
 type JobFiltersModalProps = {
   isOpen: boolean;
