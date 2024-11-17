@@ -498,6 +498,18 @@ begin
 end;
 $$ language plpgsql;
 
+-- 10) function to get all available countries
+create or replace function get_available_countries()
+returns table (
+  id uuid,
+  country_name text
+) language sql as $$
+  SELECT DISTINCT c.id, c.country_name
+  FROM job_posting_country jpc
+  JOIN country c ON c.id = jpc.country_id
+  ORDER BY c.country_name;
+$$;
+
 
 -- TRIGGERS
 

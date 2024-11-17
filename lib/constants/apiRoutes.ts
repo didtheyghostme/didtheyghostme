@@ -29,7 +29,10 @@ export const API = {
     getAllJobs: "/api/admin/job", // return all jobs
     getJobChangelog: (job_posting_id: string) => `/api/admin/job/${job_posting_id}/changelog`, // return changelog for a job
   },
-  COUNTRY: "/api/country", // return all countries
+  COUNTRY: {
+    getAll: "/api/country", // return all countries
+    getAvailable: "/api/country/available", // return all available countries
+  },
   EXPERIENCE_LEVEL: "/api/experience-level", // return all experience levels
 } as const;
 
