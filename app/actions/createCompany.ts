@@ -9,6 +9,7 @@ import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
 import { DBTable } from "@/lib/constants/dbTables";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { mp } from "@/lib/mixpanelServer";
+import { extractDomain } from "@/components/ImageWithFallback";
 
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyTable> => {
   return await withRateLimit(async () => {
@@ -25,7 +26,7 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
 
       const dataToInsert = {
         ...validatedData,
-        logo_url: validatedData.company_url,
+        logo_url: extractDomain(validatedData.company_url),
         user_id,
       };
 

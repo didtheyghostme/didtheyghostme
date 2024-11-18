@@ -18,7 +18,7 @@ function cleanCompanyName(name: string): string {
     .trim();
 }
 
-function extractDomain(url: string): string {
+export function extractDomain(url: string): string {
   try {
     const { hostname } = new URL(url);
 
