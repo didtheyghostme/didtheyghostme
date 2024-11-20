@@ -2,11 +2,14 @@
 
 import { useQueryStates, parseAsString } from "nuqs";
 import mixpanel from "mixpanel-browser";
+import { Suspense } from "react";
 
 import { AllJobSearchInput } from "./AllJobSearchInput";
 import { AllJobSearchResult } from "./AllJobSearchResult";
 
-export function AllJobSearch() {
+import { LoadingContent } from "@/components/LoadingContent";
+
+function AllJobSearchContent() {
   const [{ search }, setQueryStates] = useQueryStates({
     search: parseAsString.withDefault(""),
   });
@@ -24,5 +27,13 @@ export function AllJobSearch() {
       <AllJobSearchInput search={search} onSearchChange={handleSearchChange} />
       <AllJobSearchResult />
     </>
+  );
+}
+
+export function AllJobSearch() {
+  return (
+    <Suspense fallback={<LoadingContent />}>
+      <AllJobSearchContent />
+    </Suspense>
   );
 }
