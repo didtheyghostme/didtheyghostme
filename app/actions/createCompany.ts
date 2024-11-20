@@ -9,7 +9,7 @@ import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
 import { DBTable } from "@/lib/constants/dbTables";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { mp } from "@/lib/mixpanelServer";
-import { extractDomain } from "@/components/ImageWithFallback";
+import { extractDomain } from "@/lib/extractDomain";
 
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyTable> => {
   return await withRateLimit(async () => {

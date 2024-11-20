@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ImageProps, Image, cn } from "@nextui-org/react";
 
+import { extractDomain } from "@/lib/extractDomain";
+
 const EMPTY_PLACEHOLDER_URL = "https://placehold.co/56?text=?";
 
 const LOGO_DEV_URL = "https://img.logo.dev/";
@@ -16,16 +18,6 @@ function cleanCompanyName(name: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "") // Remove any character that's not a letter or number
     .trim();
-}
-
-export function extractDomain(url: string): string {
-  try {
-    const { hostname } = new URL(url);
-
-    return hostname.replace(/^www\./, "");
-  } catch (error) {
-    return "";
-  }
 }
 
 function getLogoDevFullUrl(url: string | null) {
