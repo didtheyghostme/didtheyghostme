@@ -53,13 +53,15 @@ export default function PrivacyPage() {
             Clerk - for authentication services:
             <ul className="mt-2 list-disc pl-6">
               <li>Handles sign-in with Google, GitHub, and email</li>
-              <li>We only access basic profile information needed for authentication</li>
+              <li>We only access basic profile information needed for authentication (name, email, profile picture)</li>
+              <li>We process Google account data in accordance with Google&apos;s API Services User Data Policy</li>
+              <li>You can revoke access to your Google account through Google&apos;s security settings</li>
               <li>Authentication data is processed in accordance with Clerk&apos;s security standards</li>
-              <li>You can manage your authentication methods through your account settings</li>
+              <li>You can manage all authentication methods through your Clerk account settings</li>
             </ul>
           </li>
           <li>Supabase - for data storage</li>
-          <li>Mixpanel - for analytics</li>
+          <li>Analytics services - to understand platform usage and improve user experience</li>
         </ul>
         <p className="mt-2">
           These services have their own privacy policies and data handling practices. By using our platform, you also agree to the terms and privacy policies of these third-party services.
@@ -68,14 +70,12 @@ export default function PrivacyPage() {
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">4. Data Security</h2>
-        <p>We implement appropriate security measures to protect your information:</p>
+        <p>Our platform security is primarily managed through our service providers:</p>
         <ul className="list-disc pl-6">
-          <li>Secure authentication through trusted providers</li>
-          <li>Encryption of data in transit</li>
-          <li>Regular security assessments</li>
-          <li>Limited access to personal information</li>
+          <li>Authentication security is handled by Clerk (SOC 2 Type 2 certified)</li>
+          <li>Data storage is secured through Supabase&apos;s infrastructure</li>
         </ul>
-        <p className="mt-2">However, no internet-based platform can guarantee absolute security. You use this platform at your own risk.</p>
+        <p className="mt-2">While we choose reputable service providers, no internet-based platform can guarantee absolute security. You use this platform at your own risk.</p>
       </section>
 
       <section className="space-y-4">
@@ -83,11 +83,9 @@ export default function PrivacyPage() {
         <p>You have the right to:</p>
         <ul className="list-disc pl-6">
           <li>Access your personal information</li>
-          <li>Request correction of inaccurate data</li>
-          <li>Delete your account and associated content</li>
-          <li>Export your submitted content (job applications and interview experiences)</li>
+          <li>Edit or delete your submitted content</li>
           <li>Manage your authentication methods through Clerk&apos;s user settings</li>
-          <li>Opt-out of non-essential data collection</li>
+          <li>Request account deletion by contacting us</li>
         </ul>
       </section>
 
@@ -101,7 +99,10 @@ export default function PrivacyPage() {
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">7. Data Retention</h2>
-        <p>We retain your information for as long as necessary to provide our services and comply with legal obligations. You can request deletion of your account and associated data at any time.</p>
+        <p>
+          Your data is retained in our service providers as long as you maintain your account and the platform remains active. To request account deletion, please contact us through our contact page.
+          Note that if the platform discontinues its services, all user data will be deleted.
+        </p>
       </section>
 
       <section className="space-y-4">

@@ -21,7 +21,7 @@ export default function TermsPage() {
           <li>Maintain the security of your account credentials</li>
           <li>Accept responsibility for all activities under your account</li>
           <li>Not share your account credentials</li>
-          <li>Notify us immediately of any unauthorized access</li>
+          <li>Manage account security through Clerk&apos;s security settings</li>
           <li>Only use authentication services (including Google, GitHub, or email) in accordance with their terms</li>
         </ul>
       </section>
@@ -44,9 +44,12 @@ export default function TermsPage() {
         <p>Our platform uses Clerk for authentication, which provides sign-in with Google, GitHub, and email. By using these services, you:</p>
         <ul className="list-disc pl-6">
           <li>Agree to comply with Clerk&apos;s Terms of Service and Privacy Policy</li>
+          <li>Agree to comply with Google&apos;s API Services User Data Policy when using Google Sign-In</li>
           <li>Understand that authentication data is processed according to our Privacy Policy and Clerk&apos;s security standards</li>
           <li>Accept that third-party services have their own terms and privacy policies</li>
+          <li>Acknowledge that we use analytics services to monitor platform usage</li>
           <li>Acknowledge that we are not responsible for third-party service disruptions</li>
+          <li>Can revoke access to any authentication method through respective provider settings</li>
         </ul>
       </section>
 
@@ -82,7 +85,8 @@ export default function TermsPage() {
         <p>We reserve the right, but have no obligation, to:</p>
         <ul className="list-disc pl-6">
           <li>Monitor, moderate, or remove any content</li>
-          <li>Suspend or terminate accounts</li>
+          <li>Suspend or terminate access to the platform</li>
+          <li>Process account deletion requests</li>
           <li>Modify or discontinue platform features</li>
           <li>Enforce these terms at our sole discretion</li>
         </ul>
@@ -107,10 +111,9 @@ export default function TermsPage() {
         <h2 className="text-xl font-semibold">9. Data Processing and Security</h2>
         <p>Regarding your data and platform security:</p>
         <ul className="list-disc pl-6">
-          <li>We implement reasonable security measures to protect your information</li>
-          <li>We process data in accordance with applicable data protection laws</li>
-          <li>We maintain appropriate technical and organizational security measures</li>
-          <li>We require similar security commitments from our service providers</li>
+          <li>Authentication security is provided by Clerk, a SOC 2 Type 2 certified provider</li>
+          <li>Data storage is managed by Supabase with their security infrastructure</li>
+          <li>You acknowledge that all security depends on these third-party providers</li>
         </ul>
       </section>
 
