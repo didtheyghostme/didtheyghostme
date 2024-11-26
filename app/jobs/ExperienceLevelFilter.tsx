@@ -15,7 +15,7 @@ export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperie
 
   const internshipId = experienceLevels.find((level) => level.experience_level === "Internship")?.id ?? "";
 
-  const defaultKey = selectedExperienceLevelId !== "" ? selectedExperienceLevelId : internshipId ?? "";
+  const defaultKey = selectedExperienceLevelId !== "" ? selectedExperienceLevelId : internshipId;
 
   return (
     <Select
