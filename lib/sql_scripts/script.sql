@@ -464,12 +464,14 @@ CREATE OR REPLACE FUNCTION update_job_with_countries(
   p_country_ids uuid[],
   p_closed_date DATE,
   p_job_status text,
-  p_job_posted_date DATE
+  p_job_posted_date DATE,
+  p_experience_level_ids uuid[]
 ) returns void as $$
 DECLARE
   v_old_job_posting job_posting%ROWTYPE;
   v_new_job_posting job_posting%ROWTYPE;
   v_old_country_ids uuid[];
+  v_old_experience_level_ids uuid[];
   v_history jsonb;
 BEGIN
   -- Get old data first
@@ -483,6 +485,14 @@ BEGIN
     FROM job_posting_country 
     WHERE job_posting_id = p_job_posting_id
     ORDER BY country_id
+  );
+
+  -- Get old experience level IDs before any changes
+  v_old_experience_level_ids := ARRAY(
+    SELECT experience_level_id 
+    FROM job_posting_experience_level 
+    WHERE job_posting_id = p_job_posting_id
+    ORDER BY experience_level_id
   );
 
   -- Update job_posting and get new data
@@ -510,6 +520,17 @@ BEGIN
   SELECT p_job_posting_id, unnest(p_country_ids)
   WHERE array_length(p_country_ids, 1) > 0
   ON CONFLICT (job_posting_id, country_id) DO NOTHING;
+
+  -- Delete experience level relationships that are no longer needed
+  DELETE FROM job_posting_experience_level
+  WHERE job_posting_id = p_job_posting_id
+  AND experience_level_id NOT IN (SELECT unnest(p_experience_level_ids));
+
+  -- Insert/Update experience level relationships
+  INSERT INTO job_posting_experience_level (job_posting_id, experience_level_id)
+  SELECT p_job_posting_id, unnest(p_experience_level_ids)
+  WHERE array_length(p_experience_level_ids, 1) > 0
+  ON CONFLICT (job_posting_id, experience_level_id) DO NOTHING;
 
   -- Build history for changed fields (fixing NULL at source) using COALESCE
   SELECT COALESCE(jsonb_object_agg(
@@ -548,8 +569,30 @@ BEGIN
     );
   END IF;
 
+  -- Add experience level changes if any exist
+  IF v_old_experience_level_ids IS DISTINCT FROM (SELECT ARRAY(SELECT unnest(p_experience_level_ids) ORDER BY 1)) THEN
+    v_history := v_history || jsonb_build_object(
+      'experience_levels', jsonb_build_object(
+        'old', (
+          SELECT jsonb_agg(experience_level ORDER BY experience_level)
+          FROM experience_level
+          WHERE id IN (
+            SELECT UNNEST(v_old_experience_level_ids)
+          )
+        ),
+        'new', (
+          SELECT jsonb_agg(experience_level ORDER BY experience_level)
+          FROM experience_level
+          WHERE id IN (
+            SELECT UNNEST(p_experience_level_ids)
+          )
+        )
+      )
+    );
+  END IF;
+
   -- Insert changelog if there are any changes
-  IF v_history IS NOT NULL AND v_history <> '{}'::jsonb THEN
+  IF v_history <> '{}'::jsonb THEN
     INSERT INTO job_posting_changelog (
       job_posting_id,
       history,

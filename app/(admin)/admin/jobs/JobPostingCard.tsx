@@ -8,6 +8,7 @@ import { JobPostingHistory } from "./JobPostingHistory";
 
 import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
+import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 
 function EditIcon() {
   return (
@@ -29,7 +30,7 @@ function HistoryIcon() {
   );
 }
 
-export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[] }) {
+export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[]; experienceLevels: ExperienceLevelSelect[] }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingHistory, setIsViewingHistory] = useState(false);
 
@@ -47,6 +48,10 @@ export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPo
 
             <p>
               Countries: <span className="text-default-700">{jobPosting.job_posting_country.map((jpc) => jpc.country.country_name).join(", ")}</span>
+            </p>
+
+            <p>
+              Experience Levels: <span className="text-default-700">{jobPosting.job_posting_experience_level.map((jpel) => jpel.experience_level.experience_level).join(", ")}</span>
             </p>
 
             <p>
@@ -75,7 +80,7 @@ export function JobPostingCard({ jobPosting, countries }: { jobPosting: AllJobPo
       </div>
 
       <Modal isOpen={isEditing} onOpenChange={(open) => setIsEditing(open)}>
-        <ModalContent>{(onClose) => <JobPostingEditForm countries={countries} jobPosting={jobPosting} onClose={onClose} />}</ModalContent>
+        <ModalContent>{(onClose) => <JobPostingEditForm countries={countries} experienceLevels={experienceLevels} jobPosting={jobPosting} onClose={onClose} />}</ModalContent>
       </Modal>
 
       <Modal isOpen={isViewingHistory} size="2xl" onOpenChange={(open) => setIsViewingHistory(open)}>

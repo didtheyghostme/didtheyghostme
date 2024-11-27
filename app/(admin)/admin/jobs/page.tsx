@@ -9,6 +9,7 @@ import { JobPostingCard } from "./JobPostingCard";
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
+import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 
 export default function AdminJobsPage() {
   const [search, setSearch] = useState("");
@@ -18,8 +19,10 @@ export default function AdminJobsPage() {
 
   const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
 
-  if (error || countriesError) return <div>Failed to load jobs</div>;
-  if (isLoading || countriesLoading) return <div>Loading...</div>;
+  const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
+
+  if (error || countriesError || experienceLevelsError) return <div>Failed to load jobs</div>;
+  if (isLoading || countriesLoading || experienceLevelsLoading) return <div>Loading...</div>;
   if (!jobs) return <div>No jobs found</div>;
 
   const filteredJobs = jobs.filter((job) => {
@@ -36,7 +39,7 @@ export default function AdminJobsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredJobs.map((job) => (
-          <JobPostingCard key={job.id} countries={countries} jobPosting={job} />
+          <JobPostingCard key={job.id} countries={countries} experienceLevels={experienceLevels} jobPosting={job} />
         ))}
       </div>
     </div>
