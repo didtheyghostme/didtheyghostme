@@ -57,6 +57,7 @@ export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPost
             name="countries"
             render={({ field, fieldState }) => (
               <Select
+                disallowEmptySelection
                 isMultiline
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
