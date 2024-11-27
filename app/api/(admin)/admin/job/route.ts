@@ -7,9 +7,10 @@ import { buildSelectString } from "@/lib/buildSelectString";
 
 type AllJobPostingWithCompanySelect = JobPostingTable & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
-} & JobPostingCountry;
+} & JobPostingCountry &
+  JobPostingExperienceLevel;
 
-export type AllJobPostingWithCompany = StrictOmit<AllJobPostingWithCompanySelect, "job_posting_country"> & JobPostingCountryJoined;
+export type AllJobPostingWithCompany = StrictOmit<AllJobPostingWithCompanySelect, "job_posting_country" | "job_posting_experience_level"> & JobPostingCountryJoined & JobPostingExperienceLevelJoined;
 
 export async function GET() {
   const supabase = await createClerkSupabaseClientSsr();
@@ -37,11 +38,20 @@ export async function GET() {
         country_name: true,
       },
     },
+    [DBTable.JOB_POSTING_EXPERIENCE_LEVEL]: {
+      __isLeftJoin: true,
+      [DBTable.EXPERIENCE_LEVEL]: {
+        id: true,
+        experience_level: true,
+      },
+    },
   };
 
   const selectString = buildSelectString(selectObject);
 
   const { data: jobs, error } = await supabase.from(DBTable.JOB_POSTING).select(selectString).order("updated_at", { ascending: false });
+
+  // console.warn("jobs admin", jobs);
 
   if (error) {
     console.error("Error fetching jobs:", error);

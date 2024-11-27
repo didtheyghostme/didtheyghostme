@@ -213,6 +213,8 @@ type Company = CompanyTable;
 
 type JobPosting = JobPostingTable;
 
+// job posting country
+
 type JobPostingCountryItem = {
   country: Pick<CountryTable, "id" | "country_name">;
 };
@@ -223,4 +225,18 @@ type JobPostingCountry = {
 
 type JobPostingCountryJoined = {
   job_posting_country: JobPostingCountryItem[];
+};
+
+// job posting experience level
+
+type JobPostingExperienceLevelItem = {
+  experience_level: Pick<ExperienceLevelTable, "id" | "experience_level">;
+};
+
+type JobPostingExperienceLevel = {
+  job_posting_experience_level: JobPostingExperienceLevelItem;
+};
+
+type JobPostingExperienceLevelJoined = {
+  job_posting_experience_level: JobPostingExperienceLevelItem[];
 };

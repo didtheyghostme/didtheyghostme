@@ -12,8 +12,19 @@ import { updateJobPostingAdminSchema } from "@/lib/schema/updateJobPostingAdminS
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
+import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 
-export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[]; onClose: () => void }) {
+export function JobPostingEditForm({
+  jobPosting,
+  countries,
+  experienceLevels,
+  onClose,
+}: {
+  jobPosting: AllJobPostingWithCompany;
+  countries: CountryTable[];
+  experienceLevels: ExperienceLevelSelect[];
+  onClose: () => void;
+}) {
   const {
     control,
     handleSubmit,
@@ -27,14 +38,18 @@ export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPost
       closed_date: jobPosting.closed_date,
       job_status: jobPosting.job_status,
       job_posted_date: jobPosting.job_posted_date,
+      experience_level_id: jobPosting.job_posting_experience_level.map((jpel) => jpel.experience_level.id),
     },
   });
+
+  // console.warn("experience levels", experienceLevels, "current", jobPosting.job_posting_experience_level);
 
   const { updateJobPosting, isUpdating } = useUpdateJobPostingAdmin(jobPosting.id);
 
   const onSubmit = async (data: UpdateJobPostingAdminFormValues) => {
     try {
       await updateJobPosting(data);
+      // console.warn("data", data);
       toast.success("Job posting updated successfully");
       onClose();
     } catch (error) {
@@ -76,6 +91,29 @@ export function JobPostingEditForm({ jobPosting, countries, onClose }: { jobPost
               </Select>
             )}
           />
+
+          <Controller
+            control={control}
+            name="experience_level_id"
+            render={({ field, fieldState }) => (
+              <Select
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                items={experienceLevels}
+                label="Experience Level"
+                selectedKeys={field.value}
+                selectionMode="single"
+                onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+              >
+                {(level) => (
+                  <SelectItem key={level.id} value={level.id}>
+                    {level.experience_level}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+          />
+
           <Controller
             control={control}
             name="url"
