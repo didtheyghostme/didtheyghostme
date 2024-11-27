@@ -72,7 +72,7 @@ export default function CompanyDetailsPage() {
       title: "",
       countries: [],
       url: null,
-      experience_level_id: "",
+      experience_level_id: [],
     },
   });
 
@@ -96,7 +96,7 @@ export default function CompanyDetailsPage() {
       const internshipId = findInternshipId(experienceLevels);
 
       if (internshipId) {
-        setValue("experience_level_id", internshipId);
+        setValue("experience_level_id", [internshipId]);
       }
     }
   }, [countries, experienceLevels, setValue]);
@@ -168,7 +168,7 @@ export default function CompanyDetailsPage() {
       title: "",
       url: null,
       countries: findSingaporeId(countries) ? [findSingaporeId(countries)] : [],
-      experience_level_id: findInternshipId(experienceLevels) || "",
+      experience_level_id: findInternshipId(experienceLevels) ? [findInternshipId(experienceLevels)] : [],
     });
   };
 
@@ -291,9 +291,9 @@ export default function CompanyDetailsPage() {
                       items={experienceLevels ?? []}
                       label="Experience Level"
                       placeholder="Select experience level"
-                      selectedKeys={[field.value]}
+                      selectedKeys={field.value}
                       selectionMode="single"
-                      onChange={field.onChange}
+                      onSelectionChange={(keys) => field.onChange(Array.from(keys))}
                     >
                       {(level) => (
                         <SelectItem key={level.id} value={level.id}>

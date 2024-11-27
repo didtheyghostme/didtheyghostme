@@ -410,7 +410,7 @@ create or replace function insert_job_with_countries(
   p_company_id uuid,
   p_user_id text,
   p_country_ids uuid[],
-  p_experience_level_id uuid
+  p_experience_level_ids uuid[]
 ) returns void as $$
 declare
   v_job_id uuid;
@@ -440,14 +440,17 @@ begin
     unnest(p_country_ids)
   where array_length(p_country_ids, 1) > 0;
 
-  -- Insert the experience level relationship
+
+  -- Insert the experience level relationships (similar to countries)
   insert into job_posting_experience_level (
     job_posting_id,
     experience_level_id
-  ) values (
+  )
+  select 
     v_job_id,
-    p_experience_level_id
-  );
+    unnest(p_experience_level_ids)
+  where array_length(p_experience_level_ids, 1) > 0;
+
 end;
 $$ language plpgsql;
 
