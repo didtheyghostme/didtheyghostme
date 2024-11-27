@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Modal, ModalContent, Link } from "@nextui-org/react";
+import { Card, Modal, ModalContent } from "@nextui-org/react";
+import Link from "next/link";
 
 import { JobPostingEditForm } from "./JobPostingEditForm";
 import { JobPostingHistory } from "./JobPostingHistory";
@@ -39,7 +40,12 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
       <div className="flex justify-between">
         <div>
           <h3 className="text-lg font-medium">{jobPosting.title}</h3>
-          <p className="text-success">Company: {jobPosting.company.company_name}</p>
+          <p className="text-success">
+            Company:{" "}
+            <Link className="text-primary underline" href={`/company/${jobPosting.company.id}`} target="_blank">
+              {jobPosting.company.company_name}
+            </Link>
+          </p>
 
           <div className="mt-2 space-y-1 text-sm text-default-500">
             <p>
@@ -55,13 +61,16 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
             </p>
 
             <p>
-              Internal URL: <Link href={`/job/${jobPosting.id}`}>View</Link>
+              Internal URL:{" "}
+              <Link className="text-primary underline" href={`/job/${jobPosting.id}`}>
+                View
+              </Link>
             </p>
 
             {jobPosting.url && (
               <p>
                 URL:{" "}
-                <a className="text-primary hover:underline" href={jobPosting.url} rel="noopener noreferrer" target="_blank">
+                <a className="text-primary underline" href={jobPosting.url} rel="noopener noreferrer" target="_blank">
                   View job portal URL
                 </a>
               </p>
