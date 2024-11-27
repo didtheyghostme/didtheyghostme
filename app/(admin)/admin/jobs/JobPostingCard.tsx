@@ -10,6 +10,20 @@ import { JobPostingHistory } from "./JobPostingHistory";
 import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
+import { CustomChip } from "@/components/CustomChip";
+
+function getJobStatusColor(status: JobStatus): "primary" | "danger" | "warning" | "success" | "default" {
+  switch (status) {
+    case "Verified":
+      return "success";
+    case "Closed":
+      return "warning";
+    case "Pending":
+      return "primary";
+    default:
+      return "danger";
+  }
+}
 
 function EditIcon() {
   return (
@@ -49,7 +63,10 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
 
           <div className="mt-2 space-y-1 text-sm text-default-500">
             <p>
-              Status: <span className="text-default-700">{jobPosting.job_status}</span>
+              Status:{" "}
+              <CustomChip color={getJobStatusColor(jobPosting.job_status)} size="sm" variant="flat">
+                {jobPosting.job_status}
+              </CustomChip>
             </p>
 
             <p>
