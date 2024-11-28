@@ -4,18 +4,20 @@ import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { LoadingContent } from "@/components/LoadingContent";
 
 type ExperienceLevelFilterProps = {
-  onExperienceLevelChange: (experienceLevelId: string) => void;
-  selectedExperienceLevelId: string;
+  onExperienceLevelChange: (experienceLevelIds: string[]) => void;
+  selectedExperienceLevelIds: string[];
   experienceLevels: ExperienceLevelSelect[];
   experienceLevelsLoading: boolean;
 };
 
-export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperienceLevelId, experienceLevels, experienceLevelsLoading }: ExperienceLevelFilterProps) {
+export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperienceLevelIds, experienceLevels, experienceLevelsLoading }: ExperienceLevelFilterProps) {
   if (experienceLevelsLoading) return <LoadingContent />;
 
-  const internshipId = experienceLevels.find((level) => level.experience_level === "Internship")?.id ?? "";
+  const internshipId = experienceLevels.find((level) => level.experience_level === "Internship")?.id;
 
-  const defaultKey = selectedExperienceLevelId !== "" ? selectedExperienceLevelId : internshipId;
+  const hasValidSelection = selectedExperienceLevelIds.some((id) => id.trim().length > 0); // to handle [""] as experienceLevels.length > 0 will be true
+
+  const defaultKeys = hasValidSelection ? selectedExperienceLevelIds : internshipId ? [internshipId] : [];
 
   return (
     <Select
@@ -24,12 +26,10 @@ export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperie
       items={experienceLevels}
       label="Filter by experience level"
       placeholder="Select experience level"
-      selectedKeys={[defaultKey]}
-      selectionMode="single"
+      selectedKeys={defaultKeys}
+      selectionMode="multiple"
       onSelectionChange={(keys) => {
-        const selectedKey = Array.from(keys)[0] as string;
-
-        onExperienceLevelChange(selectedKey);
+        onExperienceLevelChange(Array.from(keys) as string[]);
       }}
     >
       {(level) => (

@@ -10,15 +10,15 @@ export const API = {
       isVerified,
       selectedCountries,
       sortOrder,
-      experienceLevelId,
+      experienceLevelIds,
     }: {
       page: number;
       search: string;
       isVerified: boolean;
       selectedCountries: string[];
       sortOrder: "ASC" | "DESC";
-      experienceLevelId: string;
-    }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}&sortOrder=${sortOrder}&experienceLevelId=${experienceLevelId}`,
+      experienceLevelIds: string[];
+    }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}&sortOrder=${sortOrder}&experienceLevelIds=${experienceLevelIds}`,
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },

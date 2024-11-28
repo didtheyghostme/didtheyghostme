@@ -12,16 +12,18 @@ import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { CustomChip } from "@/components/CustomChip";
 
-function getJobStatusColor(status: JobStatus): "primary" | "danger" | "warning" | "success" | "default" {
+function getJobStatusColor(status: JobStatus): "primary" | "secondary" | "danger" | "warning" | "success" | "default" {
   switch (status) {
+    case "Pending":
+      return "danger";
+    case "No URL":
+      return "danger";
     case "Verified":
       return "success";
     case "Closed":
       return "warning";
-    case "Pending":
-      return "primary";
     default:
-      return "danger";
+      return "secondary"; // fallback color for Rejected
   }
 }
 

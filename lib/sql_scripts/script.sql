@@ -615,7 +615,7 @@ CREATE OR REPLACE FUNCTION get_all_search_jobs(
   p_search text,
   p_is_verified boolean,
   p_country_ids uuid[],
-  p_experience_level_id uuid,
+  p_experience_level_ids uuid[],
   p_sort_order text DEFAULT 'DESC'
 )
 RETURNS json AS $$
@@ -658,14 +658,16 @@ BEGIN
     -- Filter by selected countries (if any), else = Singapore
     AND (
       CASE
-        WHEN p_country_ids IS NOT NULL THEN jpc.country_id = ANY(p_country_ids)
+        WHEN p_country_ids IS NOT NULL AND array_length(p_country_ids, 1) > 0 
+        THEN jpc.country_id = ANY(p_country_ids)
         ELSE jpc.country_id = v_default_country_id
       END
     )
-    -- Filter by experience level (if selected), else = Internship
+    -- Filter by experience levels (if any), else = Internship
     AND (
       CASE
-        WHEN p_experience_level_id IS NOT NULL THEN jpel.experience_level_id = p_experience_level_id
+        WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
+        THEN jpel.experience_level_id = ANY(p_experience_level_ids)
         ELSE jpel.experience_level_id = v_default_experience_level_id
       END
     );
@@ -699,9 +701,17 @@ BEGIN
               INNER JOIN country co ON jpc2.country_id = co.id
               WHERE jpc2.job_posting_id = jp.id
             ) as job_posting_country,
-            json_build_object(
-              'experience_level', el.experience_level
-            ) as experience_level
+            -- Subquery to get all experience levels for each job
+            (
+              SELECT json_agg(
+                json_build_object(
+                  'experience_level', el2.experience_level
+                )
+              )
+              FROM job_posting_experience_level jpel2
+              INNER JOIN experience_level el2 ON jpel2.experience_level_id = el2.id
+              WHERE jpel2.job_posting_id = jp.id
+            ) as experience_levels
           FROM job_posting jp
           INNER JOIN company c ON jp.company_id = c.id
           INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
@@ -720,13 +730,15 @@ BEGIN
             )
             AND (
               CASE
-                WHEN p_country_ids IS NOT NULL THEN jpc.country_id = ANY(p_country_ids)
+                WHEN p_country_ids IS NOT NULL AND array_length(p_country_ids, 1) > 0 
+                THEN jpc.country_id = ANY(p_country_ids)
                 ELSE jpc.country_id = v_default_country_id
               END
             )
             AND (
               CASE
-                WHEN p_experience_level_id IS NOT NULL THEN jpel.experience_level_id = p_experience_level_id
+                WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
+                THEN jpel.experience_level_id = ANY(p_experience_level_ids)
                 ELSE jpel.experience_level_id = v_default_experience_level_id
               END
             )
@@ -737,8 +749,7 @@ BEGIN
             jp.job_posted_date, 
             jp.closed_date,
             c.company_name, 
-            c.logo_url,
-            el.experience_level
+            c.logo_url
           ORDER BY 
             CASE WHEN p_sort_order = 'ASC' THEN jp.updated_at END ASC,
             CASE WHEN p_sort_order = 'DESC' THEN jp.updated_at END DESC
