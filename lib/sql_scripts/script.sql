@@ -693,25 +693,27 @@ BEGIN
               SELECT json_agg(
                 json_build_object(
                   'country', json_build_object(
-                    'country_name', co.country_name
+                    'country_name', co2.country_name
                   )
                 )
               )
               FROM job_posting_country jpc2
-              INNER JOIN country co ON jpc2.country_id = co.id
+              INNER JOIN country co2 ON jpc2.country_id = co2.id
               WHERE jpc2.job_posting_id = jp.id
             ) as job_posting_country,
             -- Subquery to get all experience levels for each job
             (
               SELECT json_agg(
                 json_build_object(
-                  'experience_level', el2.experience_level
+                  'experience_level', json_build_object(
+                    'experience_level', el2.experience_level
+                  )
                 )
               )
               FROM job_posting_experience_level jpel2
               INNER JOIN experience_level el2 ON jpel2.experience_level_id = el2.id
               WHERE jpel2.job_posting_id = jp.id
-            ) as experience_levels
+            ) as job_posting_experience_level
           FROM job_posting jp
           INNER JOIN company c ON jp.company_id = c.id
           INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
