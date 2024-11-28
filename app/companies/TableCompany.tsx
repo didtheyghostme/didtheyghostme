@@ -72,40 +72,51 @@ export function TableCompany() {
     return sortedAndFilteredItems.slice(start, end);
   }, [page, sortedAndFilteredItems]);
 
-  const onSearchChange = React.useCallback((value: string) => {
+  const onSearchChange = (value: string) => {
     if (value) {
-      setFilterValue(value);
-      setPage(1);
-
       mixpanel.track("Company Table", {
         action: "search",
         search_term: value,
+        current_page: page,
+        total_pages: pages,
       });
+      setFilterValue(value);
+      setPage(1);
     } else {
       setFilterValue("");
     }
-  }, []);
+  };
 
-  const onClear = React.useCallback(() => {
-    setFilterValue("");
-    setPage(1);
+  const onClear = () => {
     mixpanel.track("Company Table", {
       action: "clear_search",
+      search_term: filterValue,
+      current_page: page,
+      total_pages: pages,
     });
-  }, []);
+    setFilterValue("");
+    setPage(1);
+  };
 
   const handleSortChange = (key: SortOption["key"]) => {
-    setCurrentSort(key);
     mixpanel.track("Company Table", {
       action: "sort_changed",
+      search_term: filterValue,
       sort_key: key,
+      current_page: page,
+      total_pages: pages,
     });
+    setCurrentSort(key);
+    setPage(1);
   };
 
   const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
     mixpanel.track("Company Table", {
       action: action,
       company_id: id,
+      search_term: filterValue,
+      current_page: page,
+      total_pages: pages,
     });
   };
 
@@ -113,8 +124,11 @@ export function TableCompany() {
   const handlePageChange = (newPage: number) => {
     mixpanel.track("Company Table", {
       action: "page_changed",
+      search_term: filterValue,
       from_page: page,
       to_page: newPage,
+      current_page: page,
+      total_pages: pages,
     });
     setPage(newPage);
   };
@@ -128,12 +142,18 @@ export function TableCompany() {
   const mixpanelTrackModalOpen = () => {
     mixpanel.track("Company Table", {
       action: "add_company_modal_opened",
+      search_term: filterValue,
+      current_page: page,
+      total_pages: pages,
     });
   };
 
   const handleModalClose = () => {
     mixpanel.track("Company Table", {
       action: "add_company_modal_closed",
+      search_term: filterValue,
+      current_page: page,
+      total_pages: pages,
     });
     setIsModalOpen(false);
   };

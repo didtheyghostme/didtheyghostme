@@ -195,12 +195,14 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
       action: "filter_status_button_clicked",
       previous_filter: statusFilter,
       new_filter: selectedKeys,
+      current_page: page,
+      total_pages: pages,
     });
 
     if (selectedKeys.length === 0 || selectedKeys.length === statusFilterOptions.length - 1) {
-      setQueryStates({ status: ["all"] });
+      setQueryStates({ status: ["all"], page: 1 });
     } else {
-      setQueryStates({ status: selectedKeys });
+      setQueryStates({ status: selectedKeys, page: 1 });
     }
   };
 
@@ -208,8 +210,10 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
     mixpanel.track("Applied Applications Table Tab", {
       action: "sort_by_button_clicked",
       sort_key: key,
+      current_page: page,
+      total_pages: pages,
     });
-    setQueryStates({ sort: key });
+    setQueryStates({ sort: key, page: 1 });
   };
 
   const topContent = React.useMemo(() => {
@@ -358,20 +362,25 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
 
   return (
     <div className="flex flex-col">
-      {paginatedItems.length === 0 && <DataNotFoundMessage message="No one has applied to this job yet" title="No applications yet" />}
-
-      {paginatedItems.length > 0 && (
+      {applications.length === 0 ? (
+        <DataNotFoundMessage message="No one has applied to this job yet" title="No applications yet" />
+      ) : (
         <>
           {topContent}
 
-          <ApplicationHeader />
-          <div className="flex flex-col gap-1">
-            {paginatedItems.map((application) => (
-              <ApplicationRow key={application.id} application={application} />
-            ))}
-          </div>
-          {/* Pagination */}
-          {bottomContent}
+          {paginatedItems.length > 0 && (
+            <>
+              <ApplicationHeader />
+              <div className="flex flex-col gap-1">
+                {paginatedItems.map((application) => (
+                  <ApplicationRow key={application.id} application={application} />
+                ))}
+              </div>
+              {bottomContent}
+            </>
+          )}
+
+          {paginatedItems.length === 0 && <DataNotFoundMessage message="No applications match your current filters" title="No matching applications" />}
         </>
       )}
     </div>
