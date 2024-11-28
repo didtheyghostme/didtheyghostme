@@ -23,9 +23,10 @@ import { CustomChip } from "@/components/CustomChip";
 
 export type AllJobsPageDataSelect = Pick<JobPostingTable, "id" | "title" | "updated_at" | "job_posted_date" | "closed_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
-} & JobPostingCountry;
+} & JobPostingCountry &
+  JobPostingExperienceLevel;
 
-export type AllJobsPageData = StrictOmit<AllJobsPageDataSelect, "job_posting_country"> & JobPostingCountryJoined;
+export type AllJobsPageData = StrictOmit<AllJobsPageDataSelect, "job_posting_country" | "job_posting_experience_level"> & JobPostingCountryJoined & JobPostingExperienceLevelJoined;
 
 const DEFAULT_RESPONSE: AllJobsPageResponse = {
   data: [],
@@ -33,13 +34,13 @@ const DEFAULT_RESPONSE: AllJobsPageResponse = {
 };
 
 export function AllJobSearchResult() {
-  const [{ page, search, isVerified, countries, sortOrder, experienceLevelId }, setQueryStates] = useQueryStates({
+  const [{ page, search, isVerified, countries, sortOrder, experienceLevelIds }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     search: parseAsString.withDefault(""),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelId: parseAsString.withDefault(""),
+    experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
   });
 
   const debouncedSearch = useDebounce(search);
@@ -55,7 +56,7 @@ export function AllJobSearchResult() {
       isVerified,
       selectedCountries: countries,
       sortOrder,
-      experienceLevelId,
+      experienceLevelIds,
     }),
     fetcher,
   );

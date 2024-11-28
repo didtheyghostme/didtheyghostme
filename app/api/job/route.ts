@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
   const countriesParam = searchParams.get("countries");
   const countries = countriesParam ? countriesParam.split(",").filter(Boolean) : null;
 
-  const experienceLevelIdParams = searchParams.get("experienceLevelId");
-  const experienceLevelId = experienceLevelIdParams && experienceLevelIdParams !== "" ? experienceLevelIdParams : null;
+  const experienceLevelIdsParam = searchParams.get("experienceLevelIds");
+  const experienceLevelIds = experienceLevelIdsParam ? experienceLevelIdsParam.split(",").filter(Boolean) : null;
 
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     p_is_verified: isVerified,
     p_country_ids: countries,
     p_sort_order: sortOrder,
-    p_experience_level_id: experienceLevelId,
+    p_experience_level_ids: experienceLevelIds,
   });
 
   if (error) {

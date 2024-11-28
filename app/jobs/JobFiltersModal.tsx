@@ -27,8 +27,8 @@ type JobFiltersModalProps = {
   onVerifiedChange: (isVerified: boolean) => void;
   sortOrder: JobSortOrderKey;
   onSortChange: (newOrder: JobSortOrderKey) => void;
-  selectedExperienceLevelId: string;
-  onExperienceLevelChange: (experienceLevelId: string) => void;
+  selectedExperienceLevelIds: string[];
+  onExperienceLevelChange: (experienceLevelIds: string[]) => void;
   experienceLevels: ExperienceLevelSelect[];
 };
 
@@ -44,7 +44,7 @@ export function JobFiltersModal({
   onVerifiedChange,
   sortOrder: initialSortOrder,
   onSortChange,
-  selectedExperienceLevelId: initialExperienceLevelId,
+  selectedExperienceLevelIds: initialExperienceLevelIds,
   onExperienceLevelChange,
   experienceLevels,
 }: JobFiltersModalProps) {
@@ -52,14 +52,14 @@ export function JobFiltersModal({
   const [tempCountries, setTempCountries] = useState(initialCountries);
   const [tempVerified, setTempVerified] = useState(initialVerified);
   const [tempSortOrder, setTempSortOrder] = useState(initialSortOrder);
-  const [tempExperienceLevelId, setTempExperienceLevelId] = useState(initialExperienceLevelId);
+  const [tempExperienceLevelIds, setTempExperienceLevelIds] = useState(initialExperienceLevelIds);
 
   const handleClose = () => {
     // Reset to initial values when closing without applying
     setTempCountries(initialCountries);
     setTempVerified(initialVerified);
     setTempSortOrder(initialSortOrder);
-    setTempExperienceLevelId(initialExperienceLevelId);
+    setTempExperienceLevelIds(initialExperienceLevelIds);
     onClose();
   };
 
@@ -68,7 +68,7 @@ export function JobFiltersModal({
     onCountriesChange(tempCountries);
     onVerifiedChange(tempVerified);
     onSortChange(tempSortOrder);
-    onExperienceLevelChange(tempExperienceLevelId);
+    onExperienceLevelChange(tempExperienceLevelIds);
 
     onClose();
   };
@@ -125,8 +125,8 @@ export function JobFiltersModal({
                 <ExperienceLevelFilter
                   experienceLevels={experienceLevels}
                   experienceLevelsLoading={experienceLevelsLoading}
-                  selectedExperienceLevelId={tempExperienceLevelId}
-                  onExperienceLevelChange={setTempExperienceLevelId}
+                  selectedExperienceLevelIds={tempExperienceLevelIds}
+                  onExperienceLevelChange={setTempExperienceLevelIds}
                 />
               </div>
             </ModalBody>

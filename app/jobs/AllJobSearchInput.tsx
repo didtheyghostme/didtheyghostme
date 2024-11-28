@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Input } from "@nextui-org/react";
-import { parseAsArrayOf, parseAsBoolean, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 import useSWR from "swr";
 import mixpanel from "mixpanel-browser";
 
@@ -32,11 +32,12 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
 
   const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
 
-  const [{ isVerified, countries, sortOrder, experienceLevelId }, setQueryStates] = useQueryStates({
+  const [{ isVerified, countries, sortOrder, experienceLevelIds, page }, setQueryStates] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelId: parseAsString.withDefault(""),
+    experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
   });
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -48,9 +49,10 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       is_verified: isVerified,
       sort_order: sortOrder,
-      experience_level_id: experienceLevelId,
+      experience_level_ids: experienceLevelIds,
+      page,
     });
-    setQueryStates({ countries: selectedCountries });
+    setQueryStates({ countries: selectedCountries, page: 1 });
   };
 
   const handleVerifiedChange = (isSelected: boolean) => {
@@ -60,9 +62,10 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       sort_order: sortOrder,
-      experience_level_id: experienceLevelId,
+      experience_level_ids: experienceLevelIds,
+      page,
     });
-    setQueryStates({ isVerified: isSelected });
+    setQueryStates({ isVerified: isSelected, page: 1 });
   };
 
   const handleSortChange = (newOrder: JobSortOrderKey) => {
@@ -72,21 +75,23 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       is_verified: isVerified,
-      experience_level_id: experienceLevelId,
+      experience_level_ids: experienceLevelIds,
+      page,
     });
-    setQueryStates({ sortOrder: newOrder });
+    setQueryStates({ sortOrder: newOrder, page: 1 });
   };
 
-  const handleExperienceLevelChange = (newExperienceLevelId: string) => {
+  const handleExperienceLevelChange = (newExperienceLevelIds: string[]) => {
     mixpanel.track("All Jobs Action", {
       action: "experience_level_changed",
-      experience_level_id: newExperienceLevelId,
+      experience_level_ids: newExperienceLevelIds,
       search: search,
       countries: countries,
       is_verified: isVerified,
       sort_order: sortOrder,
+      page,
     });
-    setQueryStates({ experienceLevelId: newExperienceLevelId });
+    setQueryStates({ experienceLevelIds: newExperienceLevelIds, page: 1 });
   };
 
   return (
@@ -107,7 +112,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
         isOpen={isFilterModalOpen}
         isVerified={isVerified}
         selectedCountries={countries}
-        selectedExperienceLevelId={experienceLevelId}
+        selectedExperienceLevelIds={experienceLevelIds}
         sortOrder={sortOrder}
         onClose={() => setIsFilterModalOpen(false)}
         onCountriesChange={handleCountriesChange}
