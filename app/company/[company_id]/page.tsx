@@ -81,8 +81,8 @@ export default function CompanyDetailsPage() {
       title: "",
       countries: [],
       url: null,
-      experience_level_id: [],
-      job_category_id: [],
+      experience_level_ids: [],
+      job_category_ids: [],
     },
   });
 
@@ -92,7 +92,7 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  // Add this useEffect to set ["SingaporeID"] as default once countries are loaded and "Internship" as default once experience levels are loaded
+  // Add this useEffect to set ["SingaporeID"] as default once countries are loaded and "Internship" as default once experience levels are loaded and "Tech" as default once job categories are loaded
   useEffect(() => {
     if (countries?.length) {
       const singaporeId = findSingaporeId(countries);
@@ -106,7 +106,7 @@ export default function CompanyDetailsPage() {
       const internshipId = findInternshipId(experienceLevels);
 
       if (internshipId) {
-        setValue("experience_level_id", [internshipId]);
+        setValue("experience_level_ids", [internshipId]);
       }
     }
 
@@ -114,7 +114,7 @@ export default function CompanyDetailsPage() {
       const techId = findTechId(jobCategories);
 
       if (techId) {
-        setValue("job_category_id", [techId]);
+        setValue("job_category_ids", [techId]);
       }
     }
   }, [countries, experienceLevels, jobCategories, setValue]);
@@ -144,6 +144,9 @@ export default function CompanyDetailsPage() {
         company_name: company.company_name,
         company_id,
         job_title: data.title,
+        countries: data.countries,
+        experience_level_ids: data.experience_level_ids,
+        job_category_ids: data.job_category_ids,
       });
       toast.success("Job added successfully");
 
@@ -160,6 +163,9 @@ export default function CompanyDetailsPage() {
         action: "job_creation_error",
         company_id,
         job_title: data.title,
+        countries: data.countries,
+        experience_level_ids: data.experience_level_ids,
+        job_category_ids: data.job_category_ids,
         error: err instanceof Error ? err.message : "Unknown error occurred",
       });
       toast.error("Error adding job");
@@ -186,7 +192,8 @@ export default function CompanyDetailsPage() {
       title: "",
       url: null,
       countries: findSingaporeId(countries) ? [findSingaporeId(countries)] : [],
-      experience_level_id: findInternshipId(experienceLevels) ? [findInternshipId(experienceLevels)] : [],
+      experience_level_ids: findInternshipId(experienceLevels) ? [findInternshipId(experienceLevels)] : [],
+      job_category_ids: findTechId(jobCategories) ? [findTechId(jobCategories)] : [],
     });
   };
 
@@ -200,6 +207,7 @@ export default function CompanyDetailsPage() {
       company_id,
       job_id: job.id,
       job_status: job.job_status,
+      job_title: job.title,
     });
   };
 
@@ -209,6 +217,7 @@ export default function CompanyDetailsPage() {
       company_id,
       job_id: job.id,
       job_status: job.job_status,
+      job_title: job.title,
     });
   };
 
@@ -300,12 +309,12 @@ export default function CompanyDetailsPage() {
 
                 <Controller
                   control={control}
-                  name="job_category_id"
+                  name="job_category_ids"
                   render={({ field }) => (
                     <Select
                       isRequired
-                      errorMessage={errors.job_category_id?.message}
-                      isInvalid={!!errors.job_category_id}
+                      errorMessage={errors.job_category_ids?.message}
+                      isInvalid={!!errors.job_category_ids}
                       items={jobCategories ?? []}
                       label="Job Category"
                       placeholder="Select job category"
@@ -324,12 +333,12 @@ export default function CompanyDetailsPage() {
 
                 <Controller
                   control={control}
-                  name="experience_level_id"
+                  name="experience_level_ids"
                   render={({ field }) => (
                     <Select
                       isRequired
-                      errorMessage={errors.experience_level_id?.message}
-                      isInvalid={!!errors.experience_level_id}
+                      errorMessage={errors.experience_level_ids?.message}
+                      isInvalid={!!errors.experience_level_ids}
                       items={experienceLevels ?? []}
                       label="Experience Level"
                       placeholder="Select experience level"
