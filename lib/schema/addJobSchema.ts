@@ -5,6 +5,13 @@ export const addJobSchema = z.object({
   url: z.string().url("Invalid URL").nullable(),
   countries: z.array(z.string()).min(1, "At least one country is required"),
   experience_level_id: z.array(z.string()).min(1, "At least one experience level is required"),
-}) satisfies z.ZodType<Pick<JobPostingTable, "title" | "url"> & { countries: string[]; experience_level_id: string[] }>;
+  job_category_id: z.array(z.string()).min(1, "At least one job category is required"),
+}) satisfies z.ZodType<
+  Pick<JobPostingTable, "title" | "url"> & {
+    countries: string[];
+    experience_level_id: string[];
+    job_category_id: string[];
+  }
+>;
 
 export type AddJobFormData = z.infer<typeof addJobSchema>;

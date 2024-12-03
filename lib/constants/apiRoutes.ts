@@ -50,6 +50,9 @@ export const API = {
   EXPERIENCE_LEVEL: {
     getAll: "/api/experience-level", // return all experience levels
   },
+  JOB_CATEGORY: {
+    getAll: "/api/job-category", // return all job categories
+  },
 } as const;
 
 export const DB_RPC = {

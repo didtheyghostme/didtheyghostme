@@ -39,6 +39,21 @@ type JobPostingTable = {
   updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
 } & BaseUser;
 
+type JobCategoryName = "Tech" | "Product Management" | "Quant" | "Other";
+
+type JobCategoryTable = {
+  id: string;
+  job_category_name: JobCategoryName;
+  created_at: string;
+};
+
+type JobPostingJobCategoryTable = {
+  id: string;
+  job_posting_id: string;
+  job_category_id: string;
+  created_at: string;
+};
+
 type CountryTable = {
   id: string;
   country_name: string;
