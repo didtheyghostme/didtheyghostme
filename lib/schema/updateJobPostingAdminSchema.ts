@@ -9,7 +9,8 @@ export const updateJobPostingAdminSchema = z.object({
   closed_date: z.string().nullable(),
   job_status: z.enum(Object.values(JOB_STATUS) as [string, ...string[]]),
   job_posted_date: z.string().nullable(),
-  experience_level_id: z.array(z.string()).min(1, "At least one experience level is required"),
+  experience_level_ids: z.array(z.string()).min(1, "At least one experience level is required"),
+  job_category_ids: z.array(z.string()).min(1, "At least one job category is required"),
 });
 
 export type UpdateJobPostingAdminFormValues = z.infer<typeof updateJobPostingAdminSchema>;

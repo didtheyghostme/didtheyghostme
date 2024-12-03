@@ -11,6 +11,7 @@ import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { CustomChip } from "@/components/CustomChip";
+import { JobCategorySelect } from "@/app/api/job-category/route";
 
 function getJobStatusColor(status: JobStatus): "primary" | "secondary" | "danger" | "warning" | "success" | "default" {
   switch (status) {
@@ -47,7 +48,17 @@ function HistoryIcon() {
   );
 }
 
-export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jobPosting: AllJobPostingWithCompany; countries: CountryTable[]; experienceLevels: ExperienceLevelSelect[] }) {
+export function JobPostingCard({
+  jobPosting,
+  countries,
+  experienceLevels,
+  jobCategories,
+}: {
+  jobPosting: AllJobPostingWithCompany;
+  countries: CountryTable[];
+  experienceLevels: ExperienceLevelSelect[];
+  jobCategories: JobCategorySelect[];
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [isViewingHistory, setIsViewingHistory] = useState(false);
 
@@ -64,12 +75,12 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
           </p>
 
           <div className="mt-2 space-y-1 text-sm text-default-500">
-            <p>
+            <div>
               Status:{" "}
               <CustomChip color={getJobStatusColor(jobPosting.job_status)} size="sm" variant="flat">
                 {jobPosting.job_status}
               </CustomChip>
-            </p>
+            </div>
 
             <p>
               Countries: <span className="text-default-700">{jobPosting.job_posting_country.map((jpc) => jpc.country.country_name).join(", ")}</span>
@@ -77,6 +88,10 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
 
             <p>
               Experience Levels: <span className="text-default-700">{jobPosting.job_posting_experience_level.map((jpel) => jpel.experience_level.experience_level).join(", ")}</span>
+            </p>
+
+            <p>
+              Job Categories: <span className="text-default-700">{jobPosting.job_posting_job_category.map((jpc) => jpc.job_category.job_category_name).join(", ")}</span>
             </p>
 
             <p>
@@ -108,7 +123,9 @@ export function JobPostingCard({ jobPosting, countries, experienceLevels }: { jo
       </div>
 
       <Modal isOpen={isEditing} onOpenChange={(open) => setIsEditing(open)}>
-        <ModalContent>{(onClose) => <JobPostingEditForm countries={countries} experienceLevels={experienceLevels} jobPosting={jobPosting} onClose={onClose} />}</ModalContent>
+        <ModalContent>
+          {(onClose) => <JobPostingEditForm countries={countries} experienceLevels={experienceLevels} jobCategories={jobCategories} jobPosting={jobPosting} onClose={onClose} />}
+        </ModalContent>
       </Modal>
 
       <Modal isOpen={isViewingHistory} size="2xl" onOpenChange={(open) => setIsViewingHistory(open)}>

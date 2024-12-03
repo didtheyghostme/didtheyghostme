@@ -8,9 +8,13 @@ import { buildSelectString } from "@/lib/buildSelectString";
 type AllJobPostingWithCompanySelect = JobPostingTable & {
   [DBTable.COMPANY]: Pick<CompanyTable, "id" | "company_name" | "logo_url">;
 } & JobPostingCountry &
-  JobPostingExperienceLevel;
+  JobPostingExperienceLevel &
+  JobPostingJobCategory;
 
-export type AllJobPostingWithCompany = StrictOmit<AllJobPostingWithCompanySelect, "job_posting_country" | "job_posting_experience_level"> & JobPostingCountryJoined & JobPostingExperienceLevelJoined;
+export type AllJobPostingWithCompany = StrictOmit<AllJobPostingWithCompanySelect, "job_posting_country" | "job_posting_experience_level" | "job_posting_job_category"> &
+  JobPostingCountryJoined &
+  JobPostingExperienceLevelJoined &
+  JobPostingJobCategoryJoined;
 
 export async function GET() {
   const supabase = await createClerkSupabaseClientSsr();
@@ -43,6 +47,13 @@ export async function GET() {
       [DBTable.EXPERIENCE_LEVEL]: {
         id: true,
         experience_level: true,
+      },
+    },
+    [DBTable.JOB_POSTING_JOB_CATEGORY]: {
+      __isLeftJoin: true,
+      [DBTable.JOB_CATEGORY]: {
+        id: true,
+        job_category_name: true,
       },
     },
   };

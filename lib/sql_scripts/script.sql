@@ -476,13 +476,15 @@ CREATE OR REPLACE FUNCTION update_job_with_countries(
   p_closed_date DATE,
   p_job_status text,
   p_job_posted_date DATE,
-  p_experience_level_ids uuid[]
+  p_experience_level_ids uuid[],
+  p_job_category_ids uuid[]
 ) returns void as $$
 DECLARE
   v_old_job_posting job_posting%ROWTYPE;
   v_new_job_posting job_posting%ROWTYPE;
   v_old_country_ids uuid[];
   v_old_experience_level_ids uuid[];
+  v_old_job_category_ids uuid[];
   v_history jsonb;
 BEGIN
   -- Get old data first
@@ -504,6 +506,14 @@ BEGIN
     FROM job_posting_experience_level 
     WHERE job_posting_id = p_job_posting_id
     ORDER BY experience_level_id
+  );
+
+  -- Get old job category IDs before any changes
+  v_old_job_category_ids := ARRAY(
+    SELECT job_category_id 
+    FROM job_posting_job_category 
+    WHERE job_posting_id = p_job_posting_id
+    ORDER BY job_category_id
   );
 
   -- Update job_posting and get new data
@@ -542,6 +552,17 @@ BEGIN
   SELECT p_job_posting_id, unnest(p_experience_level_ids)
   WHERE array_length(p_experience_level_ids, 1) > 0
   ON CONFLICT (job_posting_id, experience_level_id) DO NOTHING;
+
+  -- Delete job category relationships that are no longer needed
+  DELETE FROM job_posting_job_category
+  WHERE job_posting_id = p_job_posting_id
+  AND job_category_id NOT IN (SELECT unnest(p_job_category_ids));
+
+  -- Insert/Update job category relationships
+  INSERT INTO job_posting_job_category (job_posting_id, job_category_id)
+  SELECT p_job_posting_id, unnest(p_job_category_ids)
+  WHERE array_length(p_job_category_ids, 1) > 0
+  ON CONFLICT (job_posting_id, job_category_id) DO NOTHING;
 
   -- Build history for changed fields (fixing NULL at source) using COALESCE
   SELECT COALESCE(jsonb_object_agg(
@@ -597,6 +618,24 @@ BEGIN
           WHERE id IN (
             SELECT UNNEST(p_experience_level_ids)
           )
+        )
+      )
+    );
+  END IF;
+
+  -- Add job category changes if any exist
+  IF v_old_job_category_ids IS DISTINCT FROM (SELECT ARRAY(SELECT unnest(p_job_category_ids) ORDER BY 1)) THEN
+    v_history := v_history || jsonb_build_object(
+      'job_categories', jsonb_build_object(
+        'old', (
+          SELECT jsonb_agg(job_category_name ORDER BY job_category_name)
+          FROM job_category
+          WHERE id IN (SELECT UNNEST(v_old_job_category_ids))
+        ),
+        'new', (
+          SELECT jsonb_agg(job_category_name ORDER BY job_category_name)
+          FROM job_category
+          WHERE id IN (SELECT UNNEST(p_job_category_ids))
         )
       )
     );

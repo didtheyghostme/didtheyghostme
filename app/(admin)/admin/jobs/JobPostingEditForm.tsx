@@ -13,16 +13,19 @@ import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
+import { JobCategorySelect } from "@/app/api/job-category/route";
 
 export function JobPostingEditForm({
   jobPosting,
   countries,
   experienceLevels,
+  jobCategories,
   onClose,
 }: {
   jobPosting: AllJobPostingWithCompany;
   countries: CountryTable[];
   experienceLevels: ExperienceLevelSelect[];
+  jobCategories: JobCategorySelect[];
   onClose: () => void;
 }) {
   const {
@@ -38,7 +41,8 @@ export function JobPostingEditForm({
       closed_date: jobPosting.closed_date,
       job_status: jobPosting.job_status,
       job_posted_date: jobPosting.job_posted_date,
-      experience_level_id: jobPosting.job_posting_experience_level.map((jpel) => jpel.experience_level.id),
+      experience_level_ids: jobPosting.job_posting_experience_level.map((jpel) => jpel.experience_level.id),
+      job_category_ids: jobPosting.job_posting_job_category.map((jpc) => jpc.job_category.id),
     },
   });
 
@@ -94,7 +98,7 @@ export function JobPostingEditForm({
 
           <Controller
             control={control}
-            name="experience_level_id"
+            name="experience_level_ids"
             render={({ field, fieldState }) => (
               <Select
                 errorMessage={fieldState.error?.message}
@@ -108,6 +112,28 @@ export function JobPostingEditForm({
                 {(level) => (
                   <SelectItem key={level.id} value={level.id}>
                     {level.experience_level}
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="job_category_ids"
+            render={({ field, fieldState }) => (
+              <Select
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                items={jobCategories}
+                label="Job Category"
+                selectedKeys={field.value}
+                selectionMode="single"
+                onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+              >
+                {(category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.job_category_name}
                   </SelectItem>
                 )}
               </Select>

@@ -29,7 +29,8 @@ const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJo
       p_closed_date: validatedData.closed_date,
       p_job_status: validatedData.job_status,
       p_job_posted_date: validatedData.job_posted_date,
-      p_experience_level_ids: validatedData.experience_level_id,
+      p_experience_level_ids: validatedData.experience_level_ids,
+      p_job_category_ids: validatedData.job_category_ids,
     });
 
     if (error) throw error;
