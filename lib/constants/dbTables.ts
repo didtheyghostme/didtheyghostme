@@ -12,6 +12,7 @@ export const DBTable = {
   JOB_POSTING_COUNTRY: "job_posting_country",
   EXPERIENCE_LEVEL: "experience_level",
   JOB_POSTING_EXPERIENCE_LEVEL: "job_posting_experience_level",
+  JOB_CATEGORY: "job_category",
   // Add other table names here
 } as const;
 

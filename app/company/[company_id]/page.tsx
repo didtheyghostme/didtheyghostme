@@ -27,6 +27,7 @@ import { CustomButton } from "@/components/CustomButton";
 import { CompanyDetailsPageAllJobsResponse } from "@/app/api/company/[company_id]/job/route";
 import { CompanyDetailsPageCompanyResponse } from "@/app/api/company/[company_id]/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
+import { JobCategorySelect } from "@/app/api/job-category/route";
 
 function findSingaporeId(countries: CountryTable[]) {
   const singapore = countries?.find((country) => country.country_name === "Singapore");
@@ -38,6 +39,12 @@ function findInternshipId(experienceLevels: ExperienceLevelSelect[]) {
   const internship = experienceLevels?.find((level) => level.experience_level === "Internship");
 
   return internship?.id;
+}
+
+function findTechId(jobCategories: JobCategorySelect[]) {
+  const tech = jobCategories?.find((category) => category.job_category_name === "Tech");
+
+  return tech?.id;
 }
 
 export default function CompanyDetailsPage() {
@@ -52,6 +59,8 @@ export default function CompanyDetailsPage() {
   const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
 
   const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
+
+  const { data: jobCategories = [], error: jobCategoriesError, isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
 
   // console.warn("jobs", allJobs);
 
@@ -73,6 +82,7 @@ export default function CompanyDetailsPage() {
       countries: [],
       url: null,
       experience_level_id: [],
+      job_category_id: [],
     },
   });
 
@@ -99,11 +109,19 @@ export default function CompanyDetailsPage() {
         setValue("experience_level_id", [internshipId]);
       }
     }
-  }, [countries, experienceLevels, setValue]);
 
-  if (isLoading || jobIsLoading || countriesLoading || experienceLevelsLoading) return <LoadingContent />;
-  if (error || jobError || countriesError || experienceLevelsError) {
-    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError) || isRateLimitError(experienceLevelsError)) {
+    if (jobCategories?.length) {
+      const techId = findTechId(jobCategories);
+
+      if (techId) {
+        setValue("job_category_id", [techId]);
+      }
+    }
+  }, [countries, experienceLevels, jobCategories, setValue]);
+
+  if (isLoading || jobIsLoading || countriesLoading || experienceLevelsLoading || jobCategoriesLoading) return <LoadingContent />;
+  if (error || jobError || countriesError || experienceLevelsError || jobCategoriesError) {
+    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError) || isRateLimitError(experienceLevelsError) || isRateLimitError(jobCategoriesError)) {
       return <RateLimitErrorMessage />;
     }
 
@@ -277,6 +295,30 @@ export default function CompanyDetailsPage() {
                         field.onChange(value === "" ? null : value);
                       }}
                     />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="job_category_id"
+                  render={({ field }) => (
+                    <Select
+                      isRequired
+                      errorMessage={errors.job_category_id?.message}
+                      isInvalid={!!errors.job_category_id}
+                      items={jobCategories ?? []}
+                      label="Job Category"
+                      placeholder="Select job category"
+                      selectedKeys={field.value}
+                      selectionMode="single"
+                      onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                    >
+                      {(category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.job_category_name}
+                        </SelectItem>
+                      )}
+                    </Select>
                   )}
                 />
 
