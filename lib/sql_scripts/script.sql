@@ -627,6 +627,7 @@ CREATE OR REPLACE FUNCTION get_all_search_jobs(
   p_is_verified boolean,
   p_country_ids uuid[],
   p_experience_level_ids uuid[],
+  p_job_category_ids uuid[],
   p_sort_order text DEFAULT 'DESC'
 )
 RETURNS json AS $$
@@ -636,6 +637,7 @@ DECLARE
   v_total_count int;
   v_default_experience_level_id uuid;
   v_default_country_id uuid;
+  v_default_job_category_id uuid;
 BEGIN
   v_offset := (p_page - 1) * v_limit;
 
@@ -648,12 +650,17 @@ BEGIN
   FROM country
   WHERE country_name = 'Singapore';
 
+  SELECT id INTO v_default_job_category_id
+  FROM job_category
+  WHERE job_category_name = 'Tech';
+
   -- Count query
   SELECT COUNT(DISTINCT jp.id) INTO v_total_count
   FROM job_posting jp
   INNER JOIN company c ON jp.company_id = c.id
   INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
   INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
+  INNER JOIN job_posting_job_category jpjc ON jp.id = jpjc.job_posting_id -- Add job category join
   WHERE 
     -- Filter by job status (Verified only or both Pending and Verified)
     CASE
@@ -680,6 +687,14 @@ BEGIN
         WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
         THEN jpel.experience_level_id = ANY(p_experience_level_ids)
         ELSE jpel.experience_level_id = v_default_experience_level_id
+      END
+    )
+    -- Filter by job categories (if any), else = Tech
+    AND (
+      CASE
+        WHEN p_job_category_ids IS NOT NULL AND array_length(p_job_category_ids, 1) > 0 
+        THEN jpjc.job_category_id = ANY(p_job_category_ids)
+        ELSE jpjc.job_category_id = v_default_job_category_id
       END
     );
 
@@ -724,13 +739,28 @@ BEGIN
               FROM job_posting_experience_level jpel2
               INNER JOIN experience_level el2 ON jpel2.experience_level_id = el2.id
               WHERE jpel2.job_posting_id = jp.id
-            ) as job_posting_experience_level
+            ) as job_posting_experience_level,
+            -- Subquery to get all job categories for each job
+            (
+              SELECT json_agg(
+                json_build_object(
+                  'job_category', json_build_object(
+                    'job_category_name', jc2.job_category_name
+                  )
+                )
+              )
+              FROM job_posting_job_category jpjc2
+              INNER JOIN job_category jc2 ON jpjc2.job_category_id = jc2.id
+              WHERE jpjc2.job_posting_id = jp.id
+            ) as job_posting_job_category
           FROM job_posting jp
           INNER JOIN company c ON jp.company_id = c.id
           INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
           INNER JOIN country co ON jpc.country_id = co.id
           INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
           INNER JOIN experience_level el ON jpel.experience_level_id = el.id
+          INNER JOIN job_posting_job_category jpjc ON jp.id = jpjc.job_posting_id
+          INNER JOIN job_category jc ON jpjc.job_category_id = jc.id
           WHERE 
             CASE
               WHEN p_is_verified THEN jp.job_status = 'Verified'
@@ -753,6 +783,13 @@ BEGIN
                 WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
                 THEN jpel.experience_level_id = ANY(p_experience_level_ids)
                 ELSE jpel.experience_level_id = v_default_experience_level_id
+              END
+            )
+            AND (
+              CASE
+                WHEN p_job_category_ids IS NOT NULL AND array_length(p_job_category_ids, 1) > 0 
+                THEN jpjc.job_category_id = ANY(p_job_category_ids)
+                ELSE jpjc.job_category_id = v_default_job_category_id
               END
             )
           GROUP BY 

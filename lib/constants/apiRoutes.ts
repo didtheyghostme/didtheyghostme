@@ -11,6 +11,7 @@ export const API = {
       selectedCountries,
       sortOrder,
       experienceLevelIds,
+      jobCategoryIds,
     }: {
       page: number;
       search: string;
@@ -18,7 +19,15 @@ export const API = {
       selectedCountries: string[];
       sortOrder: "ASC" | "DESC";
       experienceLevelIds: string[];
-    }) => `/api/job?page=${page}&search=${encodeURIComponent(search)}&isVerified=${isVerified}&countries=${selectedCountries}&sortOrder=${sortOrder}&experienceLevelIds=${experienceLevelIds}`,
+      jobCategoryIds: string[];
+    }) =>
+      `/api/job?page=${page}` +
+      `&search=${encodeURIComponent(search)}` +
+      `&isVerified=${isVerified}` +
+      `&countries=${selectedCountries}` +
+      `&sortOrder=${sortOrder}` +
+      `&experienceLevelIds=${experienceLevelIds}` +
+      `&jobCategoryIds=${jobCategoryIds}`,
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },
