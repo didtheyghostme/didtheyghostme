@@ -82,6 +82,13 @@ export const experienceLevelLimiters = {
   sustainedWrite: limiters["experience-level-sustained-write"],
 };
 
+export const jobCategoryLimiters = {
+  burstRead: limiters["job-category-burst-read"],
+  burstWrite: limiters["job-category-burst-write"],
+  sustainedRead: limiters["job-category-sustained-read"],
+  sustainedWrite: limiters["job-category-sustained-write"],
+};
+
 // Type guard for Upstash errors
 export function isUpstashDailyLimitError(error: unknown): boolean {
   return error instanceof UpstashErrors.UpstashError && error.message.includes("max daily request limit exceeded");

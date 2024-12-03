@@ -1,7 +1,7 @@
 // Types
 export type WindowType = "BURST" | "SUSTAINED";
 export type OperationType = "READ" | "WRITE";
-export type RateLimitRouteType = "JOB" | "COMPANY" | "COUNTRY" | "EXPERIENCE-LEVEL" | "OTHERS";
+export type RateLimitRouteType = "JOB" | "COMPANY" | "COUNTRY" | "EXPERIENCE-LEVEL" | "JOB-CATEGORY" | "OTHERS";
 
 type RouteConfig = {
   [K in RateLimitRouteType]: {
@@ -60,6 +60,18 @@ export const RATE_LIMITS: RateLimitConfig = {
 
   // Experience level routes (frontend filtered, write is same as job (in same RPC so unused))
   "EXPERIENCE-LEVEL": {
+    BURST: {
+      READ: 40,
+      WRITE: 10,
+    },
+    SUSTAINED: {
+      READ: 100,
+      WRITE: 30,
+    },
+  },
+
+  // Job category routes (frontend filtered, write is same as job (in same RPC so unused))
+  "JOB-CATEGORY": {
     BURST: {
       READ: 40,
       WRITE: 10,
