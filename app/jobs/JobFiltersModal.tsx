@@ -101,11 +101,6 @@ export function JobFiltersModal({
             <ModalHeader>Filter Jobs</ModalHeader>
             <ModalBody className="gap-6">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Countries</p>
-                <CountryFilter availableCountries={availableCountries} countriesLoading={countriesLoading} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
-              </div>
-
-              <div className="space-y-2">
                 <p className="text-sm font-medium">Job Status</p>
                 <VerifiedJobsToggle isVerified={tempVerified} onVerifiedChange={setTempVerified} />
               </div>
@@ -147,6 +142,11 @@ export function JobFiltersModal({
               <div className="space-y-2">
                 <p className="text-sm font-medium">Job Category</p>
                 <JobCategoryFilter jobCategories={jobCategories} jobCategoriesLoading={jobCategoriesLoading} selectedJobCategoryIds={tempJobCategoryIds} onJobCategoryChange={setTempJobCategoryIds} />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Countries</p>
+                <CountryFilter availableCountries={availableCountries} countriesLoading={countriesLoading} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
               </div>
             </ModalBody>
             <ModalFooter>

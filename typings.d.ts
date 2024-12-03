@@ -255,3 +255,17 @@ type JobPostingExperienceLevel = {
 type JobPostingExperienceLevelJoined = {
   job_posting_experience_level: JobPostingExperienceLevelItem[];
 };
+
+// job posting job category
+
+type JobPostingJobCategoryItem = {
+  job_category: Pick<JobCategoryTable, "id" | "job_category_name">;
+};
+
+type JobPostingJobCategory = {
+  job_posting_job_category: JobPostingJobCategoryItem;
+};
+
+type JobPostingJobCategoryJoined = {
+  job_posting_job_category: JobPostingJobCategoryItem[];
+};
