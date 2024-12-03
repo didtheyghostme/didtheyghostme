@@ -14,6 +14,7 @@ import { FilterIcon } from "@/components/icons";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
+import { JobCategorySelect } from "@/app/api/job-category/route";
 
 export type JobSortOrderKey = "ASC" | "DESC";
 
@@ -32,12 +33,15 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
 
   const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
 
-  const [{ isVerified, countries, sortOrder, experienceLevelIds, page }, setQueryStates] = useQueryStates({
+  const { data: jobCategories = [], isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
+
+  const [{ isVerified, countries, sortOrder, experienceLevelIds, page, jobCategoryIds }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
     experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
+    jobCategoryIds: parseAsArrayOf(parseAsString).withDefault([]),
   });
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -51,6 +55,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       sort_order: sortOrder,
       experience_level_ids: experienceLevelIds,
       page,
+      job_category_ids: jobCategoryIds,
     });
     setQueryStates({ countries: selectedCountries, page: 1 });
   };
@@ -64,6 +69,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       sort_order: sortOrder,
       experience_level_ids: experienceLevelIds,
       page,
+      job_category_ids: jobCategoryIds,
     });
     setQueryStates({ isVerified: isSelected, page: 1 });
   };
@@ -77,6 +83,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       is_verified: isVerified,
       experience_level_ids: experienceLevelIds,
       page,
+      job_category_ids: jobCategoryIds,
     });
     setQueryStates({ sortOrder: newOrder, page: 1 });
   };
@@ -90,8 +97,23 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       is_verified: isVerified,
       sort_order: sortOrder,
       page,
+      job_category_ids: jobCategoryIds,
     });
     setQueryStates({ experienceLevelIds: newExperienceLevelIds, page: 1 });
+  };
+
+  const handleJobCategoryChange = (newJobCategoryIds: string[]) => {
+    mixpanel.track("All Jobs Action", {
+      action: "job_category_changed",
+      job_category_ids: newJobCategoryIds,
+      search,
+      countries,
+      is_verified: isVerified,
+      sort_order: sortOrder,
+      experience_level_ids: experienceLevelIds,
+      page,
+    });
+    setQueryStates({ jobCategoryIds: newJobCategoryIds, page: 1 });
   };
 
   return (
@@ -111,12 +133,16 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
         experienceLevelsLoading={experienceLevelsLoading}
         isOpen={isFilterModalOpen}
         isVerified={isVerified}
+        jobCategories={jobCategories}
+        jobCategoriesLoading={jobCategoriesLoading}
         selectedCountries={countries}
         selectedExperienceLevelIds={experienceLevelIds}
+        selectedJobCategoryIds={jobCategoryIds}
         sortOrder={sortOrder}
         onClose={() => setIsFilterModalOpen(false)}
         onCountriesChange={handleCountriesChange}
         onExperienceLevelChange={handleExperienceLevelChange}
+        onJobCategoryChange={handleJobCategoryChange}
         onSortChange={handleSortChange}
         onVerifiedChange={handleVerifiedChange}
       />
