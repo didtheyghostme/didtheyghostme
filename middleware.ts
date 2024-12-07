@@ -6,7 +6,7 @@ import { jobLimiters, othersLimiters, companyLimiters, countryLimiters, createFa
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
 import { getUpstashFailedStatus, setUpstashFailedStatus } from "@/lib/rateLimitFallbackRedis";
 
-const isProtectedRoute = createRouteMatcher(["/api/applications(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/applications", "/settings"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
@@ -34,8 +34,11 @@ export default clerkMiddleware(async (auth, req) => {
   // First check: Protects API routes (requires authentication)
 
   if (isProtectedRoute(req)) {
-    await auth().protect();
+    if (!session?.userId) {
+      const redirectUrl = new URL(process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL ?? "/", req.url);
 
+      return NextResponse.redirect(redirectUrl);
+    }
     return NextResponse.next();
   }
 
