@@ -188,6 +188,15 @@ type ReportAdminTable = {
   handled_at: string | null;
 } & BaseUser;
 
+type UserPreferencesKey = "default_countries" | "default_job_categories" | "default_experience_levels";
+
+type UserPreferencesTable = {
+  id: string;
+  preference_key: UserPreferencesKey;
+  preference_value: string;
+  created_at: string;
+} & BaseUser;
+
 // Utility Types (for insert)
 
 type NullableKeys<T> = {

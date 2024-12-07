@@ -2,112 +2,154 @@
 
 import { Select, SelectItem } from "@nextui-org/react";
 import useSWR from "swr";
-import { useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomButton } from "@/components/CustomButton";
-import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
-import { JobCategorySelect } from "@/app/api/job-category/route";
+import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
+
+const settingsPreferencesSchema = z.object({
+  default_countries: z.array(z.string()).min(1, "Select at least one country"),
+  default_experience_levels: z.array(z.string()).min(1, "Select at least one experience level"),
+  default_job_categories: z.array(z.string()).min(1, "Select at least one job category"),
+}) satisfies z.ZodType<Record<UserPreferencesKey, string[]>>;
+
+type SettingsPreferencesFormData = z.infer<typeof settingsPreferencesSchema>;
 
 export default function SettingsPage() {
-  const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
+  const { data, error, isLoading } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
 
-  const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SettingsPreferencesFormData>({
+    resolver: zodResolver(settingsPreferencesSchema),
+    defaultValues: {
+      default_countries: [],
+      default_experience_levels: [],
+      default_job_categories: [],
+    },
+  });
 
-  const { data: jobCategories = [], error: jobCategoriesError, isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
+  // Set initial values when data loads
+  useEffect(() => {
+    if (data) {
+      reset({
+        default_countries: data.default_countries,
+        default_experience_levels: data.default_experience_levels,
+        default_job_categories: data.default_job_categories,
+      });
+    }
+  }, [data, reset]);
 
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
-  const [selectedExperienceLevel, setSelectedExperienceLevel] = useState<string>("");
-  const [selectedJobCategory, setSelectedJobCategory] = useState<string>("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  if (countriesLoading || experienceLevelsLoading || jobCategoriesLoading) return <LoadingContent />;
-  if (countriesError || experienceLevelsError || jobCategoriesError) {
-    return <ErrorMessageContent message="Failed to load settings" />;
-  }
-
-  const handleSaveSettings = async () => {
-    if (isSaving) return;
-
+  const onSubmit = async (formData: SettingsPreferencesFormData) => {
     try {
-      setIsSaving(true);
       // TODO: Implement API endpoint to save user preferences
 
-      //   mixpanel.track("Settings Saved", {
-      //     default_country: selectedCountry,
-      //     default_experience_level: selectedExperienceLevel,
-      //     default_job_category: selectedJobCategory,
-      //   });
-
+      mixpanel.track("Settings Saved", formData);
       toast.success("Settings saved successfully");
     } catch (err) {
       toast.error("Failed to save settings");
-    } finally {
-      setIsSaving(false);
     }
   };
 
+  if (isLoading) return <LoadingContent />;
+  if (error) return <ErrorMessageContent message="Failed to load settings" />;
+  if (!data) return null;
+
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-4">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold">Default Preferences Settings</h1>
 
-      <div className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Default Preferences</h2>
+          <h2 className="text-xl font-semibold">Job Search Preferences</h2>
           <p className="text-default-500">These settings will be used as default filters when browsing jobs.</p>
         </div>
 
-        <Select
-          label="Default Country"
-          placeholder="Select a country"
-          selectedKeys={selectedCountry ? [selectedCountry] : []}
-          selectionMode="single"
-          onSelectionChange={(keys) => setSelectedCountry(Array.from(keys)[0] as string)}
-        >
-          {countries.map((country) => (
-            <SelectItem key={country.id} value={country.id}>
-              {country.country_name}
-            </SelectItem>
-          ))}
-        </Select>
+        <Controller
+          control={control}
+          name="default_countries"
+          render={({ field }) => (
+            <Select
+              errorMessage={errors.default_countries?.message}
+              isInvalid={!!errors.default_countries}
+              items={data.available_countries.map((name) => ({ name }))}
+              label="Default Countries"
+              placeholder="Select countries"
+              selectedKeys={field.value}
+              selectionMode="multiple"
+              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+            >
+              {(country) => (
+                <SelectItem key={country.name} value={country.name}>
+                  {country.name}
+                </SelectItem>
+              )}
+            </Select>
+          )}
+        />
 
-        <Select
-          label="Default Experience Level"
-          placeholder="Select an experience level"
-          selectedKeys={selectedExperienceLevel ? [selectedExperienceLevel] : []}
-          selectionMode="single"
-          onSelectionChange={(keys) => setSelectedExperienceLevel(Array.from(keys)[0] as string)}
-        >
-          {experienceLevels.map((level) => (
-            <SelectItem key={level.id} value={level.id}>
-              {level.experience_level}
-            </SelectItem>
-          ))}
-        </Select>
+        <Controller
+          control={control}
+          name="default_experience_levels"
+          render={({ field }) => (
+            <Select
+              errorMessage={errors.default_experience_levels?.message}
+              isInvalid={!!errors.default_experience_levels}
+              items={data.all_experience_levels.map((name) => ({ name }))}
+              label="Default Experience Levels"
+              placeholder="Select experience levels"
+              selectedKeys={field.value}
+              selectionMode="multiple"
+              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+            >
+              {(level) => (
+                <SelectItem key={level.name} value={level.name}>
+                  {level.name}
+                </SelectItem>
+              )}
+            </Select>
+          )}
+        />
 
-        <Select
-          label="Default Job Category"
-          placeholder="Select a job category"
-          selectedKeys={selectedJobCategory ? [selectedJobCategory] : []}
-          selectionMode="single"
-          onSelectionChange={(keys) => setSelectedJobCategory(Array.from(keys)[0] as string)}
-        >
-          {jobCategories.map((category) => (
-            <SelectItem key={category.id} value={category.id}>
-              {category.job_category_name}
-            </SelectItem>
-          ))}
-        </Select>
+        <Controller
+          control={control}
+          name="default_job_categories"
+          render={({ field }) => (
+            <Select
+              errorMessage={errors.default_job_categories?.message}
+              isInvalid={!!errors.default_job_categories}
+              items={data.all_job_categories.map((name) => ({ name }))}
+              label="Default Job Categories"
+              placeholder="Select job categories"
+              selectedKeys={field.value}
+              selectionMode="multiple"
+              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+            >
+              {(category) => (
+                <SelectItem key={category.name} value={category.name}>
+                  {category.name}
+                </SelectItem>
+              )}
+            </Select>
+          )}
+        />
 
-        <CustomButton className="w-full" color="primary" isLoading={isSaving} onPress={handleSaveSettings}>
+        <CustomButton className="w-full" color="primary" isLoading={isSubmitting} type="submit">
           Save Settings
         </CustomButton>
-      </div>
+      </form>
     </div>
   );
 }

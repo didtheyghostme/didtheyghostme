@@ -46,6 +46,7 @@ export const API = {
   },
   PROTECTED: {
     getByCurrentUser: "/api/applications", // return all applications for the current user
+    getSettings: "/api/settings", // return user preferences settings for the current user
   },
   ADMIN: {
     getAllReports: "/api/admin", // return all reports
@@ -73,4 +74,5 @@ export const DB_RPC = {
   INSERT_JOB_WITH_COUNTRIES: "insert_job_with_countries",
   UPDATE_JOB_WITH_COUNTRIES: "update_job_with_countries",
   GET_ALL_SEARCH_JOBS: "get_all_search_jobs",
+  GET_USER_PREFERENCES_AND_OPTIONS: "get_user_preferences_and_options",
 } as const;
