@@ -47,6 +47,8 @@ export const API = {
   PROTECTED: {
     getByCurrentUser: "/api/applications", // return all applications for the current user
     getSettings: "/api/settings", // return user preferences settings for the current user
+    getJobSearchSettings: "/api/settings/job-search", // return user preferences settings for the current user
+    getInsertJobSettings: "/api/settings/insert-job", // return user preferences settings for the current user
   },
   ADMIN: {
     getAllReports: "/api/admin", // return all reports
@@ -55,7 +57,6 @@ export const API = {
   },
   COUNTRY: {
     getAll: "/api/country", // return all countries
-    getAvailable: "/api/country/available", // return all available countries
   },
   EXPERIENCE_LEVEL: {
     getAll: "/api/experience-level", // return all experience levels
@@ -74,6 +75,8 @@ export const DB_RPC = {
   INSERT_JOB_WITH_COUNTRIES: "insert_job_with_countries",
   UPDATE_JOB_WITH_COUNTRIES: "update_job_with_countries",
   GET_ALL_SEARCH_JOBS: "get_all_search_jobs",
-  GET_USER_PREFERENCES_AND_OPTIONS: "get_user_preferences_and_options",
   UPDATE_USER_PREFERENCES: "update_user_preferences",
+  GET_USER_PREFERENCES_SETTINGS: "get_user_preferences_settings",
+  GET_USER_PREFERENCES_JOB_SEARCH: "get_user_preferences_job_search",
+  GET_USER_PREFERENCES_INSERT_JOB: "get_user_preferences_insert_job",
 } as const;

@@ -12,7 +12,7 @@ import { CustomButton } from "@/components/CustomButton";
 import { FilterIcon } from "@/components/icons";
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
-import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
+import { SettingsJobSearchResponse } from "@/app/api/(protected)/settings/job-search/route";
 
 export type JobSortOrderKey = "ASC" | "DESC";
 
@@ -27,23 +27,18 @@ type AllJobSearchInputProps = {
 };
 
 export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputProps) {
-  // const { data: availableCountries = [], isLoading: countriesLoading } = useSWR<AvailableCountry[]>(API.COUNTRY.getAvailable, fetcher);
-
-  // const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
-
-  // const { data: jobCategories = [], isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
-
   const {
     data: settingsPreferences = {
       available_countries: [],
       all_experience_levels: [],
       all_job_categories: [],
+
       default_countries: [],
       default_experience_levels: [],
       default_job_categories: [],
-    } as SettingsUserPreferencesResponse,
+    } as SettingsJobSearchResponse,
     isLoading,
-  } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
+  } = useSWR<SettingsJobSearchResponse>(API.PROTECTED.getJobSearchSettings, fetcher);
 
   // console.warn("settingsPreferences", settingsPreferences);
 

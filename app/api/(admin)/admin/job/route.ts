@@ -30,6 +30,7 @@ export async function GET() {
     company_id: true,
     job_posted_date: true,
     user_id: true,
+    job_url_linkedin: true,
     [DBTable.COMPANY]: {
       id: true,
       company_name: true,

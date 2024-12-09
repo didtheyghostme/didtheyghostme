@@ -26,7 +26,7 @@ import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 import { CompanyDetailsPageAllJobsResponse } from "@/app/api/company/[company_id]/job/route";
 import { CompanyDetailsPageCompanyResponse } from "@/app/api/company/[company_id]/route";
-import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
+import { SettingsInsertJobResponse } from "@/app/api/(protected)/settings/insert-job/route";
 
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
@@ -37,26 +37,21 @@ export default function CompanyDetailsPage() {
 
   const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
 
-  // const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
-
-  // const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
-
-  // const { data: jobCategories = [], error: jobCategoriesError, isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
-
   // console.warn("jobs", allJobs);
 
   const {
     data: settingsPreferences = {
-      available_countries: [],
+      all_countries: [],
       all_experience_levels: [],
       all_job_categories: [],
-      default_countries: [],
-      default_experience_levels: [],
-      default_job_categories: [],
-    },
+
+      insert_default_countries: [],
+      insert_default_experience_levels: [],
+      insert_default_job_categories: [],
+    } as SettingsInsertJobResponse,
     error: settingsPreferencesError,
     isLoading: settingsPreferencesLoading,
-  } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
+  } = useSWR<SettingsInsertJobResponse>(API.PROTECTED.getInsertJobSettings, fetcher);
 
   const { createJob, isCreating } = useCreateJob(company_id as string);
 
@@ -116,7 +111,7 @@ export default function CompanyDetailsPage() {
       });
       toast.success("Job added successfully");
 
-      handleCloseModal();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Error adding job:", err);
       if (isRateLimitError(err)) {
@@ -157,17 +152,15 @@ export default function CompanyDetailsPage() {
       company_id,
     });
     setIsModalOpen(false);
-
-    setDefaultValues();
   };
 
   const setDefaultValues = () => {
     reset({
       title: "",
       url: null,
-      countries: settingsPreferences.default_countries,
-      experience_level_names: settingsPreferences.default_experience_levels,
-      job_category_names: settingsPreferences.default_job_categories,
+      countries: settingsPreferences.insert_default_countries,
+      experience_level_names: settingsPreferences.insert_default_experience_levels,
+      job_category_names: settingsPreferences.insert_default_job_categories,
     });
   };
 
@@ -338,7 +331,7 @@ export default function CompanyDetailsPage() {
                       isRequired
                       errorMessage={errors.countries?.message}
                       isInvalid={!!errors.countries}
-                      items={settingsPreferences.available_countries.map((name) => ({ name }))}
+                      items={settingsPreferences.all_countries.map((name) => ({ name }))}
                       label="Countries"
                       placeholder="Select countries"
                       selectedKeys={field.value}
