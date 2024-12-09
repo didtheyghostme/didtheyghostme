@@ -664,9 +664,9 @@ CREATE OR REPLACE FUNCTION get_all_search_jobs(
   p_page int,
   p_search text,
   p_is_verified boolean,
-  p_country_ids uuid[],
-  p_experience_level_ids uuid[],
-  p_job_category_ids uuid[],
+  p_country_names text[],
+  p_experience_level_names text[],
+  p_job_category_names text[],
   p_sort_order text DEFAULT 'DESC'
 )
 RETURNS json AS $$
@@ -674,24 +674,53 @@ DECLARE
   v_limit int := 10;
   v_offset int;
   v_total_count int;
-  v_default_experience_level_id uuid;
-  v_default_country_id uuid;
-  v_default_job_category_id uuid;
+  v_country_ids uuid[];
+  v_experience_level_ids uuid[];
+  v_job_category_ids uuid[];
+  v_default_country_ids uuid[];
+  v_default_experience_level_ids uuid[];
+  v_default_job_category_ids uuid[];
 BEGIN
   v_offset := (p_page - 1) * v_limit;
 
-  -- Get default IDs once at the start
-  SELECT id INTO v_default_experience_level_id
-  FROM experience_level
-  WHERE experience_level = 'Internship';
+  -- Convert names to IDs only if names are provided
+  IF p_country_names IS NOT NULL AND array_length(p_country_names, 1) > 0 THEN
+    SELECT ARRAY_AGG(id) INTO v_country_ids
+    FROM country
+    WHERE country_name = ANY(p_country_names);
+  END IF;
 
-  SELECT id INTO v_default_country_id
-  FROM country
-  WHERE country_name = 'Singapore';
+  IF p_experience_level_names IS NOT NULL AND array_length(p_experience_level_names, 1) > 0 THEN
+    SELECT ARRAY_AGG(id) INTO v_experience_level_ids
+    FROM experience_level
+    WHERE experience_level = ANY(p_experience_level_names);
+  END IF;
 
-  SELECT id INTO v_default_job_category_id
-  FROM job_category
-  WHERE job_category_name = 'Tech';
+  IF p_job_category_names IS NOT NULL AND array_length(p_job_category_names, 1) > 0 THEN
+    SELECT ARRAY_AGG(id) INTO v_job_category_ids
+    FROM job_category
+    WHERE job_category_name = ANY(p_job_category_names);
+  END IF;
+
+  -- Get default IDs as arrays only if user-provided IDs are not present
+  IF (v_country_ids IS NULL OR array_length(v_country_ids, 1) = 0) THEN
+    SELECT ARRAY_AGG(id) INTO v_default_country_ids
+    FROM country
+    WHERE country_name IN ('Singapore');
+  END IF;
+
+  IF (v_experience_level_ids IS NULL OR array_length(v_experience_level_ids, 1) = 0) THEN
+    SELECT ARRAY_AGG(id) INTO v_default_experience_level_ids
+    FROM experience_level
+    WHERE experience_level IN ('Internship');
+  END IF;
+
+  IF (v_job_category_ids IS NULL OR array_length(v_job_category_ids, 1) = 0) THEN
+    SELECT ARRAY_AGG(id) INTO v_default_job_category_ids
+    FROM job_category
+    WHERE job_category_name IN ('Tech');
+  END IF;
+
 
   -- Count query
   SELECT COUNT(DISTINCT jp.id) INTO v_total_count
@@ -699,7 +728,7 @@ BEGIN
   INNER JOIN company c ON jp.company_id = c.id
   INNER JOIN job_posting_country jpc ON jp.id = jpc.job_posting_id
   INNER JOIN job_posting_experience_level jpel ON jp.id = jpel.job_posting_id
-  INNER JOIN job_posting_job_category jpjc ON jp.id = jpjc.job_posting_id -- Add job category join
+  INNER JOIN job_posting_job_category jpjc ON jp.id = jpjc.job_posting_id
   WHERE 
     -- Filter by job status (Verified only or both Pending and Verified)
     CASE
@@ -712,28 +741,28 @@ BEGIN
       OR jp.title ILIKE '%' || p_search || '%'
       OR c.company_name ILIKE '%' || p_search || '%'
     )
-    -- Filter by selected countries (if any), else = Singapore
+    -- Filter by selected countries (if any), else use defaults
     AND (
       CASE
-        WHEN p_country_ids IS NOT NULL AND array_length(p_country_ids, 1) > 0 
-        THEN jpc.country_id = ANY(p_country_ids)
-        ELSE jpc.country_id = v_default_country_id
+        WHEN v_country_ids IS NOT NULL AND array_length(v_country_ids, 1) > 0 
+        THEN jpc.country_id = ANY(v_country_ids)
+        ELSE jpc.country_id = ANY(v_default_country_ids)
       END
     )
-    -- Filter by experience levels (if any), else = Internship
+    -- Filter by experience levels (if any), else use defaults
     AND (
       CASE
-        WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
-        THEN jpel.experience_level_id = ANY(p_experience_level_ids)
-        ELSE jpel.experience_level_id = v_default_experience_level_id
+        WHEN v_experience_level_ids IS NOT NULL AND array_length(v_experience_level_ids, 1) > 0 
+        THEN jpel.experience_level_id = ANY(v_experience_level_ids)
+        ELSE jpel.experience_level_id = ANY(v_default_experience_level_ids)
       END
     )
-    -- Filter by job categories (if any), else = Tech
+    -- Filter by job categories (if any), else use defaults
     AND (
       CASE
-        WHEN p_job_category_ids IS NOT NULL AND array_length(p_job_category_ids, 1) > 0 
-        THEN jpjc.job_category_id = ANY(p_job_category_ids)
-        ELSE jpjc.job_category_id = v_default_job_category_id
+        WHEN v_job_category_ids IS NOT NULL AND array_length(v_job_category_ids, 1) > 0 
+        THEN jpjc.job_category_id = ANY(v_job_category_ids)
+        ELSE jpjc.job_category_id = ANY(v_default_job_category_ids)
       END
     );
 
@@ -812,23 +841,23 @@ BEGIN
             )
             AND (
               CASE
-                WHEN p_country_ids IS NOT NULL AND array_length(p_country_ids, 1) > 0 
-                THEN jpc.country_id = ANY(p_country_ids)
-                ELSE jpc.country_id = v_default_country_id
+                WHEN v_country_ids IS NOT NULL AND array_length(v_country_ids, 1) > 0 
+                THEN jpc.country_id = ANY(v_country_ids)
+                ELSE jpc.country_id = ANY(v_default_country_ids)
               END
             )
             AND (
               CASE
-                WHEN p_experience_level_ids IS NOT NULL AND array_length(p_experience_level_ids, 1) > 0 
-                THEN jpel.experience_level_id = ANY(p_experience_level_ids)
-                ELSE jpel.experience_level_id = v_default_experience_level_id
+                WHEN v_experience_level_ids IS NOT NULL AND array_length(v_experience_level_ids, 1) > 0 
+                THEN jpel.experience_level_id = ANY(v_experience_level_ids)
+                ELSE jpel.experience_level_id = ANY(v_default_experience_level_ids)
               END
             )
             AND (
               CASE
-                WHEN p_job_category_ids IS NOT NULL AND array_length(p_job_category_ids, 1) > 0 
-                THEN jpjc.job_category_id = ANY(p_job_category_ids)
-                ELSE jpjc.job_category_id = v_default_job_category_id
+                WHEN v_job_category_ids IS NOT NULL AND array_length(v_job_category_ids, 1) > 0 
+                THEN jpjc.job_category_id = ANY(v_job_category_ids)
+                ELSE jpjc.job_category_id = ANY(v_default_job_category_ids)
               END
             )
           GROUP BY 
@@ -870,27 +899,29 @@ $$;
 
 
 -- 11) function to get user preferences and options
-CREATE OR REPLACE FUNCTION get_user_preferences_and_options(p_user_id text)
+CREATE OR REPLACE FUNCTION get_user_preferences_and_options(p_user_id text DEFAULT NULL)
 RETURNS json AS $$
 DECLARE
     v_default_countries text[];
     v_default_job_categories text[];
     v_default_experience_levels text[];
 BEGIN
-    -- Get user preferences as arrays
-    SELECT ARRAY_AGG(preference_value) INTO v_default_countries
-    FROM user_preference
-    WHERE user_id = p_user_id AND preference_key = 'default_country';
+    -- Get user preferences as arrays only if user_id is provided
+    IF p_user_id IS NOT NULL THEN
+        SELECT ARRAY_AGG(preference_value) INTO v_default_countries
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_country';
 
-    SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
-    FROM user_preference
-    WHERE user_id = p_user_id AND preference_key = 'default_job_category';
+        SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_job_category';
 
-    SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
-    FROM user_preference
-    WHERE user_id = p_user_id AND preference_key = 'default_experience_level';
+        SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_experience_level';
+    END IF;
 
-    -- Return flattened results
+    -- Return flattened results with defaults for both logged-in and logged-out users
     RETURN json_build_object(
         'default_countries', COALESCE(v_default_countries, ARRAY['Singapore']),
         'default_job_categories', COALESCE(v_default_job_categories, ARRAY['Tech']),
