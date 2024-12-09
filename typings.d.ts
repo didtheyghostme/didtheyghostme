@@ -189,7 +189,13 @@ type ReportAdminTable = {
   handled_at: string | null;
 } & BaseUser;
 
-type UserPreferencesKey = "default_countries" | "default_job_categories" | "default_experience_levels";
+type UserPreferencesKey =
+  | "default_countries"
+  | "default_job_categories"
+  | "default_experience_levels"
+  | "insert_default_countries"
+  | "insert_default_job_categories"
+  | "insert_default_experience_levels";
 
 type UserPreferencesTable = {
   id: string;

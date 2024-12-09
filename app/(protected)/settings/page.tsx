@@ -13,14 +13,16 @@ import { API } from "@/lib/constants/apiRoutes";
 import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomButton } from "@/components/CustomButton";
-import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
+import { SettingsResponse } from "@/app/api/(protected)/settings/route";
 import { UpdateUserPreferenceFormValues, updateUserPreferenceSchema } from "@/lib/schema/updateUserPreferenceSchema";
 import { useUpdateUserPreferences } from "@/lib/hooks/useUpdateUserPreferences";
 
 export default function SettingsPage() {
-  const { data, error, isLoading } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
+  const { data, error, isLoading } = useSWR<SettingsResponse>(API.PROTECTED.getSettings, fetcher);
 
   const { updateUserPreferences, isUpdating } = useUpdateUserPreferences();
+
+  // console.warn("data", data);
 
   const {
     control,
@@ -33,6 +35,9 @@ export default function SettingsPage() {
       default_countries: [],
       default_experience_levels: [],
       default_job_categories: [],
+      insert_default_countries: [],
+      insert_default_experience_levels: [],
+      insert_default_job_categories: [],
     },
   });
 
@@ -43,6 +48,9 @@ export default function SettingsPage() {
         default_countries: data.default_countries,
         default_experience_levels: data.default_experience_levels,
         default_job_categories: data.default_job_categories,
+        insert_default_countries: data.insert_default_countries,
+        insert_default_experience_levels: data.insert_default_experience_levels,
+        insert_default_job_categories: data.insert_default_job_categories,
       });
     }
   }, [data, reset]);
@@ -50,7 +58,6 @@ export default function SettingsPage() {
   const onSubmit = async (formData: UpdateUserPreferenceFormValues) => {
     try {
       await updateUserPreferences(formData);
-
       mixpanel.track("Settings Saved", formData);
       toast.success("Settings saved successfully");
     } catch (err) {
@@ -67,79 +74,163 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-bold">Default Preferences Settings</h1>
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Job Search Preferences</h2>
-          <p className="text-default-500">These settings will be used as default filters when browsing jobs.</p>
+        {/* Job Search Preferences Section */}
+        <div className="rounded-lg border border-default-200 p-6">
+          <div className="mb-6 space-y-2">
+            <h2 className="text-xl font-semibold">Job Search Preferences</h2>
+            <p className="text-default-500">These settings will be used as default filters when browsing jobs.</p>
+          </div>
+
+          <div className="space-y-4">
+            <Controller
+              control={control}
+              name="default_countries"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.default_countries?.message}
+                  isInvalid={!!errors.default_countries}
+                  items={data.available_countries.map((name) => ({ name }))}
+                  label="Default Countries"
+                  placeholder="Select countries"
+                  selectedKeys={field.value}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(country) => (
+                    <SelectItem key={country.name} value={country.name}>
+                      {country.name}
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="default_experience_levels"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.default_experience_levels?.message}
+                  isInvalid={!!errors.default_experience_levels}
+                  items={data.all_experience_levels.map((name) => ({ name }))}
+                  label="Default Experience Levels"
+                  placeholder="Select experience levels"
+                  selectedKeys={field.value}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(level) => (
+                    <SelectItem key={level.name} value={level.name}>
+                      {level.name}
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="default_job_categories"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.default_job_categories?.message}
+                  isInvalid={!!errors.default_job_categories}
+                  items={data.all_job_categories.map((name) => ({ name }))}
+                  label="Default Job Categories"
+                  placeholder="Select job categories"
+                  selectedKeys={field.value}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(category) => (
+                    <SelectItem key={category.name} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
+            />
+          </div>
         </div>
 
-        <Controller
-          control={control}
-          name="default_countries"
-          render={({ field }) => (
-            <Select
-              errorMessage={errors.default_countries?.message}
-              isInvalid={!!errors.default_countries}
-              items={data.available_countries.map((name) => ({ name }))}
-              label="Default Countries"
-              placeholder="Select countries"
-              selectedKeys={field.value}
-              selectionMode="multiple"
-              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
-            >
-              {(country) => (
-                <SelectItem key={country.name} value={country.name}>
-                  {country.name}
-                </SelectItem>
-              )}
-            </Select>
-          )}
-        />
+        {/* Job Insert Preferences Section */}
+        <div className="rounded-lg border border-default-200 p-6">
+          <div className="mb-6 space-y-2">
+            <h2 className="text-xl font-semibold">Job Insert Preferences</h2>
+            <p className="text-default-500">These settings will be used as default values when adding new jobs.</p>
+          </div>
 
-        <Controller
-          control={control}
-          name="default_experience_levels"
-          render={({ field }) => (
-            <Select
-              errorMessage={errors.default_experience_levels?.message}
-              isInvalid={!!errors.default_experience_levels}
-              items={data.all_experience_levels.map((name) => ({ name }))}
-              label="Default Experience Levels"
-              placeholder="Select experience levels"
-              selectedKeys={field.value}
-              selectionMode="multiple"
-              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
-            >
-              {(level) => (
-                <SelectItem key={level.name} value={level.name}>
-                  {level.name}
-                </SelectItem>
+          <div className="space-y-4">
+            <Controller
+              control={control}
+              name="insert_default_countries"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.insert_default_countries?.message}
+                  isInvalid={!!errors.insert_default_countries}
+                  items={data.all_countries.map((name) => ({ name }))}
+                  label="Default Countries"
+                  placeholder="Select countries"
+                  selectedKeys={field.value}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(country) => (
+                    <SelectItem key={country.name} value={country.name}>
+                      {country.name}
+                    </SelectItem>
+                  )}
+                </Select>
               )}
-            </Select>
-          )}
-        />
+            />
 
-        <Controller
-          control={control}
-          name="default_job_categories"
-          render={({ field }) => (
-            <Select
-              errorMessage={errors.default_job_categories?.message}
-              isInvalid={!!errors.default_job_categories}
-              items={data.all_job_categories.map((name) => ({ name }))}
-              label="Default Job Categories"
-              placeholder="Select job categories"
-              selectedKeys={field.value}
-              selectionMode="multiple"
-              onSelectionChange={(keys) => field.onChange(Array.from(keys))}
-            >
-              {(category) => (
-                <SelectItem key={category.name} value={category.name}>
-                  {category.name}
-                </SelectItem>
+            <Controller
+              control={control}
+              name="insert_default_experience_levels"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.insert_default_experience_levels?.message}
+                  isInvalid={!!errors.insert_default_experience_levels}
+                  items={data.all_experience_levels.map((name) => ({ name }))}
+                  label="Default Experience Levels"
+                  placeholder="Select experience levels"
+                  selectedKeys={field.value}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(level) => (
+                    <SelectItem key={level.name} value={level.name}>
+                      {level.name}
+                    </SelectItem>
+                  )}
+                </Select>
               )}
-            </Select>
-          )}
-        />
+            />
+
+            <Controller
+              control={control}
+              name="insert_default_job_categories"
+              render={({ field }) => (
+                <Select
+                  errorMessage={errors.insert_default_job_categories?.message}
+                  isInvalid={!!errors.insert_default_job_categories}
+                  items={data.all_job_categories.map((name) => ({ name }))}
+                  label="Default Job Categories"
+                  placeholder="Select job categories"
+                  selectedKeys={field.value}
+                  selectionMode="single"
+                  onSelectionChange={(keys) => field.onChange(Array.from(keys))}
+                >
+                  {(category) => (
+                    <SelectItem key={category.name} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
+            />
+          </div>
+        </div>
 
         <CustomButton className="w-full" color="primary" isLoading={isUpdating} type="submit">
           Save Settings

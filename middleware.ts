@@ -14,9 +14,7 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isJobRoutes = createRouteMatcher(["/api/job(.*)"]);
 const isCompanyRoutes = createRouteMatcher(["/api/company(.*)"]);
 const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(.*)"]);
-// const isCountryRoutes = createRouteMatcher(["/api/country(.*)"]);
-// const isExperienceLevelRoutes = createRouteMatcher(["/api/experience-level(.*)"]);
-// const isJobCategoryRoutes = createRouteMatcher(["/api/job-category(.*)"]);
+
 const isSettingsRoutes = createRouteMatcher(["/api/settings(.*)"]);
 
 async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; ip: string }): Promise<boolean> {

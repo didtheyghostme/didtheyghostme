@@ -903,90 +903,62 @@ $$ LANGUAGE plpgsql;
 
 
 -- 10) function to get all available countries
-create or replace function get_available_countries()
-returns table (
-  id uuid,
-  country_name text
-) language sql as $$
-  SELECT DISTINCT c.id, c.country_name
-  FROM job_posting_country jpc
-  JOIN country c ON c.id = jpc.country_id
-  ORDER BY c.country_name;
+CREATE OR REPLACE FUNCTION get_available_countries()
+RETURNS TABLE (country_name text) 
+LANGUAGE sql AS $$
+    SELECT DISTINCT c.country_name
+    FROM job_posting_country jpc
+    INNER JOIN country c ON c.id = jpc.country_id
+    ORDER BY c.country_name ASC;
 $$;
 
 
--- 11) function to get user preferences and options
-CREATE OR REPLACE FUNCTION get_user_preferences_and_options(p_user_id text DEFAULT NULL)
-RETURNS json AS $$
-DECLARE
-    v_default_countries text[];
-    v_default_job_categories text[];
-    v_default_experience_levels text[];
-BEGIN
-    -- Get user preferences as arrays only if user_id is provided
-    IF p_user_id IS NOT NULL THEN
-        SELECT ARRAY_AGG(preference_value) INTO v_default_countries
-        FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_countries';
-
-        SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
-        FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_job_categories';
-
-        SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
-        FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_experience_levels';
-    END IF;
-
-    -- Return flattened results with defaults for both logged-in and logged-out users
-    RETURN json_build_object(
-        'default_countries', COALESCE(v_default_countries, ARRAY['Singapore']),
-        'default_job_categories', COALESCE(v_default_job_categories, ARRAY['Tech']),
-        'default_experience_levels', COALESCE(v_default_experience_levels, ARRAY['Internship']),
-        'available_countries', (
-            SELECT json_agg(country_name ORDER BY country_name)
-            FROM (SELECT country_name FROM get_available_countries()) as countries
-        ),
-        'all_job_categories', (
-            SELECT json_agg(job_category_name ORDER BY created_at ASC)
-            FROM job_category
-        ),
-        'all_experience_levels', (
-            SELECT json_agg(experience_level ORDER BY created_at ASC)
-            FROM experience_level
-        )
-    );
-END;
-$$ LANGUAGE plpgsql;
-
-
--- 12) function to update user preferences
+-- 11) function to update user preferences
 CREATE OR REPLACE FUNCTION update_user_preferences(
   p_user_id text,
+  -- Search preferences
   p_default_countries text[],
   p_default_job_categories text[],
-  p_default_experience_levels text[]
+  p_default_experience_levels text[],
+  -- Insert preferences
+  p_insert_default_countries text[],
+  p_insert_default_job_categories text[],
+  p_insert_default_experience_levels text[]
 ) RETURNS void AS $$
 BEGIN
-  -- Delete country preferences that are no longer needed
+  -- Delete search preferences that are no longer needed
   DELETE FROM user_preference 
   WHERE user_id = p_user_id 
     AND preference_key = 'default_countries'
     AND preference_value NOT IN (SELECT unnest(p_default_countries));
 
-  -- Delete job category preferences that are no longer needed
   DELETE FROM user_preference 
   WHERE user_id = p_user_id 
     AND preference_key = 'default_job_categories'
     AND preference_value NOT IN (SELECT unnest(p_default_job_categories));
 
-  -- Delete experience level preferences that are no longer needed
   DELETE FROM user_preference 
   WHERE user_id = p_user_id 
     AND preference_key = 'default_experience_levels'
     AND preference_value NOT IN (SELECT unnest(p_default_experience_levels));
+
+  -- Delete insert preferences that are no longer needed
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'insert_default_countries'
+    AND preference_value NOT IN (SELECT unnest(p_insert_default_countries));
+
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'insert_default_job_categories'
+    AND preference_value NOT IN (SELECT unnest(p_insert_default_job_categories));
+
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'insert_default_experience_levels'
+    AND preference_value NOT IN (SELECT unnest(p_insert_default_experience_levels));
   
-  -- Insert new preferences with conflict handling
+  -- Insert new search preferences
   INSERT INTO user_preference (user_id, preference_key, preference_value)
   SELECT 
     p_user_id,
@@ -1010,5 +982,210 @@ BEGIN
     unnest(p_default_experience_levels)
   ON CONFLICT (user_id, preference_key, preference_value) 
   DO NOTHING;
+
+  -- Insert new insert preferences
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'insert_default_countries'::text,
+    unnest(p_insert_default_countries)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
+
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'insert_default_job_categories'::text,
+    unnest(p_insert_default_job_categories)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
+
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'insert_default_experience_levels'::text,
+    unnest(p_insert_default_experience_levels)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- 12) Helper function to get all options for user preferences
+CREATE OR REPLACE FUNCTION helper_user_preferences_get_all_options(
+    p_include_available_countries boolean DEFAULT false,
+    p_include_all_countries boolean DEFAULT true
+) RETURNS json AS $$
+DECLARE
+    v_result jsonb := '{}'::jsonb;
+BEGIN
+    -- Add available_countries if requested
+    IF p_include_available_countries THEN
+        v_result := v_result || jsonb_build_object(
+            'available_countries',
+            (SELECT json_agg(country_name) FROM get_available_countries())
+        );
+    END IF;
+
+    -- Add all_countries if requested
+    IF p_include_all_countries THEN
+        v_result := v_result || jsonb_build_object(
+            'all_countries',
+            (SELECT json_agg(country_name ORDER BY country_name ASC) FROM country)
+        );
+    END IF;
+
+    -- Add job categories
+    v_result := v_result || jsonb_build_object(
+        'all_job_categories',
+        (SELECT json_agg(job_category_name ORDER BY created_at ASC) FROM job_category)
+    );
+
+    -- Add experience levels
+    v_result := v_result || jsonb_build_object(
+        'all_experience_levels',
+        (SELECT json_agg(experience_level ORDER BY created_at ASC) FROM experience_level)
+    );
+
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- 13) function to get user preferences for job search
+CREATE OR REPLACE FUNCTION get_user_preferences_job_search(p_user_id text DEFAULT NULL)
+RETURNS json AS $$
+DECLARE
+    v_default_countries text[];
+    v_default_job_categories text[];
+    v_default_experience_levels text[];
+    v_all_options json;
+BEGIN
+    -- Get all options
+    v_all_options := helper_user_preferences_get_all_options(
+        p_include_available_countries := true,
+        p_include_all_countries := false
+    );
+
+    -- Get user preferences
+    IF p_user_id IS NOT NULL THEN
+        SELECT ARRAY_AGG(preference_value) INTO v_default_countries
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_countries';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_job_categories';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_experience_levels';
+    END IF;
+
+    RETURN jsonb_build_object(
+        'default_countries', COALESCE(v_default_countries, ARRAY['Singapore']),
+        'default_job_categories', COALESCE(v_default_job_categories, ARRAY['Tech']),
+        'default_experience_levels', COALESCE(v_default_experience_levels, ARRAY['Internship'])
+    ) || v_all_options::jsonb;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+-- 14) function to get user preferences for insert job
+CREATE OR REPLACE FUNCTION get_user_preferences_insert_job(p_user_id text DEFAULT NULL)
+RETURNS json AS $$
+DECLARE
+    v_insert_default_countries text[];
+    v_insert_default_job_categories text[];
+    v_insert_default_experience_levels text[];
+    v_all_options json;
+BEGIN
+    -- Get all options
+    v_all_options := helper_user_preferences_get_all_options(
+        p_include_available_countries := false,
+        p_include_all_countries := true
+    );
+    
+    -- Get user preferences
+    IF p_user_id IS NOT NULL THEN
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_countries
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_countries';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_job_categories
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_job_categories';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_experience_levels
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_experience_levels';
+    END IF;
+
+    RETURN jsonb_build_object(
+        'insert_default_countries', COALESCE(v_insert_default_countries, ARRAY['Singapore']),
+        'insert_default_job_categories', COALESCE(v_insert_default_job_categories, ARRAY['Tech']),
+        'insert_default_experience_levels', COALESCE(v_insert_default_experience_levels, ARRAY['Internship'])
+    ) || v_all_options::jsonb;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+-- 15) function to get user preferences for settings
+CREATE OR REPLACE FUNCTION get_user_preferences_settings(p_user_id text DEFAULT NULL)
+RETURNS json AS $$
+DECLARE
+    v_default_countries text[];
+    v_default_job_categories text[];
+    v_default_experience_levels text[];
+    v_insert_default_countries text[];
+    v_insert_default_job_categories text[];
+    v_insert_default_experience_levels text[];
+    v_all_options json;
+BEGIN
+    -- Get all options
+    v_all_options := helper_user_preferences_get_all_options(
+        p_include_available_countries := true,
+        p_include_all_countries := true
+    );
+
+    -- Get user preferences
+    IF p_user_id IS NOT NULL THEN
+        -- Get search preferences
+        SELECT ARRAY_AGG(preference_value) INTO v_default_countries
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_countries';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_job_categories';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'default_experience_levels';
+
+        -- Get insert preferences
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_countries
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_countries';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_job_categories
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_job_categories';
+
+        SELECT ARRAY_AGG(preference_value) INTO v_insert_default_experience_levels
+        FROM user_preference
+        WHERE user_id = p_user_id AND preference_key = 'insert_default_experience_levels';
+    END IF;
+
+    RETURN jsonb_build_object(
+        'default_countries', COALESCE(v_default_countries, ARRAY['Singapore']),
+        'default_job_categories', COALESCE(v_default_job_categories, ARRAY['Tech']),
+        'default_experience_levels', COALESCE(v_default_experience_levels, ARRAY['Internship']),
+        'insert_default_countries', COALESCE(v_insert_default_countries, ARRAY['Singapore']),
+        'insert_default_job_categories', COALESCE(v_insert_default_job_categories, ARRAY['Tech']),
+        'insert_default_experience_levels', COALESCE(v_insert_default_experience_levels, ARRAY['Internship'])
+    ) || v_all_options::jsonb;
 END;
 $$ LANGUAGE plpgsql;
