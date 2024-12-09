@@ -26,16 +26,20 @@ export async function GET(request: NextRequest) {
   const jobCategoryIdsParam = searchParams.get("jobCategoryIds");
   const jobCategoryIds = jobCategoryIdsParam ? jobCategoryIdsParam.split(",").filter(Boolean) : null;
 
+  // console.warn("countries=", countries);
+  // console.warn("experienceLevelIds=", experienceLevelIds);
+  // console.warn("jobCategoryIds=", jobCategoryIds);
+
   const supabase = await createClerkSupabaseClientSsr();
 
   const { data, error } = await supabase.rpc(DB_RPC.GET_ALL_SEARCH_JOBS, {
     p_page: page,
     p_search: search,
     p_is_verified: isVerified,
-    p_country_ids: countries,
+    p_country_names: countries,
     p_sort_order: sortOrder,
-    p_experience_level_ids: experienceLevelIds,
-    p_job_category_ids: jobCategoryIds,
+    p_experience_level_names: experienceLevelIds,
+    p_job_category_names: jobCategoryIds,
   });
 
   if (error) {
