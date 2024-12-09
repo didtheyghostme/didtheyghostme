@@ -170,7 +170,7 @@ export function JobPostingEditForm({
                 label="Posted Date"
                 maxValue={today(getLocalTimeZone())}
                 value={field.value ? parseDate(field.value) : null}
-                onChange={(date: CalendarDate) => field.onChange(date.toString())}
+                onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
           />
@@ -185,7 +185,7 @@ export function JobPostingEditForm({
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
                 value={field.value ? parseDate(field.value) : null}
-                onChange={(date: CalendarDate) => field.onChange(date.toString())}
+                onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
           />
