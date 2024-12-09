@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Input } from "@nextui-org/react";
-import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { createParser, parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 import useSWR from "swr";
 import mixpanel from "mixpanel-browser";
 
@@ -46,13 +46,39 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
 
   // console.warn("settingsPreferences", settingsPreferences);
 
+  const parseAsJobCategory = createParser({
+    parse: (value: string): JobCategoryName | null => {
+      if (!settingsPreferences.all_job_categories.includes(value as JobCategoryName)) {
+        mixpanel.track("All Jobs Filter invalid job category", {
+          job_category: value,
+        });
+      }
+
+      return settingsPreferences.all_job_categories.includes(value as JobCategoryName) ? (value as JobCategoryName) : null;
+    },
+    serialize: (value: JobCategoryName): string => value,
+  });
+
+  const parseAsExperienceLevel = createParser({
+    parse: (value: string): ExperienceLevel | null => {
+      if (!settingsPreferences.all_experience_levels.includes(value as ExperienceLevel)) {
+        mixpanel.track("All Jobs Filter invalid experience level", {
+          experience_level: value,
+        });
+      }
+
+      return settingsPreferences.all_experience_levels.includes(value as ExperienceLevel) ? (value as ExperienceLevel) : null;
+    },
+    serialize: (value: ExperienceLevel): string => value,
+  });
+
   const [{ isVerified, countries, sortOrder, experienceLevelIds, page, jobCategoryIds }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
-    jobCategoryIds: parseAsArrayOf(parseAsString).withDefault([]),
+    experienceLevelIds: parseAsArrayOf(parseAsExperienceLevel).withDefault([]),
+    jobCategoryIds: parseAsArrayOf(parseAsJobCategory).withDefault([]),
   });
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -145,8 +171,8 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
           isVerified={isVerified}
           jobCategories={settingsPreferences.all_job_categories}
           selectedCountries={countries.length > 0 ? countries : settingsPreferences.default_countries}
-          selectedExperienceLevelIds={experienceLevelIds.length > 0 ? (experienceLevelIds as ExperienceLevel[]) : settingsPreferences.default_experience_levels}
-          selectedJobCategoryIds={jobCategoryIds.length > 0 ? (jobCategoryIds as JobCategoryName[]) : settingsPreferences.default_job_categories}
+          selectedExperienceLevelIds={experienceLevelIds.length > 0 ? experienceLevelIds : settingsPreferences.default_experience_levels}
+          selectedJobCategoryIds={jobCategoryIds.length > 0 ? jobCategoryIds : settingsPreferences.default_job_categories}
           sortOrder={sortOrder}
           onClose={() => setIsFilterModalOpen(false)}
           onCountriesChange={handleCountriesChange}
