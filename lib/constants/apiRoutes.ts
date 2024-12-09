@@ -57,7 +57,6 @@ export const API = {
   },
   COUNTRY: {
     getAll: "/api/country", // return all countries
-    getAvailable: "/api/country/available", // return all available countries
   },
   EXPERIENCE_LEVEL: {
     getAll: "/api/experience-level", // return all experience levels

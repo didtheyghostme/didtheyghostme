@@ -27,12 +27,6 @@ type AllJobSearchInputProps = {
 };
 
 export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputProps) {
-  // const { data: availableCountries = [], isLoading: countriesLoading } = useSWR<AvailableCountry[]>(API.COUNTRY.getAvailable, fetcher);
-
-  // const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
-
-  // const { data: jobCategories = [], isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
-
   const {
     data: settingsPreferences = {
       available_countries: [],
