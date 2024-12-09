@@ -26,26 +26,7 @@ import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 import { CompanyDetailsPageAllJobsResponse } from "@/app/api/company/[company_id]/job/route";
 import { CompanyDetailsPageCompanyResponse } from "@/app/api/company/[company_id]/route";
-import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
-import { JobCategorySelect } from "@/app/api/job-category/route";
-
-function findSingaporeId(countries: CountryTable[]) {
-  const singapore = countries?.find((country) => country.country_name === "Singapore");
-
-  return singapore?.id;
-}
-
-function findInternshipId(experienceLevels: ExperienceLevelSelect[]) {
-  const internship = experienceLevels?.find((level) => level.experience_level === "Internship");
-
-  return internship?.id;
-}
-
-function findTechId(jobCategories: JobCategorySelect[]) {
-  const tech = jobCategories?.find((category) => category.job_category_name === "Tech");
-
-  return tech?.id;
-}
+import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
 
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
@@ -56,13 +37,26 @@ export default function CompanyDetailsPage() {
 
   const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
 
-  const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
+  // const { data: countries = [], error: countriesError, isLoading: countriesLoading } = useSWR<CountryTable[]>(API.COUNTRY.getAll, fetcher);
 
-  const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
+  // const { data: experienceLevels = [], error: experienceLevelsError, isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
 
-  const { data: jobCategories = [], error: jobCategoriesError, isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
+  // const { data: jobCategories = [], error: jobCategoriesError, isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
 
   // console.warn("jobs", allJobs);
+
+  const {
+    data: settingsPreferences = {
+      available_countries: [],
+      all_experience_levels: [],
+      all_job_categories: [],
+      default_countries: [],
+      default_experience_levels: [],
+      default_job_categories: [],
+    },
+    error: settingsPreferencesError,
+    isLoading: settingsPreferencesLoading,
+  } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
 
   const { createJob, isCreating } = useCreateJob(company_id as string);
 
@@ -73,16 +67,15 @@ export default function CompanyDetailsPage() {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
     setFocus,
   } = useForm<AddJobFormData>({
     resolver: zodResolver(addJobSchema),
     defaultValues: {
       title: "",
-      countries: [],
       url: null,
-      experience_level_ids: [],
-      job_category_ids: [],
+      countries: [],
+      experience_level_names: [],
+      job_category_names: [],
     },
   });
 
@@ -92,36 +85,9 @@ export default function CompanyDetailsPage() {
     }
   }, [isModalOpen, setFocus]);
 
-  // Add this useEffect to set ["SingaporeID"] as default once countries are loaded and "Internship" as default once experience levels are loaded and "Tech" as default once job categories are loaded
-  useEffect(() => {
-    if (countries?.length) {
-      const singaporeId = findSingaporeId(countries);
-
-      if (singaporeId) {
-        setValue("countries", [singaporeId]);
-      }
-    }
-
-    if (experienceLevels?.length) {
-      const internshipId = findInternshipId(experienceLevels);
-
-      if (internshipId) {
-        setValue("experience_level_ids", [internshipId]);
-      }
-    }
-
-    if (jobCategories?.length) {
-      const techId = findTechId(jobCategories);
-
-      if (techId) {
-        setValue("job_category_ids", [techId]);
-      }
-    }
-  }, [countries, experienceLevels, jobCategories, setValue]);
-
-  if (isLoading || jobIsLoading || countriesLoading || experienceLevelsLoading || jobCategoriesLoading) return <LoadingContent />;
-  if (error || jobError || countriesError || experienceLevelsError || jobCategoriesError) {
-    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(countriesError) || isRateLimitError(experienceLevelsError) || isRateLimitError(jobCategoriesError)) {
+  if (isLoading || jobIsLoading || settingsPreferencesLoading) return <LoadingContent />;
+  if (error || jobError || settingsPreferencesError) {
+    if (isRateLimitError(error) || isRateLimitError(jobError) || isRateLimitError(settingsPreferencesError)) {
       return <RateLimitErrorMessage />;
     }
 
@@ -145,8 +111,8 @@ export default function CompanyDetailsPage() {
         company_id,
         job_title: data.title,
         countries: data.countries,
-        experience_level_ids: data.experience_level_ids,
-        job_category_ids: data.job_category_ids,
+        experience_level_names: data.experience_level_names,
+        job_category_names: data.job_category_names,
       });
       toast.success("Job added successfully");
 
@@ -164,8 +130,8 @@ export default function CompanyDetailsPage() {
         company_id,
         job_title: data.title,
         countries: data.countries,
-        experience_level_ids: data.experience_level_ids,
-        job_category_ids: data.job_category_ids,
+        experience_level_names: data.experience_level_names,
+        job_category_names: data.job_category_names,
         error: err instanceof Error ? err.message : "Unknown error occurred",
       });
       toast.error("Error adding job");
@@ -178,6 +144,10 @@ export default function CompanyDetailsPage() {
       company_id,
       company_name: company.company_name,
     });
+
+    // Set default values when opening modal
+    setDefaultValues();
+
     setIsModalOpen(true);
   };
 
@@ -188,12 +158,16 @@ export default function CompanyDetailsPage() {
     });
     setIsModalOpen(false);
 
+    setDefaultValues();
+  };
+
+  const setDefaultValues = () => {
     reset({
       title: "",
       url: null,
-      countries: findSingaporeId(countries) ? [findSingaporeId(countries)] : [],
-      experience_level_ids: findInternshipId(experienceLevels) ? [findInternshipId(experienceLevels)] : [],
-      job_category_ids: findTechId(jobCategories) ? [findTechId(jobCategories)] : [],
+      countries: settingsPreferences.default_countries,
+      experience_level_names: settingsPreferences.default_experience_levels,
+      job_category_names: settingsPreferences.default_job_categories,
     });
   };
 
@@ -309,13 +283,13 @@ export default function CompanyDetailsPage() {
 
                 <Controller
                   control={control}
-                  name="job_category_ids"
+                  name="job_category_names"
                   render={({ field }) => (
                     <Select
                       isRequired
-                      errorMessage={errors.job_category_ids?.message}
-                      isInvalid={!!errors.job_category_ids}
-                      items={jobCategories ?? []}
+                      errorMessage={errors.job_category_names?.message}
+                      isInvalid={!!errors.job_category_names}
+                      items={settingsPreferences.all_job_categories.map((name) => ({ name }))}
                       label="Job Category"
                       placeholder="Select job category"
                       selectedKeys={field.value}
@@ -323,8 +297,8 @@ export default function CompanyDetailsPage() {
                       onSelectionChange={(keys) => field.onChange(Array.from(keys))}
                     >
                       {(category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.job_category_name}
+                        <SelectItem key={category.name} value={category.name}>
+                          {category.name}
                         </SelectItem>
                       )}
                     </Select>
@@ -333,13 +307,13 @@ export default function CompanyDetailsPage() {
 
                 <Controller
                   control={control}
-                  name="experience_level_ids"
+                  name="experience_level_names"
                   render={({ field }) => (
                     <Select
                       isRequired
-                      errorMessage={errors.experience_level_ids?.message}
-                      isInvalid={!!errors.experience_level_ids}
-                      items={experienceLevels ?? []}
+                      errorMessage={errors.experience_level_names?.message}
+                      isInvalid={!!errors.experience_level_names}
+                      items={settingsPreferences.all_experience_levels.map((name) => ({ name }))}
                       label="Experience Level"
                       placeholder="Select experience level"
                       selectedKeys={field.value}
@@ -347,8 +321,8 @@ export default function CompanyDetailsPage() {
                       onSelectionChange={(keys) => field.onChange(Array.from(keys))}
                     >
                       {(level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.experience_level}
+                        <SelectItem key={level.name} value={level.name}>
+                          {level.name}
                         </SelectItem>
                       )}
                     </Select>
@@ -364,7 +338,7 @@ export default function CompanyDetailsPage() {
                       isRequired
                       errorMessage={errors.countries?.message}
                       isInvalid={!!errors.countries}
-                      items={countries ?? []}
+                      items={settingsPreferences.available_countries.map((name) => ({ name }))}
                       label="Countries"
                       placeholder="Select countries"
                       selectedKeys={field.value}
@@ -372,8 +346,8 @@ export default function CompanyDetailsPage() {
                       onSelectionChange={(keys) => field.onChange(Array.from(keys))}
                     >
                       {(country) => (
-                        <SelectItem key={country.id} value={country.id}>
-                          {country.country_name}
+                        <SelectItem key={country.name} value={country.name}>
+                          {country.name}
                         </SelectItem>
                       )}
                     </Select>

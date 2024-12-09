@@ -409,14 +409,32 @@ create or replace function insert_job_with_countries(
   p_url text,
   p_company_id uuid,
   p_user_id text,
-  p_country_ids uuid[],
-  p_experience_level_ids uuid[],
-  p_job_category_ids uuid[]
+  p_country_names text[],
+  p_experience_level_names text[],
+  p_job_category_names text[]
 ) returns void as $$
 declare
   v_job_id uuid;
+  v_country_ids uuid[];
+  v_experience_level_ids uuid[];
+  v_job_category_ids uuid[];
 begin
-  -- Insert the job posting and get just the ID
+  -- Convert country names to IDs
+  SELECT ARRAY_AGG(id) INTO v_country_ids
+  FROM country
+  WHERE country_name = ANY(p_country_names);
+
+  -- Convert experience level names to IDs
+  SELECT ARRAY_AGG(id) INTO v_experience_level_ids
+  FROM experience_level
+  WHERE experience_level = ANY(p_experience_level_names);
+
+  -- Convert job category names to IDs
+  SELECT ARRAY_AGG(id) INTO v_job_category_ids
+  FROM job_category
+  WHERE job_category_name = ANY(p_job_category_names);
+
+  -- Insert the job posting and get the ID
   insert into job_posting (
     title,
     url,
@@ -438,8 +456,31 @@ begin
   )
   select 
     v_job_id,
-    unnest(p_country_ids)
-  where array_length(p_country_ids, 1) > 0;
+    unnest(v_country_ids)
+  where array_length(v_country_ids, 1) > 0;
+
+  -- Insert the experience level relationships
+  insert into job_posting_experience_level (
+    job_posting_id,
+    experience_level_id
+  )
+  select 
+    v_job_id,
+    unnest(v_experience_level_ids)
+  where array_length(v_experience_level_ids, 1) > 0;
+
+  -- Insert the job category relationships
+  insert into job_posting_job_category (
+    job_posting_id,
+    job_category_id
+  )
+  select 
+    v_job_id,
+    unnest(v_job_category_ids)
+  where array_length(v_job_category_ids, 1) > 0;
+
+end;
+$$ language plpgsql;
 
 
   -- Insert the experience level relationships (similar to countries)
