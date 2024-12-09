@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 import { createRateLimitResponse } from "@/lib/errorHandling";
-import { jobLimiters, othersLimiters, companyLimiters, countryLimiters, createFallbackRateLimiters, experienceLevelLimiters, jobCategoryLimiters } from "@/lib/rateLimit";
+import { jobLimiters, othersLimiters, companyLimiters, settingsLimiters, createFallbackRateLimiters } from "@/lib/rateLimit";
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
 import { getUpstashFailedStatus, setUpstashFailedStatus } from "@/lib/rateLimitFallbackRedis";
 
@@ -14,9 +14,10 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isJobRoutes = createRouteMatcher(["/api/job(.*)"]);
 const isCompanyRoutes = createRouteMatcher(["/api/company(.*)"]);
 const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(.*)"]);
-const isCountryRoutes = createRouteMatcher(["/api/country(.*)"]);
-const isExperienceLevelRoutes = createRouteMatcher(["/api/experience-level(.*)"]);
-const isJobCategoryRoutes = createRouteMatcher(["/api/job-category(.*)"]);
+// const isCountryRoutes = createRouteMatcher(["/api/country(.*)"]);
+// const isExperienceLevelRoutes = createRouteMatcher(["/api/experience-level(.*)"]);
+// const isJobCategoryRoutes = createRouteMatcher(["/api/job-category(.*)"]);
+const isSettingsRoutes = createRouteMatcher(["/api/settings(.*)"]);
 
 async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; ip: string }): Promise<boolean> {
   const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({
@@ -39,6 +40,7 @@ export default clerkMiddleware(async (auth, req) => {
 
       return NextResponse.redirect(redirectUrl);
     }
+
     return NextResponse.next();
   }
 
@@ -59,10 +61,8 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (isJobRoutes(req)) limiters = jobLimiters;
   else if (isCompanyRoutes(req)) limiters = companyLimiters;
-  else if (isCountryRoutes(req)) limiters = countryLimiters;
-  else if (isExperienceLevelRoutes(req)) limiters = experienceLevelLimiters;
+  else if (isSettingsRoutes(req)) limiters = settingsLimiters;
   else if (isOtherRoutes(req)) limiters = othersLimiters;
-  else if (isJobCategoryRoutes(req)) limiters = jobCategoryLimiters;
 
   if (limiters) {
     // Choose rate limiter based on HTTP method

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { AllJobsPageData } from "@/app/jobs/AllJobSearchResult";
@@ -10,6 +11,8 @@ export type AllJobsPageResponse = {
 };
 
 export async function GET(request: NextRequest) {
+  const { userId } = auth();
+
   const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get("page") ?? "1", 10);
   const search = searchParams.get("search") ?? "";
@@ -40,6 +43,7 @@ export async function GET(request: NextRequest) {
     p_sort_order: sortOrder,
     p_experience_level_names: experienceLevelNames,
     p_job_category_names: jobCategoryNames,
+    p_user_id: userId,
   });
 
   if (error) {

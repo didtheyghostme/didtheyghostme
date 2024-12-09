@@ -62,31 +62,18 @@ export const companyLimiters = {
   sustainedWrite: limiters["company-sustained-write"],
 };
 
+export const settingsLimiters = {
+  burstRead: limiters["settings-burst-read"],
+  burstWrite: limiters["settings-burst-write"],
+  sustainedRead: limiters["settings-sustained-read"],
+  sustainedWrite: limiters["settings-sustained-write"],
+};
+
 export const othersLimiters = {
   burstRead: limiters["others-burst-read"],
   burstWrite: limiters["others-burst-write"],
   sustainedRead: limiters["others-sustained-read"],
   sustainedWrite: limiters["others-sustained-write"],
-};
-
-export const countryLimiters = {
-  burstRead: limiters["country-burst-read"],
-  burstWrite: limiters["country-burst-write"],
-  sustainedRead: limiters["country-sustained-read"],
-  sustainedWrite: limiters["country-sustained-write"],
-};
-export const experienceLevelLimiters = {
-  burstRead: limiters["experience-level-burst-read"],
-  burstWrite: limiters["experience-level-burst-write"],
-  sustainedRead: limiters["experience-level-sustained-read"],
-  sustainedWrite: limiters["experience-level-sustained-write"],
-};
-
-export const jobCategoryLimiters = {
-  burstRead: limiters["job-category-burst-read"],
-  burstWrite: limiters["job-category-burst-write"],
-  sustainedRead: limiters["job-category-sustained-read"],
-  sustainedWrite: limiters["job-category-sustained-write"],
 };
 
 // Type guard for Upstash errors

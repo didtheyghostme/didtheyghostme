@@ -42,6 +42,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       default_experience_levels: [],
       default_job_categories: [],
     } as SettingsUserPreferencesResponse,
+    isLoading,
   } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
 
   // console.warn("settingsPreferences", settingsPreferences);
@@ -163,7 +164,7 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
         </CustomButton>
       </div>
 
-      {isFilterModalOpen && (
+      {isFilterModalOpen && !isLoading && (
         <JobFiltersModal
           availableCountries={settingsPreferences.available_countries}
           experienceLevels={settingsPreferences.all_experience_levels}
