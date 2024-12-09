@@ -411,7 +411,8 @@ create or replace function insert_job_with_countries(
   p_user_id text,
   p_country_names text[],
   p_experience_level_names text[],
-  p_job_category_names text[]
+  p_job_category_names text[],
+  p_job_url_linkedin text
 ) returns void as $$
 declare
   v_job_id uuid;
@@ -440,13 +441,15 @@ begin
     url,
     company_id,
     user_id,
-    job_status
+    job_status,
+    job_url_linkedin
   ) values (
     p_title,
     p_url,
     p_company_id,
     p_user_id,
-    case when p_url is null then 'No URL' else 'Pending' end
+    case when p_url is null then 'No URL' else 'Pending' end,
+    p_job_url_linkedin
   ) returning id into v_job_id;
 
   -- Insert the country relationships
@@ -478,30 +481,6 @@ begin
     v_job_id,
     unnest(v_job_category_ids)
   where array_length(v_job_category_ids, 1) > 0;
-
-end;
-$$ language plpgsql;
-
-
-  -- Insert the experience level relationships (similar to countries)
-  insert into job_posting_experience_level (
-    job_posting_id,
-    experience_level_id
-  )
-  select 
-    v_job_id,
-    unnest(p_experience_level_ids)
-  where array_length(p_experience_level_ids, 1) > 0;
-
-  -- Insert the job category relationships
-  insert into job_posting_job_category (
-    job_posting_id,
-    job_category_id
-  )
-  select 
-    v_job_id,
-    unnest(p_job_category_ids)
-  where array_length(p_job_category_ids, 1) > 0;
 
 end;
 $$ language plpgsql;
