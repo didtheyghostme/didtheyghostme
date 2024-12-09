@@ -26,7 +26,7 @@ export function TrackThisJobModal({ isOpen, isLoading, onClose, onSubmit }: Trac
       <ModalContent>
         <ModalHeader>When did you apply for this job?</ModalHeader>
         <ModalBody>
-          <DatePicker label="Application Date" maxValue={today(getLocalTimeZone())} value={appliedDate} onChange={(date: CalendarDate) => setAppliedDate(date)} />
+          <DatePicker label="Application Date" maxValue={today(getLocalTimeZone())} value={appliedDate} onChange={(date) => date && setAppliedDate(date)} />
         </ModalBody>
         <ModalFooter>
           <CustomButton color="danger" variant="light" onPress={onClose}>

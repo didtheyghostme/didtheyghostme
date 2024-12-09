@@ -8,9 +8,6 @@ import { ExperienceLevelFilter } from "./ExperienceLevelFilter";
 import { JobCategoryFilter } from "./JobCategoryFilter";
 
 import { CustomButton } from "@/components/CustomButton";
-import { AvailableCountry } from "@/app/api/country/available/route";
-import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
-import { JobCategorySelect } from "@/app/api/job-category/route";
 
 const sortOptions = [
   { key: "DESC", label: "Posted Date: Newest to Oldest" },
@@ -22,20 +19,17 @@ type JobFiltersModalProps = {
   onClose: () => void;
   selectedCountries: string[];
   onCountriesChange: (countries: string[]) => void;
-  availableCountries: AvailableCountry[];
-  countriesLoading: boolean;
-  experienceLevelsLoading: boolean;
+  availableCountries: string[];
   isVerified: boolean;
   onVerifiedChange: (isVerified: boolean) => void;
   sortOrder: JobSortOrderKey;
   onSortChange: (newOrder: JobSortOrderKey) => void;
-  selectedExperienceLevelIds: string[];
-  onExperienceLevelChange: (experienceLevelIds: string[]) => void;
-  experienceLevels: ExperienceLevelSelect[];
-  jobCategories: JobCategorySelect[];
-  jobCategoriesLoading: boolean;
-  selectedJobCategoryIds: string[];
-  onJobCategoryChange: (jobCategoryIds: string[]) => void;
+  selectedExperienceLevelNames: ExperienceLevel[];
+  onExperienceLevelChange: (experienceLevelNames: ExperienceLevel[]) => void;
+  experienceLevels: ExperienceLevel[];
+  jobCategories: JobCategoryName[];
+  selectedJobCategoryNames: JobCategoryName[];
+  onJobCategoryChange: (jobCategoryNames: JobCategoryName[]) => void;
 };
 
 export function JobFiltersModal({
@@ -44,46 +38,41 @@ export function JobFiltersModal({
   selectedCountries: initialCountries,
   onCountriesChange,
   availableCountries,
-  countriesLoading,
-  experienceLevelsLoading,
   isVerified: initialVerified,
   onVerifiedChange,
   sortOrder: initialSortOrder,
   onSortChange,
-  selectedExperienceLevelIds: initialExperienceLevelIds,
+  selectedExperienceLevelNames: initialExperienceLevelNames,
   onExperienceLevelChange,
   experienceLevels,
   jobCategories,
-  jobCategoriesLoading,
-  selectedJobCategoryIds: initialJobCategoryIds,
+  selectedJobCategoryNames: initialJobCategoryNames,
   onJobCategoryChange,
 }: JobFiltersModalProps) {
   // Local state for temporary changes
-  const [tempCountries, setTempCountries] = useState(initialCountries);
   const [tempVerified, setTempVerified] = useState(initialVerified);
   const [tempSortOrder, setTempSortOrder] = useState(initialSortOrder);
-  const [tempExperienceLevelIds, setTempExperienceLevelIds] = useState(initialExperienceLevelIds);
-  const [tempJobCategoryIds, setTempJobCategoryIds] = useState(initialJobCategoryIds);
+
+  const [tempCountries, setTempCountries] = useState(initialCountries);
+  const [tempExperienceLevelNames, setTempExperienceLevelNames] = useState(initialExperienceLevelNames);
+  const [tempJobCategoryNames, setTempJobCategoryNames] = useState(initialJobCategoryNames);
 
   const handleClose = () => {
     // Reset to initial values when closing without applying
     setTempCountries(initialCountries);
     setTempVerified(initialVerified);
     setTempSortOrder(initialSortOrder);
-    setTempExperienceLevelIds(initialExperienceLevelIds);
-    setTempJobCategoryIds(initialJobCategoryIds);
-
+    setTempExperienceLevelNames(initialExperienceLevelNames);
+    setTempJobCategoryNames(initialJobCategoryNames);
     onClose();
   };
 
-  // Apply changes when Done is clicked
   const handleDone = () => {
     onCountriesChange(tempCountries);
     onVerifiedChange(tempVerified);
     onSortChange(tempSortOrder);
-    onExperienceLevelChange(tempExperienceLevelIds);
-    onJobCategoryChange(tempJobCategoryIds);
-
+    onExperienceLevelChange(tempExperienceLevelNames);
+    onJobCategoryChange(tempJobCategoryNames);
     onClose();
   };
 
@@ -131,22 +120,17 @@ export function JobFiltersModal({
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Experience Level</p>
-                <ExperienceLevelFilter
-                  experienceLevels={experienceLevels}
-                  experienceLevelsLoading={experienceLevelsLoading}
-                  selectedExperienceLevelIds={tempExperienceLevelIds}
-                  onExperienceLevelChange={setTempExperienceLevelIds}
-                />
+                <ExperienceLevelFilter experienceLevels={experienceLevels} selectedExperienceLevelNames={tempExperienceLevelNames} onExperienceLevelChange={setTempExperienceLevelNames} />
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Job Category</p>
-                <JobCategoryFilter jobCategories={jobCategories} jobCategoriesLoading={jobCategoriesLoading} selectedJobCategoryIds={tempJobCategoryIds} onJobCategoryChange={setTempJobCategoryIds} />
+                <JobCategoryFilter jobCategories={jobCategories} selectedJobCategoryNames={tempJobCategoryNames} onJobCategoryChange={setTempJobCategoryNames} />
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Countries</p>
-                <CountryFilter availableCountries={availableCountries} countriesLoading={countriesLoading} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
+                <CountryFilter availableCountries={availableCountries} selectedCountries={tempCountries} onCountriesChange={setTempCountries} />
               </div>
             </ModalBody>
             <ModalFooter>

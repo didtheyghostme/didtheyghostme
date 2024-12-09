@@ -2,19 +2,17 @@
 
 import React, { useState } from "react";
 import { Input } from "@nextui-org/react";
-import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { createParser, parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 import useSWR from "swr";
 import mixpanel from "mixpanel-browser";
 
 import { JobFiltersModal } from "./JobFiltersModal";
 
 import { CustomButton } from "@/components/CustomButton";
-import { AvailableCountry } from "@/app/api/country/available/route";
 import { FilterIcon } from "@/components/icons";
-import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
-import { JobCategorySelect } from "@/app/api/job-category/route";
+import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
 
 export type JobSortOrderKey = "ASC" | "DESC";
 
@@ -29,19 +27,58 @@ type AllJobSearchInputProps = {
 };
 
 export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputProps) {
-  const { data: availableCountries = [], isLoading: countriesLoading } = useSWR<AvailableCountry[]>(API.COUNTRY.getAvailable, fetcher);
+  // const { data: availableCountries = [], isLoading: countriesLoading } = useSWR<AvailableCountry[]>(API.COUNTRY.getAvailable, fetcher);
 
-  const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
+  // const { data: experienceLevels = [], isLoading: experienceLevelsLoading } = useSWR<ExperienceLevelSelect[]>(API.EXPERIENCE_LEVEL.getAll, fetcher);
 
-  const { data: jobCategories = [], isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
+  // const { data: jobCategories = [], isLoading: jobCategoriesLoading } = useSWR<JobCategorySelect[]>(API.JOB_CATEGORY.getAll, fetcher);
 
-  const [{ isVerified, countries, sortOrder, experienceLevelIds, page, jobCategoryIds }, setQueryStates] = useQueryStates({
+  const {
+    data: settingsPreferences = {
+      available_countries: [],
+      all_experience_levels: [],
+      all_job_categories: [],
+      default_countries: [],
+      default_experience_levels: [],
+      default_job_categories: [],
+    } as SettingsUserPreferencesResponse,
+  } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
+
+  // console.warn("settingsPreferences", settingsPreferences);
+
+  const parseAsJobCategory = createParser({
+    parse: (value: string): JobCategoryName | null => {
+      if (!settingsPreferences.all_job_categories.includes(value as JobCategoryName)) {
+        mixpanel.track("All Jobs Filter invalid job category", {
+          job_category: value,
+        });
+      }
+
+      return settingsPreferences.all_job_categories.includes(value as JobCategoryName) ? (value as JobCategoryName) : null;
+    },
+    serialize: (value: JobCategoryName): string => value,
+  });
+
+  const parseAsExperienceLevel = createParser({
+    parse: (value: string): ExperienceLevel | null => {
+      if (!settingsPreferences.all_experience_levels.includes(value as ExperienceLevel)) {
+        mixpanel.track("All Jobs Filter invalid experience level", {
+          experience_level: value,
+        });
+      }
+
+      return settingsPreferences.all_experience_levels.includes(value as ExperienceLevel) ? (value as ExperienceLevel) : null;
+    },
+    serialize: (value: ExperienceLevel): string => value,
+  });
+
+  const [{ isVerified, countries, sortOrder, experienceLevelNames, page, jobCategoryNames }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
-    jobCategoryIds: parseAsArrayOf(parseAsString).withDefault([]),
+    experienceLevelNames: parseAsArrayOf(parseAsExperienceLevel).withDefault([]),
+    jobCategoryNames: parseAsArrayOf(parseAsJobCategory).withDefault([]),
   });
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -53,9 +90,9 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       is_verified: isVerified,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ countries: selectedCountries, page: 1 });
   };
@@ -67,9 +104,9 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ isVerified: isSelected, page: 1 });
   };
@@ -81,39 +118,39 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       is_verified: isVerified,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ sortOrder: newOrder, page: 1 });
   };
 
-  const handleExperienceLevelChange = (newExperienceLevelIds: string[]) => {
+  const handleExperienceLevelChange = (newExperienceLevelNames: ExperienceLevel[]) => {
     mixpanel.track("All Jobs Action", {
       action: "experience_level_changed",
-      experience_level_ids: newExperienceLevelIds,
+      experience_level_names: newExperienceLevelNames,
       search: search,
       countries: countries,
       is_verified: isVerified,
       sort_order: sortOrder,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
-    setQueryStates({ experienceLevelIds: newExperienceLevelIds, page: 1 });
+    setQueryStates({ experienceLevelNames: newExperienceLevelNames, page: 1 });
   };
 
-  const handleJobCategoryChange = (newJobCategoryIds: string[]) => {
+  const handleJobCategoryChange = (newJobCategoryNames: JobCategoryName[]) => {
     mixpanel.track("All Jobs Action", {
       action: "job_category_changed",
-      job_category_ids: newJobCategoryIds,
+      job_category_names: newJobCategoryNames,
       search,
       countries,
       is_verified: isVerified,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
     });
-    setQueryStates({ jobCategoryIds: newJobCategoryIds, page: 1 });
+    setQueryStates({ jobCategoryNames: newJobCategoryNames, page: 1 });
   };
 
   return (
@@ -126,26 +163,25 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
         </CustomButton>
       </div>
 
-      <JobFiltersModal
-        availableCountries={availableCountries}
-        countriesLoading={countriesLoading}
-        experienceLevels={experienceLevels}
-        experienceLevelsLoading={experienceLevelsLoading}
-        isOpen={isFilterModalOpen}
-        isVerified={isVerified}
-        jobCategories={jobCategories}
-        jobCategoriesLoading={jobCategoriesLoading}
-        selectedCountries={countries}
-        selectedExperienceLevelIds={experienceLevelIds}
-        selectedJobCategoryIds={jobCategoryIds}
-        sortOrder={sortOrder}
-        onClose={() => setIsFilterModalOpen(false)}
-        onCountriesChange={handleCountriesChange}
-        onExperienceLevelChange={handleExperienceLevelChange}
-        onJobCategoryChange={handleJobCategoryChange}
-        onSortChange={handleSortChange}
-        onVerifiedChange={handleVerifiedChange}
-      />
+      {isFilterModalOpen && (
+        <JobFiltersModal
+          availableCountries={settingsPreferences.available_countries}
+          experienceLevels={settingsPreferences.all_experience_levels}
+          isOpen={isFilterModalOpen}
+          isVerified={isVerified}
+          jobCategories={settingsPreferences.all_job_categories}
+          selectedCountries={countries.length > 0 ? countries : settingsPreferences.default_countries}
+          selectedExperienceLevelNames={experienceLevelNames.length > 0 ? experienceLevelNames : settingsPreferences.default_experience_levels}
+          selectedJobCategoryNames={jobCategoryNames.length > 0 ? jobCategoryNames : settingsPreferences.default_job_categories}
+          sortOrder={sortOrder}
+          onClose={() => setIsFilterModalOpen(false)}
+          onCountriesChange={handleCountriesChange}
+          onExperienceLevelChange={handleExperienceLevelChange}
+          onJobCategoryChange={handleJobCategoryChange}
+          onSortChange={handleSortChange}
+          onVerifiedChange={handleVerifiedChange}
+        />
+      )}
     </>
   );
 }

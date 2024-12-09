@@ -20,11 +20,15 @@ export async function GET(request: NextRequest) {
   const countriesParam = searchParams.get("countries");
   const countries = countriesParam ? countriesParam.split(",").filter(Boolean) : null;
 
-  const experienceLevelIdsParam = searchParams.get("experienceLevelIds");
-  const experienceLevelIds = experienceLevelIdsParam ? experienceLevelIdsParam.split(",").filter(Boolean) : null;
+  const experienceLevelNamesParam = searchParams.get("experienceLevelNames");
+  const experienceLevelNames = experienceLevelNamesParam ? experienceLevelNamesParam.split(",").filter(Boolean) : null;
 
-  const jobCategoryIdsParam = searchParams.get("jobCategoryIds");
-  const jobCategoryIds = jobCategoryIdsParam ? jobCategoryIdsParam.split(",").filter(Boolean) : null;
+  const jobCategoryNamesParam = searchParams.get("jobCategoryNames");
+  const jobCategoryNames = jobCategoryNamesParam ? jobCategoryNamesParam.split(",").filter(Boolean) : null;
+
+  // console.warn("countries=", countries);
+  // console.warn("experienceLevelNames=", experienceLevelNames);
+  // console.warn("jobCategoryNames=", jobCategoryNames);
 
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -32,10 +36,10 @@ export async function GET(request: NextRequest) {
     p_page: page,
     p_search: search,
     p_is_verified: isVerified,
-    p_country_ids: countries,
+    p_country_names: countries,
     p_sort_order: sortOrder,
-    p_experience_level_ids: experienceLevelIds,
-    p_job_category_ids: jobCategoryIds,
+    p_experience_level_names: experienceLevelNames,
+    p_job_category_names: jobCategoryNames,
   });
 
   if (error) {
