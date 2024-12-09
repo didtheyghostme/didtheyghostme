@@ -1,12 +1,12 @@
 import { Select, SelectItem } from "@nextui-org/react";
 
 type JobCategoryFilterProps = {
-  onJobCategoryChange: (categoryIds: JobCategoryName[]) => void;
-  selectedJobCategoryIds: JobCategoryName[];
+  onJobCategoryChange: (categoryNames: JobCategoryName[]) => void;
+  selectedJobCategoryNames: JobCategoryName[];
   jobCategories: JobCategoryName[];
 };
 
-export function JobCategoryFilter({ onJobCategoryChange, selectedJobCategoryIds, jobCategories }: JobCategoryFilterProps) {
+export function JobCategoryFilter({ onJobCategoryChange, selectedJobCategoryNames, jobCategories }: JobCategoryFilterProps) {
   return (
     <Select
       disallowEmptySelection
@@ -14,7 +14,7 @@ export function JobCategoryFilter({ onJobCategoryChange, selectedJobCategoryIds,
       items={jobCategories.map((name) => ({ name }))}
       label="Filter by job category"
       placeholder="Select job category"
-      selectedKeys={selectedJobCategoryIds}
+      selectedKeys={selectedJobCategoryNames}
       selectionMode="multiple"
       onSelectionChange={(keys) => {
         onJobCategoryChange(Array.from(keys) as JobCategoryName[]);

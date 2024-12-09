@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Input, Select, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker } from "@nextui-org/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDate, parseDate, getLocalTimeZone, today } from "@internationalized/date";
+import { parseDate, getLocalTimeZone, today } from "@internationalized/date";
 
 import { UpdateJobPostingAdminFormValues } from "@/lib/schema/updateJobPostingAdminSchema";
 import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";

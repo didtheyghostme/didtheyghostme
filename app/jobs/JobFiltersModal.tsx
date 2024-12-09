@@ -1,5 +1,5 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, SelectItem, Select } from "@nextui-org/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { CountryFilter } from "./CountryFilter";
 import { VerifiedJobsToggle } from "./VerifiedJobsToggle";
@@ -24,12 +24,12 @@ type JobFiltersModalProps = {
   onVerifiedChange: (isVerified: boolean) => void;
   sortOrder: JobSortOrderKey;
   onSortChange: (newOrder: JobSortOrderKey) => void;
-  selectedExperienceLevelIds: ExperienceLevel[];
-  onExperienceLevelChange: (experienceLevelIds: ExperienceLevel[]) => void;
+  selectedExperienceLevelNames: ExperienceLevel[];
+  onExperienceLevelChange: (experienceLevelNames: ExperienceLevel[]) => void;
   experienceLevels: ExperienceLevel[];
   jobCategories: JobCategoryName[];
-  selectedJobCategoryIds: JobCategoryName[];
-  onJobCategoryChange: (jobCategoryIds: JobCategoryName[]) => void;
+  selectedJobCategoryNames: JobCategoryName[];
+  onJobCategoryChange: (jobCategoryNames: JobCategoryName[]) => void;
 };
 
 export function JobFiltersModal({
@@ -42,11 +42,11 @@ export function JobFiltersModal({
   onVerifiedChange,
   sortOrder: initialSortOrder,
   onSortChange,
-  selectedExperienceLevelIds: initialExperienceLevelIds,
+  selectedExperienceLevelNames: initialExperienceLevelNames,
   onExperienceLevelChange,
   experienceLevels,
   jobCategories,
-  selectedJobCategoryIds: initialJobCategoryIds,
+  selectedJobCategoryNames: initialJobCategoryNames,
   onJobCategoryChange,
 }: JobFiltersModalProps) {
   // Local state for temporary changes
@@ -54,16 +54,16 @@ export function JobFiltersModal({
   const [tempSortOrder, setTempSortOrder] = useState(initialSortOrder);
 
   const [tempCountries, setTempCountries] = useState(initialCountries);
-  const [tempExperienceLevelIds, setTempExperienceLevelIds] = useState(initialExperienceLevelIds);
-  const [tempJobCategoryIds, setTempJobCategoryIds] = useState(initialJobCategoryIds);
+  const [tempExperienceLevelNames, setTempExperienceLevelNames] = useState(initialExperienceLevelNames);
+  const [tempJobCategoryNames, setTempJobCategoryNames] = useState(initialJobCategoryNames);
 
   const handleClose = () => {
     // Reset to initial values when closing without applying
     setTempCountries(initialCountries);
     setTempVerified(initialVerified);
     setTempSortOrder(initialSortOrder);
-    setTempExperienceLevelIds(initialExperienceLevelIds);
-    setTempJobCategoryIds(initialJobCategoryIds);
+    setTempExperienceLevelNames(initialExperienceLevelNames);
+    setTempJobCategoryNames(initialJobCategoryNames);
     onClose();
   };
 
@@ -71,8 +71,8 @@ export function JobFiltersModal({
     onCountriesChange(tempCountries);
     onVerifiedChange(tempVerified);
     onSortChange(tempSortOrder);
-    onExperienceLevelChange(tempExperienceLevelIds);
-    onJobCategoryChange(tempJobCategoryIds);
+    onExperienceLevelChange(tempExperienceLevelNames);
+    onJobCategoryChange(tempJobCategoryNames);
     onClose();
   };
 
@@ -120,12 +120,12 @@ export function JobFiltersModal({
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Experience Level</p>
-                <ExperienceLevelFilter experienceLevels={experienceLevels} selectedExperienceLevelIds={tempExperienceLevelIds} onExperienceLevelChange={setTempExperienceLevelIds} />
+                <ExperienceLevelFilter experienceLevels={experienceLevels} selectedExperienceLevelNames={tempExperienceLevelNames} onExperienceLevelChange={setTempExperienceLevelNames} />
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Job Category</p>
-                <JobCategoryFilter jobCategories={jobCategories} selectedJobCategoryIds={tempJobCategoryIds} onJobCategoryChange={setTempJobCategoryIds} />
+                <JobCategoryFilter jobCategories={jobCategories} selectedJobCategoryNames={tempJobCategoryNames} onJobCategoryChange={setTempJobCategoryNames} />
               </div>
 
               <div className="space-y-2">

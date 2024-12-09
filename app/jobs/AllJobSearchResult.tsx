@@ -38,14 +38,14 @@ const DEFAULT_RESPONSE: AllJobsPageResponse = {
 };
 
 export function AllJobSearchResult() {
-  const [{ page, search, isVerified, countries, sortOrder, experienceLevelIds, jobCategoryIds }, setQueryStates] = useQueryStates({
+  const [{ page, search, isVerified, countries, sortOrder, experienceLevelNames, jobCategoryNames }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     search: parseAsString.withDefault(""),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelIds: parseAsArrayOf(parseAsString).withDefault([]),
-    jobCategoryIds: parseAsArrayOf(parseAsString).withDefault([]),
+    experienceLevelNames: parseAsArrayOf(parseAsString).withDefault([]),
+    jobCategoryNames: parseAsArrayOf(parseAsString).withDefault([]),
   });
 
   const debouncedSearch = useDebounce(search);
@@ -61,8 +61,8 @@ export function AllJobSearchResult() {
       isVerified,
       selectedCountries: countries,
       sortOrder,
-      experienceLevelIds,
-      jobCategoryIds,
+      experienceLevelNames,
+      jobCategoryNames,
     }),
     fetcher,
   );

@@ -72,13 +72,13 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
     serialize: (value: ExperienceLevel): string => value,
   });
 
-  const [{ isVerified, countries, sortOrder, experienceLevelIds, page, jobCategoryIds }, setQueryStates] = useQueryStates({
+  const [{ isVerified, countries, sortOrder, experienceLevelNames, page, jobCategoryNames }, setQueryStates] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     isVerified: parseAsBoolean.withDefault(false),
     countries: parseAsArrayOf(parseAsString).withDefault([]),
     sortOrder: parseAsStringLiteral(Object.values(SORT_ORDER_OPTIONS)).withDefault("DESC"),
-    experienceLevelIds: parseAsArrayOf(parseAsExperienceLevel).withDefault([]),
-    jobCategoryIds: parseAsArrayOf(parseAsJobCategory).withDefault([]),
+    experienceLevelNames: parseAsArrayOf(parseAsExperienceLevel).withDefault([]),
+    jobCategoryNames: parseAsArrayOf(parseAsJobCategory).withDefault([]),
   });
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -90,9 +90,9 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       is_verified: isVerified,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ countries: selectedCountries, page: 1 });
   };
@@ -104,9 +104,9 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ isVerified: isSelected, page: 1 });
   };
@@ -118,39 +118,39 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
       search: search,
       countries: countries,
       is_verified: isVerified,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
     setQueryStates({ sortOrder: newOrder, page: 1 });
   };
 
-  const handleExperienceLevelChange = (newExperienceLevelIds: ExperienceLevel[]) => {
+  const handleExperienceLevelChange = (newExperienceLevelNames: ExperienceLevel[]) => {
     mixpanel.track("All Jobs Action", {
       action: "experience_level_changed",
-      experience_level_ids: newExperienceLevelIds,
+      experience_level_names: newExperienceLevelNames,
       search: search,
       countries: countries,
       is_verified: isVerified,
       sort_order: sortOrder,
       page,
-      job_category_ids: jobCategoryIds,
+      job_category_names: jobCategoryNames,
     });
-    setQueryStates({ experienceLevelIds: newExperienceLevelIds, page: 1 });
+    setQueryStates({ experienceLevelNames: newExperienceLevelNames, page: 1 });
   };
 
-  const handleJobCategoryChange = (newJobCategoryIds: JobCategoryName[]) => {
+  const handleJobCategoryChange = (newJobCategoryNames: JobCategoryName[]) => {
     mixpanel.track("All Jobs Action", {
       action: "job_category_changed",
-      job_category_ids: newJobCategoryIds,
+      job_category_names: newJobCategoryNames,
       search,
       countries,
       is_verified: isVerified,
       sort_order: sortOrder,
-      experience_level_ids: experienceLevelIds,
+      experience_level_names: experienceLevelNames,
       page,
     });
-    setQueryStates({ jobCategoryIds: newJobCategoryIds, page: 1 });
+    setQueryStates({ jobCategoryNames: newJobCategoryNames, page: 1 });
   };
 
   return (
@@ -171,8 +171,8 @@ export function AllJobSearchInput({ search, onSearchChange }: AllJobSearchInputP
           isVerified={isVerified}
           jobCategories={settingsPreferences.all_job_categories}
           selectedCountries={countries.length > 0 ? countries : settingsPreferences.default_countries}
-          selectedExperienceLevelIds={experienceLevelIds.length > 0 ? experienceLevelIds : settingsPreferences.default_experience_levels}
-          selectedJobCategoryIds={jobCategoryIds.length > 0 ? jobCategoryIds : settingsPreferences.default_job_categories}
+          selectedExperienceLevelNames={experienceLevelNames.length > 0 ? experienceLevelNames : settingsPreferences.default_experience_levels}
+          selectedJobCategoryNames={jobCategoryNames.length > 0 ? jobCategoryNames : settingsPreferences.default_job_categories}
           sortOrder={sortOrder}
           onClose={() => setIsFilterModalOpen(false)}
           onCountriesChange={handleCountriesChange}

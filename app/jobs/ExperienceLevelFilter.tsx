@@ -1,12 +1,12 @@
 import { Select, SelectItem } from "@nextui-org/react";
 
 type ExperienceLevelFilterProps = {
-  onExperienceLevelChange: (experienceLevelIds: ExperienceLevel[]) => void;
-  selectedExperienceLevelIds: ExperienceLevel[];
+  onExperienceLevelChange: (experienceLevelNames: ExperienceLevel[]) => void;
+  selectedExperienceLevelNames: ExperienceLevel[];
   experienceLevels: ExperienceLevel[];
 };
 
-export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperienceLevelIds, experienceLevels }: ExperienceLevelFilterProps) {
+export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperienceLevelNames, experienceLevels }: ExperienceLevelFilterProps) {
   return (
     <Select
       disallowEmptySelection
@@ -14,7 +14,7 @@ export function ExperienceLevelFilter({ onExperienceLevelChange, selectedExperie
       items={experienceLevels.map((name) => ({ name }))}
       label="Filter by experience level"
       placeholder="Select experience level"
-      selectedKeys={selectedExperienceLevelIds}
+      selectedKeys={selectedExperienceLevelNames}
       selectionMode="multiple"
       onSelectionChange={(keys) => {
         onExperienceLevelChange(Array.from(keys) as ExperienceLevel[]);
