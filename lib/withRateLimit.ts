@@ -6,7 +6,7 @@ import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, 
 import { RateLimitRouteType } from "./rateLimitConfig";
 import { mp } from "./mixpanelServer";
 
-type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackApplication" | "ReportAdmin" | "UpdateInterviewRounds" | "UpdateComment";
+type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackApplication" | "ReportAdmin" | "UpdateInterviewRounds" | "UpdateComment" | "UpdateUserPreferences";
 
 export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, endpointName: EndpointName): Promise<T> {
   const { userId: user_id } = auth();

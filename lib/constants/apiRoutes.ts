@@ -75,4 +75,5 @@ export const DB_RPC = {
   UPDATE_JOB_WITH_COUNTRIES: "update_job_with_countries",
   GET_ALL_SEARCH_JOBS: "get_all_search_jobs",
   GET_USER_PREFERENCES_AND_OPTIONS: "get_user_preferences_and_options",
+  UPDATE_USER_PREFERENCES: "update_user_preferences",
 } as const;

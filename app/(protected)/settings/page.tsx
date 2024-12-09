@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -15,25 +14,21 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomButton } from "@/components/CustomButton";
 import { SettingsUserPreferencesResponse } from "@/app/api/(protected)/settings/route";
-
-const settingsPreferencesSchema = z.object({
-  default_countries: z.array(z.string()).min(1, "Select at least one country"),
-  default_experience_levels: z.array(z.string()).min(1, "Select at least one experience level"),
-  default_job_categories: z.array(z.string()).min(1, "Select at least one job category"),
-}) satisfies z.ZodType<Record<UserPreferencesKey, string[]>>;
-
-type SettingsPreferencesFormData = z.infer<typeof settingsPreferencesSchema>;
+import { UpdateUserPreferenceFormValues, updateUserPreferenceSchema } from "@/lib/schema/updateUserPreferenceSchema";
+import { useUpdateUserPreferences } from "@/lib/hooks/useUpdateUserPreferences";
 
 export default function SettingsPage() {
   const { data, error, isLoading } = useSWR<SettingsUserPreferencesResponse>(API.PROTECTED.getSettings, fetcher);
+
+  const { updateUserPreferences, isUpdating } = useUpdateUserPreferences();
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
-  } = useForm<SettingsPreferencesFormData>({
-    resolver: zodResolver(settingsPreferencesSchema),
+    formState: { errors },
+  } = useForm<UpdateUserPreferenceFormValues>({
+    resolver: zodResolver(updateUserPreferenceSchema),
     defaultValues: {
       default_countries: [],
       default_experience_levels: [],
@@ -52,9 +47,9 @@ export default function SettingsPage() {
     }
   }, [data, reset]);
 
-  const onSubmit = async (formData: SettingsPreferencesFormData) => {
+  const onSubmit = async (formData: UpdateUserPreferenceFormValues) => {
     try {
-      // TODO: Implement API endpoint to save user preferences
+      await updateUserPreferences(formData);
 
       mixpanel.track("Settings Saved", formData);
       toast.success("Settings saved successfully");
@@ -146,7 +141,7 @@ export default function SettingsPage() {
           )}
         />
 
-        <CustomButton className="w-full" color="primary" isLoading={isSubmitting} type="submit">
+        <CustomButton className="w-full" color="primary" isLoading={isUpdating} type="submit">
           Save Settings
         </CustomButton>
       </form>

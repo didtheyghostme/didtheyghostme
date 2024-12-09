@@ -951,15 +951,15 @@ BEGIN
     IF p_user_id IS NOT NULL THEN
         SELECT ARRAY_AGG(preference_value) INTO v_default_countries
         FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_country';
+        WHERE user_id = p_user_id AND preference_key = 'default_countries';
 
         SELECT ARRAY_AGG(preference_value) INTO v_default_job_categories
         FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_job_category';
+        WHERE user_id = p_user_id AND preference_key = 'default_job_categories';
 
         SELECT ARRAY_AGG(preference_value) INTO v_default_experience_levels
         FROM user_preference
-        WHERE user_id = p_user_id AND preference_key = 'default_experience_level';
+        WHERE user_id = p_user_id AND preference_key = 'default_experience_levels';
     END IF;
 
     -- Return flattened results with defaults for both logged-in and logged-out users
@@ -980,5 +980,59 @@ BEGIN
             FROM experience_level
         )
     );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- 12) function to update user preferences
+CREATE OR REPLACE FUNCTION update_user_preferences(
+  p_user_id text,
+  p_default_countries text[],
+  p_default_job_categories text[],
+  p_default_experience_levels text[]
+) RETURNS void AS $$
+BEGIN
+  -- Delete country preferences that are no longer needed
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'default_countries'
+    AND preference_value NOT IN (SELECT unnest(p_default_countries));
+
+  -- Delete job category preferences that are no longer needed
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'default_job_categories'
+    AND preference_value NOT IN (SELECT unnest(p_default_job_categories));
+
+  -- Delete experience level preferences that are no longer needed
+  DELETE FROM user_preference 
+  WHERE user_id = p_user_id 
+    AND preference_key = 'default_experience_levels'
+    AND preference_value NOT IN (SELECT unnest(p_default_experience_levels));
+  
+  -- Insert new preferences with conflict handling
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'default_countries'::text,
+    unnest(p_default_countries)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
+
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'default_job_categories'::text,
+    unnest(p_default_job_categories)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
+
+  INSERT INTO user_preference (user_id, preference_key, preference_value)
+  SELECT 
+    p_user_id,
+    'default_experience_levels'::text,
+    unnest(p_default_experience_levels)
+  ON CONFLICT (user_id, preference_key, preference_value) 
+  DO NOTHING;
 END;
 $$ LANGUAGE plpgsql;
