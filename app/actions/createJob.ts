@@ -6,6 +6,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { AddJobFormData, addJobSchema } from "@/lib/schema/addJobSchema";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { DB_RPC } from "@/lib/constants/apiRoutes";
+import { isLinkedInDomain } from "@/lib/extractDomain";
 
 export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
   newJob: AddJobFormData;
@@ -20,6 +21,8 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
       // Server-side validation
       const validatedData = addJobSchema.parse(newJob);
 
+      const isLinkedInUrl = isLinkedInDomain(validatedData.url);
+
       const { error } = await supabase.rpc(DB_RPC.INSERT_JOB_WITH_COUNTRIES, {
         p_title: validatedData.title,
         p_url: validatedData.url,
@@ -28,6 +31,7 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
         p_country_names: validatedData.countries,
         p_experience_level_names: validatedData.experience_level_names,
         p_job_category_names: validatedData.job_category_names,
+        p_job_url_linkedin: isLinkedInUrl ? validatedData.url : null,
       });
 
       if (error) {

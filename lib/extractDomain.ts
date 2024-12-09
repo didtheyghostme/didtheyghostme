@@ -9,3 +9,9 @@ export function extractDomain(url: string): string {
     return "";
   }
 }
+
+export function isLinkedInDomain(url: string | null): boolean {
+  if (!url) return false;
+
+  return extractDomain(url).includes("linkedin.com");
+}

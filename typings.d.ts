@@ -35,6 +35,7 @@ type JobPostingTable = {
   company_id: string;
   job_status: JobStatus;
   job_posted_date: string | null; // for admin to set date, show new on UI if set
+  job_url_linkedin: string | null;
   created_at: string;
   updated_at: string; // for updated date when url is posted? should there be a input field for people to update url?
 } & BaseUser;
