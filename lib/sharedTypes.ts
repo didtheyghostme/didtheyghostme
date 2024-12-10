@@ -1,5 +1,5 @@
 // Leetcode Questions Input
-export type LeetcodeQuestionInput = Pick<LeetcodeQuestion, "question_number" | "difficulty">;
+export type LeetcodeQuestionInput = Pick<LeetcodeQuestionTable, "question_number" | "difficulty">;
 
 export const LEETCODE_DIFFICULTY = {
   Easy: "Easy",

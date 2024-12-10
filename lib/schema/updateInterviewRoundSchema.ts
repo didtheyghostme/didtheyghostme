@@ -2,9 +2,10 @@ import { z } from "zod";
 import { parseDate } from "@internationalized/date";
 
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
-import { LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
 
 export const INTERVIEW_TAGS = ["Online Assessment", "HR/Recruiter", "Technical", "Behavioral", "Hiring Manager", "Final Round"] as const satisfies readonly InterviewTag[];
+
+const MAX_LEETCODE_QUESTION_NUMBER = parseInt(process.env.NEXT_PUBLIC_MAX_LEETCODE_QUESTION_NUMBER || "3000");
 
 // Add new LeetCode question schema
 const leetCodeQuestionSchema = z.object({
@@ -16,8 +17,7 @@ const leetCodeQuestionSchema = z.object({
     .int("Question number must be a whole number")
     .positive("Question number must be positive")
     .min(1, "Question number must be at least 1")
-    .max(9999, "Question number must be less than 10000"),
-  difficulty: z.nativeEnum(LEETCODE_DIFFICULTY),
+    .max(MAX_LEETCODE_QUESTION_NUMBER, `Question number must be less than ${MAX_LEETCODE_QUESTION_NUMBER}`),
 });
 
 // Single interview round schema

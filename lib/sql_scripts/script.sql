@@ -120,34 +120,6 @@ BEGIN
               FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
           );
 
-          -- Then delete questions that are no longer needed
-          DELETE FROM leetcode_question
-          WHERE interview_experience_id = v_interview_experience_id
-          AND interview_experience_round_no = v_round_no
-          AND question_number NOT IN (
-              SELECT (q->>'question_number')::INT
-              FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
-          );
-
-          -- Insert/Update leetcode questions
-          INSERT INTO leetcode_question (
-              interview_experience_id,
-              interview_experience_round_no,  -- Add round_no
-              question_number,
-              difficulty,
-              user_id
-          )
-          SELECT 
-              v_interview_experience_id,
-              v_round_no,                    -- Add round_no
-              (q->>'question_number')::INT,
-              q->>'difficulty',
-              p_user_id
-          FROM jsonb_array_elements(v_round->'leetcode_questions') AS q
-          ON CONFLICT (interview_experience_id, interview_experience_round_no, question_number) 
-          DO UPDATE SET
-              difficulty = EXCLUDED.difficulty;
-
           -- Insert/Update mappings
           INSERT INTO interview_experience_leetcode_question (
               interview_experience_id,
@@ -164,14 +136,11 @@ BEGIN
           ON CONFLICT (interview_experience_id, interview_experience_round_no, leetcode_question_number)
           DO NOTHING;
       ELSE
-          -- If no leetcode questions, delete from both tables
+          -- If no leetcode questions, delete from the table
           DELETE FROM interview_experience_leetcode_question
           WHERE interview_experience_id = v_interview_experience_id
           AND interview_experience_round_no = v_round_no;
-          
-          DELETE FROM leetcode_question
-          WHERE interview_experience_id = v_interview_experience_id
-          AND interview_experience_round_no = v_round_no;
+         
       END IF;
 
 
@@ -302,8 +271,6 @@ BEGIN
       )
       FROM interview_experience_leetcode_question ielq
       LEFT JOIN leetcode_question lq ON 
-        ielq.interview_experience_id = lq.interview_experience_id AND
-        ielq.interview_experience_round_no = lq.interview_experience_round_no AND
         ielq.leetcode_question_number = lq.question_number
       WHERE ielq.interview_experience_id = ie.id
         AND ielq.interview_experience_round_no = ie.round_no
@@ -363,8 +330,6 @@ BEGIN
       )
       FROM interview_experience_leetcode_question ielq
       LEFT JOIN leetcode_question lq ON 
-        ielq.interview_experience_id = lq.interview_experience_id AND
-        ielq.interview_experience_round_no = lq.interview_experience_round_no AND
         ielq.leetcode_question_number = lq.question_number
       WHERE ielq.interview_experience_id = ie.id
         AND ielq.interview_experience_round_no = ie.round_no
