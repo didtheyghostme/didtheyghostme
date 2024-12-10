@@ -18,6 +18,7 @@
     "@clerk/themes": "^2.1.42",
     "@hookform/resolvers": "^3.9.0",
     "@internationalized/date": "^3.5.5",
+    "@nextui-org/alert": "^2.2.4",
     "@nextui-org/react": "^2.4.0",
     "@react-aria/ssr": "^3.9.2",
     "@react-aria/visually-hidden": "^3.8.10",
