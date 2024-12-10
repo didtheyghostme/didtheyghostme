@@ -3,7 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { errors as UpstashErrors } from "@upstash/redis";
 
 import { FallbackRateLimiter } from "./rateLimitFallback";
-import { RateLimitRouteType, OperationType, WindowType, RATE_LIMITS } from "./rateLimitConfig";
+import { RateLimitRouteType, OperationType, WindowType, RATE_LIMITS, RATE_LIMIT_ROUTES } from "./rateLimitConfig";
 
 // Environment Variables
 const { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = process.env;
@@ -27,14 +27,6 @@ function createLimiter(limit: number, window: number, prefix: string) {
   });
 }
 
-const routesRecord: Record<RateLimitRouteType, null> = {
-  JOB: null,
-  COMPANY: null,
-  SETTINGS: null,
-  OTHERS: null,
-} as const;
-
-const routes = Object.keys(routesRecord) as readonly RateLimitRouteType[];
 const operations = ["READ", "WRITE"] as const satisfies readonly OperationType[];
 const windows = ["BURST", "SUSTAINED"] as const satisfies readonly WindowType[];
 
@@ -43,7 +35,7 @@ type LimiterKey = `${Lowercase<RateLimitRouteType>}-${Lowercase<WindowType>}-${L
 
 export const limiters = {} as Record<LimiterKey, Ratelimit>;
 
-for (const route of routes) {
+for (const route of RATE_LIMIT_ROUTES) {
   for (const window of windows) {
     for (const operation of operations) {
       const limit = RATE_LIMITS[route][window][operation];

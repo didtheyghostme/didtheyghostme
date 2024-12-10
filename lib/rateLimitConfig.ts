@@ -1,7 +1,9 @@
 // Types
 export type WindowType = "BURST" | "SUSTAINED";
 export type OperationType = "READ" | "WRITE";
-export type RateLimitRouteType = "JOB" | "COMPANY" | "SETTINGS" | "OTHERS";
+export const RATE_LIMIT_ROUTES = ["JOB", "COMPANY", "SETTINGS", "OTHERS"] as const;
+
+export type RateLimitRouteType = (typeof RATE_LIMIT_ROUTES)[number];
 
 type RouteConfig = {
   [K in RateLimitRouteType]: {
