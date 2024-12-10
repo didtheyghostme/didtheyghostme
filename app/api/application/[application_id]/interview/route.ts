@@ -13,6 +13,8 @@ export async function GET(request: Request, { params }: { params: { application_
   // console.warn("data in route handler all interview rounds", data, error);
 
   if (error) {
+    console.error("error in route handler all interview rounds", error);
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

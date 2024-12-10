@@ -9,7 +9,7 @@ import mixpanel from "mixpanel-browser";
 import { InterviewTagsModal, utilSortInterviewTags } from "./InterviewTagsModal";
 
 import { INTERVIEW_FORM_ID, InterviewExperienceFormValues, UpdateInterviewExperienceFormSchema } from "@/lib/schema/updateInterviewRoundSchema";
-import { InterviewExperienceCardData, LEETCODE_DIFFICULTY } from "@/lib/sharedTypes";
+import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -348,7 +348,6 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                 ...(field.value || []),
                                 {
                                   question_number: 1,
-                                  difficulty: LEETCODE_DIFFICULTY.Medium,
                                 },
                               ]);
                             }}
@@ -388,24 +387,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                                   }
                                 }}
                               />
-                              <Select
-                                className="flex-1"
-                                label="Difficulty"
-                                selectedKeys={[question.difficulty]}
-                                onChange={(e) => {
-                                  const newQuestions = [...(field.value || [])];
 
-                                  newQuestions[qIndex] = {
-                                    ...newQuestions[qIndex],
-                                    difficulty: e.target.value as LeetcodeDifficulty,
-                                  };
-                                  field.onChange(newQuestions);
-                                }}
-                              >
-                                {Object.values(LEETCODE_DIFFICULTY).map((difficulty) => (
-                                  <SelectItem key={difficulty}>{difficulty}</SelectItem>
-                                ))}
-                              </Select>
                               <CustomButton
                                 className="w-full sm:w-auto"
                                 color="danger"

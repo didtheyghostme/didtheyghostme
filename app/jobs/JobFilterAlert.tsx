@@ -165,7 +165,8 @@ export function JobFilterAlertContent() {
   };
 
   // Signed in but not aware of default filter - show filter alert
-  console.warn("signedin", isSignedIn, isAwareOfDefaultFilter, isEmptyOrDefaultFilter);
+  // console.warn("signedin", isSignedIn, isAwareOfDefaultFilter, isEmptyOrDefaultFilter);
+
   if (!isAwareOfDefaultFilter && isEmptyOrDefaultFilter) {
     return (
       <ResponsiveAlert

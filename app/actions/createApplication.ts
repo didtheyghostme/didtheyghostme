@@ -25,7 +25,7 @@ const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplic
         .single();
 
       if (error) {
-        console.error("Insert error fail:", error);
+        console.error("Insert error fail for createApplication:", error);
         throw new Error(error.message);
       }
 

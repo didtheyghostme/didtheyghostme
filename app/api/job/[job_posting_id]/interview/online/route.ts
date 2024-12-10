@@ -13,6 +13,8 @@ export async function GET(request: NextRequest, { params }: { params: { job_post
   const { data, error } = await supabase.rpc(DB_RPC.GET_ONLINE_ASSESSMENTS_BY_JOB_POSTING_ID, { p_job_posting_id: params.job_posting_id });
 
   if (error) {
+    console.error("error in route handler get online assessments by job posting id", error);
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

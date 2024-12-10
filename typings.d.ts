@@ -139,17 +139,15 @@ type InterviewExperienceTable = {
 
 type LeetcodeDifficulty = "Easy" | "Medium" | "Hard";
 
-type LeetcodeQuestion = {
+type LeetcodeQuestionTable = {
   id: string;
   question_number: number;
   difficulty: LeetcodeDifficulty;
-  interview_experience_id: string;
-  interview_experience_round_no: number;
-  // title: string;
-  // url: string;
-} & BaseUser;
+  leetcode_title: string;
+  leetcode_url: string;
+};
 
-type InterviewExperienceLeetcodeQuestion = {
+type InterviewExperienceLeetcodeQuestionTable = {
   id: string;
   interview_experience_id: string;
   leetcode_question_number: number;
