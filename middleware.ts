@@ -27,6 +27,9 @@ async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteTyp
   return burstFallback.success && sustainedFallback.success;
 }
 
+// use environment variable to manually check status instead of relying on Upstash?
+const IS_UPSTASH_FAILED = process.env.NEXT_PUBLIC_IS_UPSTASH_FAILED === "true";
+
 export default clerkMiddleware(async (auth, req) => {
   const session = await auth();
 
@@ -70,9 +73,9 @@ export default clerkMiddleware(async (auth, req) => {
     const operation: OperationType = isRead ? "READ" : "WRITE";
 
     // Check if Upstash is in failed state
-    const isUpstashFailed = await getUpstashFailedStatus();
+    // const isUpstashFailed = await getUpstashFailedStatus();
 
-    if (isUpstashFailed) {
+    if (IS_UPSTASH_FAILED) {
       const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
 
       if (!isFallbackSuccess) {
@@ -92,9 +95,9 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.json(createRateLimitResponse("primary"), { status: 429 });
       }
     } catch (error) {
-      // console.warn("Upstash rate limiter failed:", error);
+      console.warn("Upstash rate limiter failed:", error);
 
-      await setUpstashFailedStatus();
+      // await setUpstashFailedStatus();
 
       const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
 
