@@ -94,8 +94,8 @@ const FEATURES: readonly Feature[] = [
     details: [
       "Share and learn from interview experiences across different companies and roles",
       "Read detailed interview experiences by round",
-      "View interview types and LeetCode questions",
-      "Track company response timelines",
+      "View interview types (Online Assessment, Technical, Behavioral, HR/Hiring Manager, Final Round) and LeetCode questions",
+      "Track company response timelines to better plan your job search",
     ],
   },
   {
@@ -113,7 +113,7 @@ const FEATURES: readonly Feature[] = [
       },
     }, // Place screenshot in public/screenshots/applications.webp
     details: [
-      "Updated daily with the latest tech internship roles",
+      "Updated daily with the latest tech internship roles in Singapore",
       "Open positions sourced from the community and curated by the platform",
       "See job postings shared by others in the community, making it easier to find hidden opportunities",
       "View when jobs were posted with 'New' tags for recent listings",
