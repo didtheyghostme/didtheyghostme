@@ -9,4 +9,9 @@ declare global {
       role?: ClerkRoles;
     };
   }
+
+  // For public metadata - user preferences
+  interface UserPublicMetadata {
+    isAwareOfDefaultFilter?: boolean;
+  }
 }

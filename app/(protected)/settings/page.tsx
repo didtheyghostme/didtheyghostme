@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useUser } from "@clerk/nextjs";
 
 import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
@@ -16,11 +17,14 @@ import { CustomButton } from "@/components/CustomButton";
 import { SettingsResponse } from "@/app/api/(protected)/settings/route";
 import { UpdateUserPreferenceFormValues, updateUserPreferenceSchema } from "@/lib/schema/updateUserPreferenceSchema";
 import { useUpdateUserPreferences } from "@/lib/hooks/useUpdateUserPreferences";
+import { updateUserIsAwareOfDefaultFilter } from "@/app/actions/updateUserIsAwareOfDefaultFilter";
 
 export default function SettingsPage() {
   const { data, error, isLoading } = useSWR<SettingsResponse>(API.PROTECTED.getSettings, fetcher);
 
   const { updateUserPreferences, isUpdating } = useUpdateUserPreferences();
+
+  const { user } = useUser();
 
   // console.warn("data", data);
 
@@ -58,10 +62,19 @@ export default function SettingsPage() {
   const onSubmit = async (formData: UpdateUserPreferenceFormValues) => {
     try {
       await updateUserPreferences(formData);
+
+      // Check if the user is not aware of default filter before updating the flag
+      if (!user?.publicMetadata.isAwareOfDefaultFilter) {
+        await updateUserIsAwareOfDefaultFilter();
+        await user?.reload();
+      }
+
       mixpanel.track("Settings Saved", formData);
       toast.success("Settings saved successfully");
     } catch (err) {
+      console.error("Failed to save settings", err);
       toast.error("Failed to save settings");
+      mixpanel.track("Settings Save Failed Error", formData);
     }
   };
 
