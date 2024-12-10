@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { createRateLimitResponse } from "@/lib/errorHandling";
 import { jobLimiters, othersLimiters, companyLimiters, settingsLimiters, createFallbackRateLimiters } from "@/lib/rateLimit";
 import { RateLimitRouteType, OperationType } from "@/lib/rateLimitConfig";
-import { getUpstashFailedStatus, setUpstashFailedStatus } from "@/lib/rateLimitFallbackRedis";
 
 const isProtectedRoute = createRouteMatcher(["/applications", "/settings"]);
 
@@ -69,7 +68,7 @@ export default clerkMiddleware(async (auth, req) => {
     // Choose rate limiter based on HTTP method
     const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const isRead = ["GET", "HEAD"].includes(req.method);
-    const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : "OTHERS";
+    const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : isSettingsRoutes(req) ? "SETTINGS" : "OTHERS";
     const operation: OperationType = isRead ? "READ" : "WRITE";
 
     // Check if Upstash is in failed state

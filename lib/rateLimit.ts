@@ -27,7 +27,14 @@ function createLimiter(limit: number, window: number, prefix: string) {
   });
 }
 
-const routes = ["JOB", "COMPANY", "OTHERS"] as const satisfies readonly RateLimitRouteType[];
+const routesRecord: Record<RateLimitRouteType, null> = {
+  JOB: null,
+  COMPANY: null,
+  SETTINGS: null,
+  OTHERS: null,
+} as const;
+
+const routes = Object.keys(routesRecord) as readonly RateLimitRouteType[];
 const operations = ["READ", "WRITE"] as const satisfies readonly OperationType[];
 const windows = ["BURST", "SUSTAINED"] as const satisfies readonly WindowType[];
 
