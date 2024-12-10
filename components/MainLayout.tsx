@@ -9,6 +9,10 @@ const HIDE_LOGO_CREDIT_PATHS = [
   "/sign-up",
   "/companies",
   "/question",
+  "/terms",
+  "/privacy",
+  "/contact",
+  "/settings",
   // Add any paths where you don't want the logo credit
 ];
 
