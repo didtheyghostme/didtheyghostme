@@ -122,6 +122,7 @@ export default function CompanyDetailsPage() {
 
       mixpanel.track("Job Added Error", {
         action: "job_creation_error",
+        company_name: company.company_name,
         company_id,
         job_title: data.title,
         countries: data.countries,
@@ -150,6 +151,7 @@ export default function CompanyDetailsPage() {
     mixpanel.track("Company Details", {
       action: "add_a_new_job_modal_closed",
       company_id,
+      company_name: company.company_name,
     });
     setIsModalOpen(false);
   };
@@ -175,6 +177,7 @@ export default function CompanyDetailsPage() {
       job_id: job.id,
       job_status: job.job_status,
       job_title: job.title,
+      company_name: company.company_name,
     });
   };
 
@@ -185,6 +188,7 @@ export default function CompanyDetailsPage() {
       job_id: job.id,
       job_status: job.job_status,
       job_title: job.title,
+      company_name: company.company_name,
     });
   };
 

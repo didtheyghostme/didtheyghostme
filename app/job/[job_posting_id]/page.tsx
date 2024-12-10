@@ -101,6 +101,8 @@ export default function JobDetailsPage() {
       page: "job_posting_page",
       company_id: jobDetails.company.id,
       job_id: jobDetails.id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
     router.push(`/company/${jobDetails.company.id}`);
   };
@@ -111,6 +113,8 @@ export default function JobDetailsPage() {
         action: "track_this_job_submitted",
         job_id: job_posting_id,
         applied_date: appliedDateString,
+        job_title: jobDetails.title,
+        company_name: jobDetails.company.company_name,
       });
 
       await createApplication(appliedDateString);
@@ -130,6 +134,8 @@ export default function JobDetailsPage() {
         action: "track_this_job_error",
         job_id: job_posting_id,
         error: err instanceof Error ? err.message : "Unknown error occurred",
+        job_title: jobDetails.title,
+        company_name: jobDetails.company.company_name,
       });
       toast.error("Error tracking job");
       console.error("Error creating application:", err);
@@ -142,6 +148,8 @@ export default function JobDetailsPage() {
       action: "job_portal_clicked",
       job_id: job_posting_id,
       url: jobDetails.url,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
   };
 
@@ -149,6 +157,8 @@ export default function JobDetailsPage() {
     mixpanel.track("Job Posting Page", {
       action: "report_link_clicked",
       job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
   };
 
@@ -162,6 +172,8 @@ export default function JobDetailsPage() {
     mixpanel.track("Job Posting Page", {
       action: "suggest_link_clicked",
       job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
   };
 
@@ -176,6 +188,8 @@ export default function JobDetailsPage() {
     mixpanel.track("Job Posting Page", {
       action: "track_job_modal_opened",
       job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
     onTrackModalOpen();
   };
@@ -193,6 +207,8 @@ export default function JobDetailsPage() {
       action: "view_my_application_clicked",
       job_id: job_posting_id,
       application_id: applicationId,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
   };
 
@@ -203,6 +219,8 @@ export default function JobDetailsPage() {
       job_id: job_posting_id,
       from_tab: selectedTab,
       to_tab: key,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
     setSelectedTab(key as TabKey);
   };
@@ -211,6 +229,8 @@ export default function JobDetailsPage() {
     mixpanel.track("Job Posting Page", {
       action: "sign_in_to_track_job_clicked",
       job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
     });
   };
 

@@ -111,9 +111,12 @@ export function TableCompany() {
   };
 
   const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+    const clickedCompany = companies.find((company) => company.id === id);
+
     mixpanel.track("Company Table", {
       action: action,
       company_id: id,
+      company_name: clickedCompany?.company_name,
       search_term: filterValue,
       current_page: page,
       total_pages: pages,

@@ -79,9 +79,13 @@ export function AllJobSearchResult() {
   };
 
   const mixpanelTrackJobClick = (job_id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+    const clickedJob = jobs.find((job) => job.id === job_id);
+
     mixpanel.track("All Jobs Card Click", {
       action: action,
       job_id: job_id,
+      company_name: clickedJob?.company.company_name,
+      job_title: clickedJob?.title,
     });
   };
 
