@@ -7,8 +7,10 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
+import { Suspense } from "react";
 
 import { updateUserIsAwareOfDefaultFilter } from "@/app/actions/updateUserIsAwareOfDefaultFilter";
+import { LoadingContent } from "@/components/LoadingContent";
 
 type ButtonProps = {
   label: string;
@@ -97,7 +99,7 @@ export function checkIfEmptyOrDefaultFilter(countries: string[], experienceLevel
   );
 }
 
-export function JobFilterAlert() {
+export function JobFilterAlertContent() {
   const router = useRouter();
   const { user, isSignedIn, isLoaded } = useUser();
   const pathname = usePathname();
@@ -183,4 +185,12 @@ export function JobFilterAlert() {
 
   // User is signed in and aware of default filter
   return null;
+}
+
+export function JobFilterAlert() {
+  return (
+    <Suspense fallback={<LoadingContent />}>
+      <JobFilterAlertContent />
+    </Suspense>
+  );
 }
