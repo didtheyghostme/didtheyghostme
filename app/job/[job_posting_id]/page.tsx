@@ -109,7 +109,7 @@ export default function JobDetailsPage() {
 
   const handleTrackJobSubmit = async (appliedDateString: string) => {
     try {
-      mixpanel.track("Job Posting Page", {
+      mixpanel.track("Job Posting Page - Job Tracked Successfully", {
         action: "track_this_job_submitted",
         job_id: job_posting_id,
         applied_date: appliedDateString,
@@ -144,7 +144,7 @@ export default function JobDetailsPage() {
 
   // Track job portal link clicks
   const mixpanelTrackJobPortalClick = () => {
-    mixpanel.track("Job Posting Page", {
+    mixpanel.track("Job Posting Page - Job Portal Clicked", {
       action: "job_portal_clicked",
       job_id: job_posting_id,
       url: jobDetails.url,
@@ -185,7 +185,7 @@ export default function JobDetailsPage() {
 
   // Track job tracking interactions
   const handleTrackThisJobClick = () => {
-    mixpanel.track("Job Posting Page", {
+    mixpanel.track("Job Posting Page Track Job Modal Opened", {
       action: "track_job_modal_opened",
       job_id: job_posting_id,
       job_title: jobDetails.title,
