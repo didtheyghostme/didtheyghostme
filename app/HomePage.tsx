@@ -137,7 +137,7 @@ const FAQS: readonly Faq[] = [
     question: "How do I figure out what interview rounds / types / questions were asked?",
     answer: `In the job posting page, there are 4 tabs: 
     Applied, Online Assessment, Interview Experience, and Questions.\n
-    • The 'Applied' tab shows when others received their first response.\n
+    • "The 'Applied' tab shows the dates when other applicants submitted their applications and when they received their first response from the company (excluding automated replies).\n
     • The 'Online Assessment' tab shows interview experiences of applicants who have completed online assessments.\n
     • The 'Interview Experience' tab shows the detailed interview experiences of other applicants.\n
     • The 'Questions' tab allows you to ask and start discussions with others about that job posting.`,
@@ -216,11 +216,11 @@ export function HomePage() {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   const mixpanelTrackFindJobsButtonClick = () => {
-    mixpanel.track("Find Jobs Button Clicked", { action: "clicked" });
+    mixpanel.track("Find Jobs Button Clicked home hero section");
   };
 
   const mixpanelTrackFindCompaniesButtonClick = () => {
-    mixpanel.track("Find Companies Button Clicked", { action: "clicked" });
+    mixpanel.track("Find Companies Button Clicked home hero section");
   };
 
   const handleTabChange = (tabName: Key) => {
