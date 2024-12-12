@@ -25,6 +25,7 @@ const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJo
       p_job_posting_id: job_posting_id,
       p_title: validatedData.title,
       p_url: validatedData.url,
+      p_job_url_linkedin: validatedData.job_url_linkedin,
       p_country_ids: validatedData.countries,
       p_closed_date: validatedData.closed_date,
       p_job_status: validatedData.job_status,

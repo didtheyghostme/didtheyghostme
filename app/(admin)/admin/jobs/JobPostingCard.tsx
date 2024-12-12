@@ -109,6 +109,15 @@ export function JobPostingCard({
                 </a>
               </p>
             )}
+
+            {jobPosting.job_url_linkedin && (
+              <p>
+                LinkedIn URL:{" "}
+                <a className="text-primary underline" href={jobPosting.job_url_linkedin} rel="noopener noreferrer" target="_blank">
+                  View LinkedIn URL
+                </a>
+              </p>
+            )}
           </div>
         </div>
 

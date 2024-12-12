@@ -37,6 +37,7 @@ export function JobPostingEditForm({
     defaultValues: {
       title: jobPosting.title,
       url: jobPosting.url,
+      job_url_linkedin: jobPosting.job_url_linkedin,
       countries: jobPosting.job_posting_country.map((jpc) => jpc.country.id),
       closed_date: jobPosting.closed_date,
       job_status: jobPosting.job_status,
@@ -144,6 +145,12 @@ export function JobPostingEditForm({
             control={control}
             name="url"
             render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="URL" type="url" value={field.value ?? ""} />}
+          />
+
+          <Controller
+            control={control}
+            name="job_url_linkedin"
+            render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="LinkedIn URL" type="url" value={field.value ?? ""} />}
           />
 
           <Controller

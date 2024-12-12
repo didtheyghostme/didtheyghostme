@@ -457,6 +457,7 @@ CREATE OR REPLACE FUNCTION update_job_with_countries(
   p_job_posting_id uuid,
   p_title text,
   p_url text,
+  p_job_url_linkedin text,
   p_country_ids uuid[],
   p_closed_date DATE,
   p_job_status text,
@@ -505,6 +506,7 @@ BEGIN
   UPDATE job_posting SET
     title = p_title,
     url = p_url,
+    job_url_linkedin = p_job_url_linkedin,
     closed_date = p_closed_date,
     job_status = p_job_status,
     job_posted_date = p_job_posted_date,
