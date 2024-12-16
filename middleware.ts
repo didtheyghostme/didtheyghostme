@@ -47,7 +47,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Second check: Protects admin routes (requires admin role)
   if (isAdminRoute(req)) {
     if (session?.sessionClaims?.metadata?.role !== "admin") {
-      const url = new URL("/", req.url);
+      const url = new URL(process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL ?? "/sign-in", req.url);
 
       return NextResponse.redirect(url);
     }

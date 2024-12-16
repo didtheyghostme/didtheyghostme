@@ -123,10 +123,49 @@ const FEATURES: readonly Feature[] = [
 
 type Faq = {
   question: string;
-  answer: string;
+  answer: string | React.ReactNode;
 };
 
 const FAQS: readonly Faq[] = [
+  {
+    question: "Who is this for and what is this platform about?",
+    answer: (
+      <>
+        <p className="mb-4">This platform is designed for anyone applying for internships or jobs, especially in Singapore. It&apos;s for you if you&apos;ve ever wondered:</p>
+        <ul className="mb-6 ml-4 space-y-2">
+          <li>• How long does it usually take to get a response after applying?</li>
+          <li>• What can I expect in Company X&apos;s Online Assessments?</li>
+          <li>• Has anyone gone through Company X&apos;s interview process? What was it like?</li>
+          <li>• Has anyone heard back from Company X after round X?</li>
+          <li>• What are the current tech internship postings in Singapore?</li>
+        </ul>
+
+        <h4 className="mb-2 text-lg font-bold">Default Job Filters</h4>
+        <p className="mb-2">On the jobs page, the default filters have been set to:</p>
+        <ul className="mb-4 ml-4 space-y-1">
+          <li>• Country: Singapore</li>
+          <li>• Job Type: Internship</li>
+          <li>• Job Category: Tech</li>
+        </ul>
+        <p className="mb-6">
+          If you&apos;re searching for roles in other countries, or for different job types such as Fresh Grad positions or fields like Product Management, you can easily adjust the filters to suit
+          your preferences.
+        </p>
+
+        <h4 className="mb-2 text-lg font-bold">A Community-Driven Platform</h4>
+        <p className="mb-3">
+          The success of this platform depends on contributions from the community. The more users share their experiences, the more helpful the platform becomes. If you find this platform useful,
+          share it with your friends, classmates, and colleagues! Together, we can:
+        </p>
+        <ul className="ml-4 space-y-1">
+          <li>• Get real interview insights and timeline expectations</li>
+          <li>• Make the job search process more transparent by uncovering opportunities others may not know about</li>
+          <li>• Support one another throughout the application process</li>
+        </ul>
+      </>
+    ),
+  },
+
   {
     question: "How do I track a new job application?",
     answer: `Simply click on any job posting and use the 'Track this job' button. If the job posting or company is not in our database, you can add it.\n
@@ -331,7 +370,7 @@ export function HomePage() {
                 }
                 onPress={() => handleFaqSelectionChange(faq.question)}
               >
-                <p className="whitespace-pre-line">{faq.answer}</p>
+                {typeof faq.answer === "string" ? <p className="whitespace-pre-line">{faq.answer}</p> : faq.answer}
               </AccordionItem>
             ))}
           </Accordion>
