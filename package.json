@@ -1,6 +1,6 @@
 {
-  "name": "next-app-template",
-  "version": "0.0.1",
+  "name": "didtheyghostme",
+  "version": "1.0.0",
   "private": true,
   "typings": "typings.d.ts",
   "scripts": {

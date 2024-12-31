@@ -1,18 +1,45 @@
-# Next.js & NextUI Template
+# didtheyghost.me - Job Tracking Platform
 
-This is a [updated template](https://github.com/nextui-org/next-app-template) for creating applications using Next.js 14 (app directory) and NextUI (v2)
-- components imported from [`@nextui-org/react`](https://nextui.org/docs/guide/installation)
-- instead of individual component, e.g. [`@nextui-org/button`](https://nextui.org/docs/components/button), [`@nextui-org/card`](https://nextui.org/docs/components/card)
+A community-driven platform that helps students and job seekers track their internship applications, share interview experiences, and discover tech opportunities in Singapore.
+
+## Key Features
+
+### 🎯 Track Applications
+
+- Monitor your job applications across different stages
+- View response timelines and track application status
+- Filter applications by status: Applied, Interviewing, Rejected, Ghosted, or Offered
+
+### 📝 Interview Insights
+
+- Share and learn from online assessment experiences
+- Access detailed interview experiences by round
+- View interview types (Technical, Behavioral, HR) and LeetCode questions
+- Track company response timelines
+
+### 💼 Job Discovery
+
+- Browse latest tech internship roles in Singapore
+- Updated daily with new positions
+- Community-sourced job postings
+- Easy filtering by job type, location, and category
+
+### 💬 Community Engagement
+
+- Ask questions about specific job postings
+- Engage with other applicants
+- Share interview experiences
+- Help others prepare for interviews
 
 ## Technologies Used
 
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [NextUI v2](https://nextui.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
+- [Next.js 14](https://nextjs.org/docs/getting-started) - React framework with App Router
+- [NextUI v2](https://nextui.org/) - Modern UI components
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [Clerk](https://clerk.com/) - Authentication
+- [Supabase](https://supabase.com/) - Database
+- [SWR](https://swr.vercel.app/) - Data fetching
 
 ## How to Use
 
