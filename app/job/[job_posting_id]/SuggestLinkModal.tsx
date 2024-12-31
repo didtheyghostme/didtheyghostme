@@ -2,6 +2,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from 
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import mixpanel from "mixpanel-browser";
 
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { suggestLinkSchema, type SuggestLinkFormValues } from "@/lib/schema/suggestLinkSchema";
@@ -28,6 +29,11 @@ export function SuggestLinkModal({ isOpen, onClose, jobId, jobStatus }: SuggestL
 
   const onSubmit = async (data: SuggestLinkFormValues) => {
     try {
+      mixpanel.track("Suggest Link Modal submitted", {
+        action: "suggest_link_submitted",
+        report_message: `status_${jobStatus}: ${data.url}`,
+      });
+
       await createReportAdmin({
         entity_type: "job_posting",
         entity_id: jobId,

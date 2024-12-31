@@ -71,6 +71,11 @@ export default function InterviewExperiencePage() {
     try {
       await updateApplicationAndInterviewRounds(data);
 
+      mixpanel.track("Interview Experience Page", {
+        action: "update_interview_experience_success",
+        data,
+      });
+
       toast.success("Interview experience updated successfully");
     } catch (error) {
       if (isRateLimitError(error)) {

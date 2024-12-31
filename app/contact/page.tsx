@@ -44,6 +44,7 @@ export default function ContactPage() {
       mixpanel.track("Contact Page", {
         action: "contact_form_submitted",
         contact_type: data.contactType,
+        message: data.message,
       });
 
       await createReportAdmin({

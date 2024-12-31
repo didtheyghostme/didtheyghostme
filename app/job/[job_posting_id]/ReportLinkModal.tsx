@@ -2,6 +2,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, RadioGroup, R
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import mixpanel from "mixpanel-browser";
 
 import { useCreateReportAdmin } from "@/lib/hooks/useCreateReportAdmin";
 import { REPORT_LINK_TYPES, reportLinkSchema, type ReportLinkFormValues } from "@/lib/schema/reportLinkSchema";
@@ -32,6 +33,12 @@ export function ReportLinkModal({ isOpen, onClose, jobId, jobStatus }: ReportLin
 
   const onSubmit = async (data: ReportLinkFormValues) => {
     try {
+      mixpanel.track("Report Link Modal submitted", {
+        action: "report_link_submitted",
+        report_type: data.report_type,
+        report_message: data.report_type === "Other" ? data.report_message : `status_${jobStatus}: ${data.url || "http://localhost:3000/job/" + jobId}`,
+      });
+
       await createReportAdmin({
         entity_type: "job_posting",
         entity_id: jobId,
