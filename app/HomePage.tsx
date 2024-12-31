@@ -197,6 +197,23 @@ const FAQS: readonly Faq[] = [
     If you suspect you’ve been ghosted, you can use our platform to check if others have received responses from the same employer. \n
     This information can help you decide whether to follow up with the employer or move on to other opportunities.`,
   },
+  {
+    question: "I have more questions or feedback to share. Who can I contact?",
+    answer: (
+      <>
+        <p className="mb-4">We&apos;d love to hear from you! Whether you want to share your feedback, ideas for features, or have any questions - we&apos;re here to help.</p>
+        <ul className="ml-4 space-y-2">
+          <li>
+            • Visit our{" "}
+            <Link className="text-primary" href="/contact">
+              contact page
+            </Link>{" "}
+            to get in touch with our support team
+          </li>
+        </ul>
+      </>
+    ),
+  },
 ];
 
 function LoomFeature({ feature, isMobile }: { feature: LoomFeature; isMobile: boolean }) {
