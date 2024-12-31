@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
-import { Input, Select, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker } from "@nextui-org/react";
+import { Input, Select, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker, cn } from "@nextui-org/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseDate, getLocalTimeZone, today } from "@internationalized/date";
@@ -14,6 +14,8 @@ import { CustomButton } from "@/components/CustomButton";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { JobCategorySelect } from "@/app/api/job-category/route";
+
+const DIRTY_INPUT_CLASS = "bg-orange-50 border-l-4 border-orange-400 dark:bg-orange-900/20";
 
 export function JobPostingEditForm({
   jobPosting,
@@ -70,7 +72,21 @@ export function JobPostingEditForm({
 
       <ModalBody>
         <div className="space-y-4">
-          <Controller control={control} name="title" render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="Title" />} />
+          <Controller
+            control={control}
+            name="title"
+            render={({ field, fieldState }) => (
+              <Input
+                {...field}
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                label="Title"
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
+              />
+            )}
+          />
 
           <Controller
             control={control}
@@ -86,6 +102,9 @@ export function JobPostingEditForm({
                 placeholder="Select countries"
                 selectedKeys={field.value}
                 selectionMode="multiple"
+                classNames={{
+                  base: fieldState.isDirty ? DIRTY_INPUT_CLASS : "",
+                }}
                 onSelectionChange={(keys) => field.onChange(Array.from(keys))}
               >
                 {(country) => (
@@ -108,6 +127,9 @@ export function JobPostingEditForm({
                 label="Experience Level"
                 selectedKeys={field.value}
                 selectionMode="single"
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
                 onSelectionChange={(keys) => field.onChange(Array.from(keys))}
               >
                 {(level) => (
@@ -130,6 +152,9 @@ export function JobPostingEditForm({
                 label="Job Category"
                 selectedKeys={field.value}
                 selectionMode="single"
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
                 onSelectionChange={(keys) => field.onChange(Array.from(keys))}
               >
                 {(category) => (
@@ -144,20 +169,53 @@ export function JobPostingEditForm({
           <Controller
             control={control}
             name="url"
-            render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="URL" type="url" value={field.value ?? ""} />}
+            render={({ field, fieldState }) => (
+              <Input
+                {...field}
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                label="URL"
+                type="url"
+                value={field.value ?? ""}
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
+              />
+            )}
           />
 
           <Controller
             control={control}
             name="job_url_linkedin"
-            render={({ field, fieldState }) => <Input {...field} errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="LinkedIn URL" type="url" value={field.value ?? ""} />}
+            render={({ field, fieldState }) => (
+              <Input
+                {...field}
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                label="LinkedIn URL"
+                type="url"
+                value={field.value ?? ""}
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
+              />
+            )}
           />
 
           <Controller
             control={control}
             name="job_status"
             render={({ field, fieldState }) => (
-              <Select errorMessage={fieldState.error?.message} isInvalid={!!fieldState.error} label="Status" selectedKeys={[field.value]} onChange={field.onChange}>
+              <Select
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+                label="Status"
+                selectedKeys={[field.value]}
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
+                onChange={field.onChange}
+              >
                 {Object.values(JOB_STATUS).map((status) => (
                   <SelectItem key={status} value={status}>
                     {status}
@@ -177,6 +235,9 @@ export function JobPostingEditForm({
                 label="Posted Date"
                 maxValue={today(getLocalTimeZone())}
                 value={field.value ? parseDate(field.value) : null}
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
@@ -192,6 +253,9 @@ export function JobPostingEditForm({
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
                 value={field.value ? parseDate(field.value) : null}
+                className={cn({
+                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                })}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
