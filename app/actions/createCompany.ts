@@ -1,9 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@clerk/nextjs/server";
 
-import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
+import { ERROR_CODES, ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { CompanyFormData, companySchema } from "@/lib/schema/addCompanySchema";
 import { DBTable } from "@/lib/constants/dbTables";
@@ -16,13 +15,8 @@ type CompanyActionResult = { success: true } | { success: false; error: string }
 
 const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<CompanyActionResult> => {
   try {
-    return await withRateLimit(async () => {
+    return await withRateLimit(async (user_id) => {
       const supabase = await createClerkSupabaseClientSsr();
-      const { userId: user_id } = auth();
-
-      if (!user_id) {
-        return { success: false, error: "User not authenticated" };
-      }
 
       try {
         // Server-side validation
@@ -84,11 +78,19 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
         };
       }
     }, "CreateCompany");
-  } catch (rateError) {
-    // Handle rate limit errors
+  } catch (error) {
+    // Handle rate limit errors or other withRateLimit errors
+    console.error("Rate limit or wrapper error:", error);
+
+    // Use your type guard to check for rate limit errors
+    if (isRateLimitError(error)) {
+      return { success: false, error: ERROR_MESSAGES.TOO_MANY_REQUESTS };
+    }
+
+    // For any other errors from withRateLimit
     return {
       success: false,
-      error: ERROR_MESSAGES.TOO_MANY_REQUESTS,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 };

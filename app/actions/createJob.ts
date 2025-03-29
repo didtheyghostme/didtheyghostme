@@ -8,7 +8,7 @@ import { withRateLimit } from "@/lib/withRateLimit";
 import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { isLinkedInDomain } from "@/lib/extractDomain";
 import { mpServerTrack } from "@/lib/mixpanelServer";
-import { ERROR_MESSAGES } from "@/lib/errorHandling";
+import { ERROR_MESSAGES, isRateLimitError } from "@/lib/errorHandling";
 
 export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
   newJob: AddJobFormData;
@@ -95,11 +95,19 @@ const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Pr
         return { success: false, error: errorMessage };
       }
     }, "CreateJob");
-  } catch (rateError) {
-    // Handle rate limit errors
+  } catch (error) {
+    // Handle rate limit errors or other withRateLimit errors
+    console.error("Rate limit or wrapper error:", error);
+
+    // Use your type guard to check for rate limit errors
+    if (isRateLimitError(error)) {
+      return { success: false, error: ERROR_MESSAGES.TOO_MANY_REQUESTS };
+    }
+
+    // For any other errors from withRateLimit
     return {
       success: false,
-      error: ERROR_MESSAGES.TOO_MANY_REQUESTS,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 };

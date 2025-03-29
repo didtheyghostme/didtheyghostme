@@ -12,10 +12,17 @@ type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackAppl
 export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, endpointName: EndpointName): Promise<T> {
   const { userId: user_id } = auth();
 
-  if (!user_id) throw new Error("User not authenticated");
-
   const cookieStore = await cookies();
   const ip = cookieStore.get("x-real-ip")?.value ?? "127.0.0.1";
+
+  if (!user_id) {
+    await mpServerTrack("Authentication error rate limit", {
+      endpoint_name: endpointName,
+      ip_address: ip,
+    });
+    throw new Error("User not authenticated");
+  }
+
   const routeType: RateLimitRouteType = endpointName === "CreateJob" ? "JOB" : endpointName === "CreateCompany" ? "COMPANY" : "OTHERS";
 
   try {
