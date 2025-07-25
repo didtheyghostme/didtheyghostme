@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 
 import { ERROR_MESSAGES } from "./errorHandling";
-import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, jobLimiters, othersLimiters } from "./rateLimit";
+import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, jobLimiters, othersLimiters, settingsLimiters } from "./rateLimit";
 import { RateLimitRouteType } from "./rateLimitConfig";
 
 import { mpServerTrack } from "@/lib/mixpanelServer";
@@ -30,6 +30,7 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
     const limiters = {
       JOB: jobLimiters,
       COMPANY: companyLimiters,
+      SETTINGS: settingsLimiters,
       OTHERS: othersLimiters,
     }[routeType];
 
