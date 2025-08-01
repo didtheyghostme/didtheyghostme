@@ -24,6 +24,7 @@ function createLimiter(limit: number, window: number, prefix: string) {
     limiter: Ratelimit.slidingWindow(limit, `${window} s`),
     analytics: true,
     prefix: `@upstash/ratelimit:${prefix}`,
+    enableProtection: true,
   });
 }
 
