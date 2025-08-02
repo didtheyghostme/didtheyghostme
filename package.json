@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.5.2",
-    "@clerk/themes": "^2.1.42",
+    "@clerk/themes": "2.3.3",
     "@heroui/react": "2.7.2",
     "@hookform/resolvers": "^3.9.0",
     "@internationalized/date": "3.7.0",
