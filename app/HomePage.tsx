@@ -12,6 +12,7 @@ import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import { GithubIcon } from "@/components/icons";
 import { siteConfig } from "@/config/site";
 import { useGithubStars } from "@/lib/hooks/useGithubStars";
+import { ShimmerButton } from "@/components/ShimmerButton";
 
 type Screenshot = {
   desktop: {
@@ -311,12 +312,15 @@ export function HomePage() {
       {/* Hero Section */}
       <section className="flex flex-col items-center gap-4 text-center">
         <motion.div animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4" initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }}>
-          <div className="mx-auto mb-4 flex items-center justify-center">
-            <Link
+          <div className="mx-auto mb-2">
+            <ShimmerButton
               isExternal
-              // eslint-disable-next-line max-len
-              className="group flex animate-pulse items-center gap-2 rounded-full bg-primary/10 py-2.5 pl-5 pr-4 text-sm font-medium text-primary shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 hover:scale-[1.03] hover:animate-none hover:bg-primary/20 hover:shadow-[0_0_20px_rgba(59,130,246,0.7)]"
+              as={Link}
+              borderRadius="9999px"
+              className="gap-2 py-2.5 pl-5 pr-4 text-sm font-medium"
               href={siteConfig.githubRepoUrl}
+              shimmerColor="rgba(0, 172, 255, 0.8)"
+              shimmerDuration="2s"
               onPress={handleGithubClick}
             >
               <div className="flex items-center gap-2">
@@ -334,7 +338,7 @@ export function HomePage() {
                   <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
                 </svg>
               </div>
-            </Link>
+            </ShimmerButton>
           </div>
 
           <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
