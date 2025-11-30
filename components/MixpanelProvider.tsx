@@ -29,6 +29,7 @@ export function MixpanelProvider({ children }: MixpanelProviderProps) {
       track_pageview: "url-with-path",
       persistence: "localStorage",
       record_sessions_percent: Number(process.env.NEXT_PUBLIC_MIXPANEL_RECORD_SESSIONS_PERCENT ?? 1),
+      record_heatmap_data: true,
       ignore_dnt: true,
       api_host: process.env.NEXT_PUBLIC_MIXPANEL_API_HOST,
     });
