@@ -5,6 +5,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { buildSelectString } from "@/lib/buildSelectString";
 import { SelectObject } from "@/lib/buildSelectString";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
+import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 
 // Select all the jobs from job_posting table for a company on the specific company page
 
@@ -35,6 +36,7 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     .from(DBTable.JOB_POSTING)
     .select(selectString)
     .eq("company_id", params.company_id)
+    .neq("job_status", JOB_STATUS.Rejected)
     .order("job_posted_date", { ascending: true })
     .order("updated_at", { ascending: false });
 
