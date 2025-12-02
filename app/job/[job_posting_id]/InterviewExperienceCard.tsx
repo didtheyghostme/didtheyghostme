@@ -2,15 +2,16 @@ import { Card, CardBody, CardHeader, Avatar, Tooltip } from "@heroui/react";
 
 import { InterviewTagsAndLeetcodeChips } from "./InterviewTagsAndLeetcodeChips";
 
-import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
+import { formatDateDayMonthYear, formatHowLongAgo, getDaysBetween } from "@/lib/formatDateUtils";
 import { CalendarIcon } from "@/components/icons";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 
 type InterviewExperienceCardProps = {
   interviewExperience: InterviewExperienceCardData;
+  appliedDate: string;
 };
 
-export function InterviewExperienceCard({ interviewExperience }: InterviewExperienceCardProps) {
+export function InterviewExperienceCard({ interviewExperience, appliedDate }: InterviewExperienceCardProps) {
   // console.log("this interview experience", interviewExperience);
 
   return (
@@ -33,17 +34,27 @@ export function InterviewExperienceCard({ interviewExperience }: InterviewExperi
           <div className="flex flex-col text-small text-default-400">
             <div className="flex items-center gap-1">
               <CalendarIcon />
-              <Tooltip content={formatHowLongAgo(interviewExperience.interview_date)}>
-                <span className="w-fit">Interviewed: {formatDateDayMonthYear(interviewExperience.interview_date)}</span>
-              </Tooltip>
+              <span>
+                Interviewed:{" "}
+                <Tooltip content={formatHowLongAgo(interviewExperience.interview_date)}>
+                  <span>
+                    {formatDateDayMonthYear(interviewExperience.interview_date)} (Day {getDaysBetween(appliedDate, interviewExperience.interview_date)})
+                  </span>
+                </Tooltip>
+              </span>
             </div>
 
             <div className="flex items-center gap-1 text-default-400">
               <CalendarIcon />
               {interviewExperience.response_date ? (
-                <Tooltip content={formatHowLongAgo(interviewExperience.response_date)}>
-                  <span className="w-fit">Receive response: {formatDateDayMonthYear(interviewExperience.response_date)}</span>
-                </Tooltip>
+                <span>
+                  Receive response:{" "}
+                  <Tooltip content={formatHowLongAgo(interviewExperience.response_date)}>
+                    <span>
+                      {formatDateDayMonthYear(interviewExperience.response_date)} (Day {getDaysBetween(appliedDate, interviewExperience.response_date)})
+                    </span>
+                  </Tooltip>
+                </span>
               ) : (
                 <span>No response date yet</span>
               )}

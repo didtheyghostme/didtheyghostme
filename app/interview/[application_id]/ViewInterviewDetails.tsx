@@ -2,7 +2,7 @@ import { Card, CardBody, CardHeader, Divider, Tooltip } from "@heroui/react";
 
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { InterviewExperienceCard } from "@/app/job/[job_posting_id]/InterviewExperienceCard";
-import { formatDateDayMonthYear, formatHowLongAgo } from "@/lib/formatDateUtils";
+import { formatDateDayMonthYear, formatHowLongAgo, getDaysBetween } from "@/lib/formatDateUtils";
 import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -45,17 +45,25 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
 
           <div className="flex items-center gap-1 text-default-400">
             <CalendarIcon />
-            <Tooltip content={formatHowLongAgo(applicationDetails.applied_date)}>
-              <span>Applied on: {formatDateDayMonthYear(applicationDetails.applied_date)}</span>
-            </Tooltip>
+            <span>
+              Applied on:{" "}
+              <Tooltip content={formatHowLongAgo(applicationDetails.applied_date)}>
+                <span>{formatDateDayMonthYear(applicationDetails.applied_date)}</span>
+              </Tooltip>
+            </span>
           </div>
 
           <div className="flex items-center gap-1 text-default-400">
             <CalendarIcon />
             {applicationDetails.first_response_date ? (
-              <Tooltip content={formatHowLongAgo(applicationDetails.first_response_date)}>
-                <span>First response date: {formatDateDayMonthYear(applicationDetails.first_response_date)}</span>
-              </Tooltip>
+              <span>
+                First response date:{" "}
+                <Tooltip content={formatHowLongAgo(applicationDetails.first_response_date)}>
+                  <span>
+                    {formatDateDayMonthYear(applicationDetails.first_response_date)} (Day {getDaysBetween(applicationDetails.applied_date, applicationDetails.first_response_date)})
+                  </span>
+                </Tooltip>
+              </span>
             ) : (
               <span>No first response date yet</span>
             )}
@@ -68,7 +76,7 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
       {interviewRounds.length > 0 && (
         <div className="flex flex-col gap-4">
           {interviewRounds.map((round) => (
-            <InterviewExperienceCard key={round.id} interviewExperience={round} />
+            <InterviewExperienceCard key={round.id} appliedDate={applicationDetails.applied_date} interviewExperience={round} />
           ))}
         </div>
       )}

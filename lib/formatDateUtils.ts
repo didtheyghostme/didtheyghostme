@@ -1,5 +1,5 @@
 import { CalendarDate, DateFormatter, getLocalTimeZone, parseDate, today } from "@internationalized/date";
-import { format, formatDistanceToNowStrict } from "date-fns";
+import { differenceInDays, format, formatDistanceToNowStrict } from "date-fns";
 
 const formatToYYYYMMDD = (dateString: string) => {
   return format(new Date(dateString), "yyyy-MM-dd");
@@ -49,4 +49,8 @@ export function formatHowLongAgo(date: Date | string | number) {
   return formatDistanceToNowStrict(new Date(date), {
     addSuffix: true,
   });
+}
+
+export function getDaysBetween(earlierDate: Date | string | number, laterDate: Date | string | number) {
+  return differenceInDays(new Date(laterDate), new Date(earlierDate));
 }
