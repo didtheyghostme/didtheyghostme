@@ -3,7 +3,7 @@ import { DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination, Sele
 import { parseDate } from "@internationalized/date";
 import { parseAsStringLiteral, parseAsArrayOf, useQueryStates, parseAsInteger } from "nuqs";
 import mixpanel from "mixpanel-browser";
-import Link from "next/link";
+import NextLink from "next/link";
 
 import { ChevronDownIcon } from "@/components/icons";
 import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
@@ -11,6 +11,7 @@ import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
+import { ClickType, getClickType, isMiddleClick } from "@/lib/getClickType";
 
 type ColumnKey = keyof Pick<ProcessedApplication, "status" | "applied_date" | "first_response_date"> | "days_between";
 
@@ -130,10 +131,10 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
     return response.compare(applied);
   };
 
-  const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
+  const mixpanelTrackOnRowClick = (applicationId: string, clickType: ClickType) => {
     mixpanel.track("Applied Applications Table Tab", {
-      action: action,
-      application_id: id,
+      click_type: clickType,
+      application_id: applicationId,
     });
   };
 
@@ -300,19 +301,13 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
 
   function ApplicationRow({ application }: { application: ProcessedApplication }) {
     return (
-      <Link
+      <NextLink
         className="group block w-full rounded-md border border-default-200 bg-content1 px-4 py-2.5 transition-all hover:border-default-400 hover:bg-default-100/50"
         href={`/interview/${application.id}`}
-        onContextMenu={() => mixpanelTrackOnRowClick(application.id, "right_clicked")} // Add this to capture right-click events
-        onClick={(e) => {
-          if (e.metaKey || e.ctrlKey) {
-            mixpanelTrackOnRowClick(application.id, "cmd_clicked");
-          } else {
-            mixpanelTrackOnRowClick(application.id, "row_clicked");
-          }
-        }}
-        onMouseDown={(e) => {
-          if (e.button === 1) {
+        onClick={(e) => mixpanelTrackOnRowClick(application.id, getClickType(e))}
+        onContextMenu={() => mixpanelTrackOnRowClick(application.id, "right_clicked")}
+        onAuxClick={(e) => {
+          if (isMiddleClick(e)) {
             mixpanelTrackOnRowClick(application.id, "middle_clicked");
           }
         }}
@@ -356,7 +351,7 @@ export function TableOfAppliedApplication({ applications }: TableOfAppliedApplic
             </div>
           </div>
         </div>
-      </Link>
+      </NextLink>
     );
   }
 

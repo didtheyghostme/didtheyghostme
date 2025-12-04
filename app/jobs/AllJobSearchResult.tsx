@@ -2,9 +2,10 @@
 
 import React from "react";
 import useSWR from "swr";
-import { Pagination, Card, CardBody, Link } from "@heroui/react";
+import { Pagination, Card, CardBody } from "@heroui/react";
 import { useQueryStates } from "nuqs";
 import mixpanel from "mixpanel-browser";
+import NextLink from "next/link";
 
 import { AllJobsPageResponse } from "@/app/api/job/route";
 import { fetcher } from "@/lib/fetcher";
@@ -19,6 +20,7 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { CustomChip } from "@/components/CustomChip";
 import { nuqsJobSearchParamSchema } from "@/lib/schema/nuqsJobSearchParamSchema";
+import { ClickType, isMiddleClick, getClickType } from "@/lib/getClickType";
 
 export type AllJobsPageDataSelect = Pick<JobPostingTable, "id" | "title" | "updated_at" | "job_posted_date" | "closed_date"> & {
   [DBTable.COMPANY]: Pick<CompanyTable, "company_name" | "logo_url">;
@@ -69,12 +71,12 @@ export function AllJobSearchResult() {
     setQueryStates({ page: newPage });
   };
 
-  const mixpanelTrackJobClick = (job_id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
-    const clickedJob = jobs.find((job) => job.id === job_id);
+  const mixpanelTrackJobClick = (jobId: string, clickType: ClickType) => {
+    const clickedJob = jobs.find((job) => job.id === jobId);
 
     mixpanel.track("All Jobs Card Click", {
-      action: action,
-      job_id: job_id,
+      click_type: clickType,
+      job_id: jobId,
       company_name: clickedJob?.company.company_name,
       job_title: clickedJob?.title,
     });
@@ -108,20 +110,14 @@ export function AllJobSearchResult() {
               <Card
                 key={job.id}
                 isPressable
-                as={Link}
+                as={NextLink}
                 className="w-full bg-background/60 hover:bg-default-100 dark:bg-default-100/50"
                 href={`/job/${job.id}`}
                 onContextMenu={() => mixpanelTrackJobClick(job.id, "right_clicked")}
-                onMouseDown={(e) => {
-                  if (e.button === 1) {
+                onPress={(e) => mixpanelTrackJobClick(job.id, getClickType(e))}
+                onAuxClick={(e) => {
+                  if (isMiddleClick(e)) {
                     mixpanelTrackJobClick(job.id, "middle_clicked");
-                  }
-                }}
-                onPress={(e) => {
-                  if (e.metaKey || e.ctrlKey) {
-                    mixpanelTrackJobClick(job.id, "cmd_clicked");
-                  } else {
-                    mixpanelTrackJobClick(job.id, "row_clicked");
                   }
                 }}
               >

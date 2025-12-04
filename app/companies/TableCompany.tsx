@@ -9,7 +9,7 @@ import { SignedOut } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import mixpanel from "mixpanel-browser";
-import Link from "next/link";
+import NextLink from "next/link";
 
 import { CreateCompanyModal } from "./CreateCompanyModal";
 
@@ -22,6 +22,7 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { GetAllCompaniesResponse } from "@/app/api/company/route";
 import { CustomButton } from "@/components/CustomButton";
+import { ClickType, getClickType, isMiddleClick } from "@/lib/getClickType";
 
 const sortOptions = [
   { key: "name_asc", label: "Company Name: A to Z", column: "company_name", direction: "ascending" },
@@ -110,12 +111,12 @@ export function TableCompanyContent() {
     setPage(1);
   };
 
-  const mixpanelTrackOnRowClick = (id: string, action: "row_clicked" | "right_clicked" | "middle_clicked" | "cmd_clicked") => {
-    const clickedCompany = companies.find((company) => company.id === id);
+  const mixpanelTrackOnRowClick = (companyId: string, clickType: ClickType) => {
+    const clickedCompany = companies.find((company) => company.id === companyId);
 
     mixpanel.track("Company Table", {
-      action: action,
-      company_id: id,
+      click_type: clickType,
+      company_id: companyId,
       company_name: clickedCompany?.company_name,
       search_term: filterValue,
       current_page: page,
@@ -270,20 +271,14 @@ export function TableCompanyContent() {
             <div className="py-8 text-center text-default-400">No companies found</div>
           ) : (
             paginatedItems.map((item) => (
-              <Link
+              <NextLink
                 key={item.id}
                 className="group rounded-medium border border-transparent bg-content1 transition-colors hover:border-primary hover:bg-content2"
                 href={`/company/${item.id}`}
+                onClick={(e) => mixpanelTrackOnRowClick(item.id, getClickType(e))}
                 onContextMenu={() => mixpanelTrackOnRowClick(item.id, "right_clicked")}
-                onClick={(e) => {
-                  if (e.metaKey || e.ctrlKey) {
-                    mixpanelTrackOnRowClick(item.id, "cmd_clicked");
-                  } else {
-                    mixpanelTrackOnRowClick(item.id, "row_clicked");
-                  }
-                }}
-                onMouseDown={(e) => {
-                  if (e.button === 1) {
+                onAuxClick={(e) => {
+                  if (isMiddleClick(e)) {
                     mixpanelTrackOnRowClick(item.id, "middle_clicked");
                   }
                 }}
@@ -292,7 +287,7 @@ export function TableCompanyContent() {
                   <div className="break-words text-small capitalize text-foreground">{item.company_name}</div>
                   <div className="break-words text-small text-default-400">{item.company_url}</div>
                 </div>
-              </Link>
+              </NextLink>
             ))
           )}
         </div>
