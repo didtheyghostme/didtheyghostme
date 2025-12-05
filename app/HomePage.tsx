@@ -171,9 +171,19 @@ const FAQS: readonly Faq[] = [
 
   {
     question: "How do I track a new job application?",
-    answer: `Simply click on any job posting and use the 'Track this job' button. If the job posting or company is not in our database, you can add it.\n
-    By contributing, you can monitor the progress of your applications and compare your status with others applying for the same role.\n
-    Our platform is community-driven, so we rely on contributions from users like you to keep our database up-to-date.`,
+    answer: (
+      <div className="space-y-3">
+        <p>Simply click on any job posting and use the &quot;Track this job&quot; button.</p>
+        <p>
+          If the job posting or company is not in our database, you can add it.{" "}
+          <Link showAnchorIcon className="text-primary underline underline-offset-4" href="/tutorial">
+            View tutorial
+          </Link>
+        </p>
+        <p>By contributing, you can monitor the progress of your applications and compare your status with others applying for the same role.</p>
+        <p>Our platform is community-driven, so we rely on contributions from users like you to keep our database up-to-date.</p>
+      </div>
+    ),
   },
   {
     question: "How do I figure out what interview rounds / types / questions were asked?",

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
-import { Input, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
+import { Input, Pagination, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Link } from "@heroui/react";
 import useSWR from "swr";
 import { usePathname } from "next/navigation";
 import { SignInButton } from "@clerk/nextjs";
@@ -161,6 +161,15 @@ export function TableCompanyContent() {
     });
   };
 
+  const mixpanelTrackLearnHowToAddNewCompanyClick = () => {
+    mixpanel.track("Company Table", {
+      action: "learn_how_to_add_new_company_clicked",
+      search_term: filterValue,
+      current_page: page,
+      total_pages: pages,
+    });
+  };
+
   const handleModalClose = () => {
     mixpanelTrackModalClose();
     setIsModalOpen(false);
@@ -268,7 +277,13 @@ export function TableCompanyContent() {
 
           {/* Company Rows */}
           {paginatedItems.length === 0 ? (
-            <div className="py-8 text-center text-default-400">No companies found</div>
+            <div className="flex flex-col items-center gap-1 py-8 text-center">
+              <span className="text-default-400">No companies found.</span>
+
+              <Link showAnchorIcon className="inline-flex items-center gap-1" color="primary" href="/tutorial" underline="hover" onPress={mixpanelTrackLearnHowToAddNewCompanyClick}>
+                Learn how to add new company
+              </Link>
+            </div>
           ) : (
             paginatedItems.map((item) => (
               <NextLink

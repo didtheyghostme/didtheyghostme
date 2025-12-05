@@ -22,6 +22,10 @@ export const siteConfig = {
       href: "/",
     },
     {
+      label: "Tutorial",
+      href: "/tutorial",
+    },
+    {
       label: "GitHub",
       href: GITHUB_REPO_URL,
     },
