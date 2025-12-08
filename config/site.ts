@@ -15,6 +15,7 @@ export const siteConfig = {
       label: "Jobs",
       href: "/jobs",
     },
+    { label: "Tutorials", href: "/tutorials", isNew: true },
   ],
   navMenuItems: [
     {
@@ -22,8 +23,9 @@ export const siteConfig = {
       href: "/",
     },
     {
-      label: "Tutorial",
-      href: "/tutorial",
+      label: "Tutorials",
+      href: "/tutorials",
+      isNew: true,
     },
     {
       label: "GitHub",

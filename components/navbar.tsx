@@ -2,7 +2,7 @@
 
 import NextLink from "next/link";
 import clsx from "clsx";
-import { Link, Navbar as HeroUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle } from "@heroui/react";
+import { Link, Navbar as HeroUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle, Chip } from "@heroui/react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -86,7 +86,14 @@ export const Navbar = () => {
                     setIsMenuOpen(false);
                   }}
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-2">
+                    {item.label}
+                    {item.isNew && (
+                      <Chip color="primary" size="sm" variant="flat">
+                        New
+                      </Chip>
+                    )}
+                  </span>
                 </Link>
               </NavbarMenuItem>
             ))}
@@ -101,13 +108,20 @@ export const Navbar = () => {
 
           <ul className="flex items-center gap-6 sm:gap-8">
             {siteConfig.navItems.map((item) => (
-              <NavbarItem key={item.href}>
+              <NavbarItem key={item.href} className={clsx(item.isNew && "hidden md:flex")}>
                 <NextLink
                   className={clsx("text-sm transition-colors sm:text-base", pathname === item.href ? "font-medium text-blue-500" : "text-default-500 hover:text-default-900")}
                   href={item.href}
                   onClick={() => handleNavBarClick(item.label)}
                 >
-                  {item.label}
+                  <span className="inline-flex items-center gap-2">
+                    {item.label}
+                    {item.isNew && (
+                      <Chip color="primary" size="sm" variant="flat">
+                        New
+                      </Chip>
+                    )}
+                  </span>
                 </NextLink>
               </NavbarItem>
             ))}

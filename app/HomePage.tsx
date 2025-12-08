@@ -176,7 +176,7 @@ const FAQS: readonly Faq[] = [
         <p>Simply click on any job posting and use the &quot;Track this job&quot; button.</p>
         <p>
           If the job posting or company is not in our database, you can add it.{" "}
-          <Link showAnchorIcon className="text-primary underline underline-offset-4" href="/tutorial">
+          <Link showAnchorIcon className="text-primary underline underline-offset-4" href="/tutorials">
             View tutorial
           </Link>
         </p>

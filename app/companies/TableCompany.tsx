@@ -280,7 +280,7 @@ export function TableCompanyContent() {
             <div className="flex flex-col items-center gap-1 py-8 text-center">
               <span className="text-default-400">No companies found.</span>
 
-              <Link showAnchorIcon className="inline-flex items-center gap-1" color="primary" href="/tutorial" underline="hover" onPress={mixpanelTrackLearnHowToAddNewCompanyClick}>
+              <Link showAnchorIcon className="inline-flex items-center gap-1" color="primary" href="/tutorials" underline="hover" onPress={mixpanelTrackLearnHowToAddNewCompanyClick}>
                 Learn how to add new company
               </Link>
             </div>
