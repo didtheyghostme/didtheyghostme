@@ -22,7 +22,22 @@ function ArcadeEmbedAddJobPosting() {
         loading="lazy"
         src="https://demo.arcade.software/J4fMC28Eap5FhkZmtBBz?embed&embed_mobile=inline&embed_desktop=inline&show_copy_link=true"
         style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", colorScheme: "light", border: "0" }}
-        title="Add a Job Posting"
+        title="Add a Job"
+      />
+    </div>
+  );
+}
+
+function ArcadeEmbedTrackJobApplication() {
+  return (
+    <div style={{ position: "relative", paddingBottom: "calc(56.25% + 41px)", height: "0", width: "100%" }}>
+      <iframe
+        allowFullScreen
+        allow="clipboard-write"
+        loading="lazy"
+        src="https://demo.arcade.software/irndwKm7znh2zhJ7WKRF?embed&embed_mobile=inline&embed_desktop=inline&show_copy_link=true"
+        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", colorScheme: "light", border: "0" }}
+        title="Track a Job Application"
       />
     </div>
   );
@@ -51,6 +66,7 @@ export default function TutorialPage() {
       {/* Tutorial 3 Track a Job Application */}
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">How to Track a Job Application</h2>
+        <ArcadeEmbedTrackJobApplication />
       </section>
     </div>
   );
