@@ -18,6 +18,7 @@ const HIDE_LOGO_CREDIT_PATHS = [
   "/privacy",
   "/contact",
   "/settings",
+  "/tutorials",
   // Add any paths where you don't want the logo credit
 ];
 
