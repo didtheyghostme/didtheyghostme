@@ -1,4 +1,4 @@
-function ArcadeEmbedCompanies() {
+function ArcadeEmbedAddCompany() {
   return (
     <div style={{ position: "relative", paddingBottom: "calc(56.22254758418741% + 41px)", height: "0", width: "100%" }}>
       <iframe
@@ -13,6 +13,21 @@ function ArcadeEmbedCompanies() {
   );
 }
 
+function ArcadeEmbedAddJobPosting() {
+  return (
+    <div style={{ position: "relative", paddingBottom: "calc(56.25% + 41px)", height: "0", width: "100%" }}>
+      <iframe
+        allowFullScreen
+        allow="clipboard-write"
+        loading="lazy"
+        src="https://demo.arcade.software/J4fMC28Eap5FhkZmtBBz?embed&embed_mobile=inline&embed_desktop=inline&show_copy_link=true"
+        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", colorScheme: "light", border: "0" }}
+        title="Add a Job Posting"
+      />
+    </div>
+  );
+}
+
 export default function TutorialPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-12 p-6">
@@ -21,15 +36,16 @@ export default function TutorialPage() {
         <p className="text-default-500">Learn how to use our platform with these interactive walkthroughs</p>
       </div>
 
-      {/* Tutorial 1: Create a Company */}
+      {/* Tutorial 1: Add a Company */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">How to Create a Company</h2>
-        <ArcadeEmbedCompanies />
+        <h2 className="text-2xl font-semibold">How to Add a Company</h2>
+        <ArcadeEmbedAddCompany />
       </section>
 
-      {/* Tutorial 2: Create a Job Posting */}
+      {/* Tutorial 2: Add a Job Posting */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">How to Create a Job Posting</h2>
+        <h2 className="text-2xl font-semibold">How to Add a Job</h2>
+        <ArcadeEmbedAddJobPosting />
       </section>
 
       {/* Tutorial 3 Track a Job Application */}
