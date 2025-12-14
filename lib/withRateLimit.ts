@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 
-import { ERROR_MESSAGES } from "./errorHandling";
+import { ERROR_MESSAGES, isRateLimitError } from "./errorHandling";
 import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, jobLimiters, othersLimiters, settingsLimiters } from "./rateLimit";
 import { RateLimitRouteType } from "./rateLimitConfig";
 
@@ -49,6 +49,8 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
       throw new Error(ERROR_MESSAGES.TOO_MANY_REQUESTS);
     }
   } catch (error) {
+    if (isRateLimitError(error)) throw error;
+
     // If Upstash fails, use memory cache fallback
     if (isUpstashDailyLimitError(error)) {
       // console.error("error name", error.name);
