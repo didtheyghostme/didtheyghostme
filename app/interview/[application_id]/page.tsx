@@ -27,22 +27,22 @@ import { CustomButton } from "@/components/CustomButton";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 
 export default function InterviewExperiencePage() {
-  const { application_id } = useParams();
+  const { application_id } = useParams<{ application_id: string }>();
   const router = useRouter();
   const { userId } = useAuth();
 
   // Fetch application details
-  const { data: applicationDetails, error, isLoading } = useSWRWithAuthKey<GetApplicationByIdResponse>(API.APPLICATION.getByApplicationId(application_id as string), userId);
+  const { data: applicationDetails, error, isLoading } = useSWRWithAuthKey<GetApplicationByIdResponse>(API.APPLICATION.getByApplicationId(application_id), userId);
 
   // Fetch interview rounds, need useSWRWithAuthKey too to match the shared update mutation hook's cache key
   const {
     data: interviewRounds,
     error: interviewRoundsError,
     isLoading: interviewRoundsLoading,
-  } = useSWRWithAuthKey<InterviewExperienceCardData[]>(API.INTERVIEW.getAllByApplicationId(application_id as string), userId);
+  } = useSWRWithAuthKey<InterviewExperienceCardData[]>(API.INTERVIEW.getAllByApplicationId(application_id), userId);
 
   // Update application and interview rounds
-  const { updateApplicationAndInterviewRounds, isUpdating } = useUpdateApplicationAndInterviewRounds(application_id as string, userId);
+  const { updateApplicationAndInterviewRounds, isUpdating } = useUpdateApplicationAndInterviewRounds(application_id, userId);
 
   // local states
   const [isEditing, setIsEditing] = useState(false);
@@ -140,7 +140,7 @@ export default function InterviewExperiencePage() {
 
       <Spacer y={8} />
 
-      <CommentSection entity_id={application_id as string} entity_type="interview_experience" />
+      <CommentSection entity_id={application_id} entity_type="interview_experience" />
     </div>
   );
 }

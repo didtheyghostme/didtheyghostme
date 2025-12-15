@@ -31,11 +31,11 @@ import { SettingsInsertJobResponse } from "@/app/api/(protected)/settings/insert
 export default function CompanyDetailsPage() {
   const pathname = usePathname();
 
-  const { company_id } = useParams();
+  const { company_id } = useParams<{ company_id: string }>();
 
-  const { data: company, error, isLoading } = useSWR<CompanyDetailsPageCompanyResponse>(API.COMPANY.getById(company_id as string), fetcher);
+  const { data: company, error, isLoading } = useSWR<CompanyDetailsPageCompanyResponse>(API.COMPANY.getById(company_id), fetcher);
 
-  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id as string), fetcher);
+  const { data: allJobs, error: jobError, isLoading: jobIsLoading } = useSWR<CompanyDetailsPageAllJobsResponse[]>(API.JOB_POSTING.getAllByCompanyId(company_id), fetcher);
 
   // console.warn("jobs", allJobs);
 
@@ -53,7 +53,7 @@ export default function CompanyDetailsPage() {
     isLoading: settingsPreferencesLoading,
   } = useSWR<SettingsInsertJobResponse>(API.PROTECTED.getInsertJobSettings, fetcher);
 
-  const { createJob, isCreating } = useCreateJob(company_id as string);
+  const { createJob, isCreating } = useCreateJob(company_id);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 

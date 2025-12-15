@@ -24,13 +24,13 @@ import { CustomButton } from "@/components/CustomButton";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 
 export default function QuestionPage() {
-  const { comment_id } = useParams();
+  const { comment_id } = useParams<{ comment_id: string }>();
 
   const router = useRouter();
 
   const { userId } = useAuth();
 
-  const { data: question, error, isLoading } = useSWRWithAuthKey<QuestionPageRequest>(API.COMMENT.getById(comment_id as string), userId);
+  const { data: question, error, isLoading } = useSWRWithAuthKey<QuestionPageRequest>(API.COMMENT.getById(comment_id), userId);
 
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
@@ -108,7 +108,7 @@ export default function QuestionPage() {
         <EditCommentModal initialContent={question.content} isOpen={!!editingCommentId} isUpdating={isUpdating} onClose={() => setEditingCommentId(null)} onSubmit={handleSubmitEditComment} />
       )}
 
-      <CommentSection entity_id={comment_id as string} entity_type="question" />
+      <CommentSection entity_id={comment_id} entity_type="question" />
     </div>
   );
 }

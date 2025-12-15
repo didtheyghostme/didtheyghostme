@@ -62,12 +62,12 @@ export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
   const { theme } = useTheme();
 
-  const { job_posting_id } = useParams();
+  const { job_posting_id } = useParams<{ job_posting_id: string }>();
   const [selectedTab, setSelectedTab] = useQueryState("tab", parseAsStringLiteral(tabKeys).withDefault("Applied"));
 
   const { userId } = useAuth();
 
-  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id as string), fetcher);
+  const { data: jobDetails, error, isLoading } = useSWR<JobDetails>(API.JOB_POSTING.getById(job_posting_id), fetcher);
 
   // console.log("jobDetails from page", jobDetails);
 
@@ -82,11 +82,11 @@ export default function JobDetailsPage() {
     data: applications,
     error: applicationsError,
     isLoading: applicationsIsLoading,
-  } = useSWRWithAuthKey<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id as string), userId);
+  } = useSWRWithAuthKey<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id), userId);
 
   // console.warn("applications", applications);
 
-  const { createApplication, isCreating } = useCreateApplication(job_posting_id as string, userId);
+  const { createApplication, isCreating } = useCreateApplication(job_posting_id, userId);
 
   if (isLoading || applicationsIsLoading) return <LoadingContent />;
   if (error || applicationsError) {
@@ -448,7 +448,7 @@ export default function JobDetailsPage() {
         <Tabs aria-label="Options" color={theme === "light" ? "primary" : "default"} selectedKey={selectedTab} onSelectionChange={handleTabChange}>
           {tabKeys.map((key) => (
             <Tab key={key} title={TABS[key].title}>
-              {key === "Applied" ? TABS[key].content(applications.data) : TABS[key].content(job_posting_id as string)}
+              {key === "Applied" ? TABS[key].content(applications.data) : TABS[key].content(job_posting_id)}
             </Tab>
           ))}
         </Tabs>
