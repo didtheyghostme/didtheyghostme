@@ -22,14 +22,19 @@ export const API = {
       sortOrder: "ASC" | "DESC";
       experienceLevelNames: string[];
       jobCategoryNames: string[];
-    }) =>
-      `/api/job?page=${page}` +
-      `&search=${encodeURIComponent(search)}` +
-      `&isVerified=${isVerified}` +
-      `&countries=${selectedCountries.map((countryName) => encodeURIComponent(countryName)).join(COUNTRY_PARAM_SEPARATOR)}` +
-      `&sortOrder=${sortOrder}` +
-      `&experienceLevelNames=${experienceLevelNames}` +
-      `&jobCategoryNames=${jobCategoryNames}`,
+    }) => {
+      const jobSearchParams = new URLSearchParams({
+        page: String(page),
+        search,
+        isVerified: String(isVerified),
+        countries: selectedCountries.join(COUNTRY_PARAM_SEPARATOR),
+        sortOrder,
+        experienceLevelNames: experienceLevelNames.join(","),
+        jobCategoryNames: jobCategoryNames.join(","),
+      });
+
+      return `/api/job?${jobSearchParams.toString()}`;
+    },
     getAllByCompanyId: (company_id: string) => `/api/company/${company_id}/job`,
     getById: (job_posting_id: string) => `/api/job/${job_posting_id}`,
   },

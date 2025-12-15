@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase.rpc(DB_RPC.GET_ALL_SEARCH_JOBS, {
     p_page: page,
-    p_search: search,
+    p_search: search.trim(),
     p_is_verified: isVerified,
     // NOTE: countries null SQL fallback to user prefs -> defaults; non-empty invalid values currently 0 results (no fallback), if want to fallback need to edit sql
     p_country_names: countries.length > 0 ? countries : null,
