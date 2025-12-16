@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // Enrich with server-side IP if missing
     if (!properties.ip) {
-      properties.ip = getClientIp(request);
+      properties.ip = getClientIp(request.headers);
     }
 
     // Only capture userAgent data for client requests

@@ -1,19 +1,22 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 
 import { ERROR_MESSAGES, isRateLimitError } from "./errorHandling";
 import { companyLimiters, createFallbackRateLimiters, isUpstashDailyLimitError, jobLimiters, othersLimiters, settingsLimiters } from "./rateLimit";
 import { RateLimitRouteType } from "./rateLimitConfig";
+import { getClientIp } from "./getClientIp";
 
 import { mpServerTrack } from "@/lib/mixpanelServer";
 
 type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackApplication" | "ReportAdmin" | "UpdateInterviewRounds" | "UpdateComment" | "UpdateUserPreferences";
 
+// TODO: update getClientIp reeusable function stub
+// move limiter to limit user_id instad of ip for logged in users
+
 export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, endpointName: EndpointName): Promise<T> {
   const { userId: user_id } = auth();
 
-  const cookieStore = await cookies();
-  const ip = cookieStore.get("x-real-ip")?.value ?? "127.0.0.1";
+  const ip = getClientIp(headers());
 
   if (!user_id) {
     await mpServerTrack("Authentication error rate limit", {

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { userAgent } from "next/server";
 
 import { mpServerTrack } from "@/lib/mixpanelServer";
+import { getClientIp } from "@/lib/getClientIp";
 
 // Define a type for the data parameter
 type PageViewData = {
@@ -17,9 +18,7 @@ type PageViewData = {
 
 export async function trackPageViewAction(data: PageViewData) {
   const headersList = headers();
-  const forwardedFor = headersList.get("x-forwarded-for");
-  const realIp = headersList.get("x-real-ip");
-  const ip = forwardedFor?.split(",")[0]?.trim() || realIp?.trim() || "unknown";
+  const ip = getClientIp(headersList);
 
   // Get user agent from the header
   const userAgentString = headersList.get("user-agent") || "";

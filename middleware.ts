@@ -71,7 +71,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (limiters) {
     // Choose rate limiter based on HTTP method
-    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const ip = getClientIp(req.headers);
     const isRead = ["GET", "HEAD"].includes(req.method);
     const routeType: RateLimitRouteType = isJobRoutes(req) ? "JOB" : isCompanyRoutes(req) ? "COMPANY" : isSettingsRoutes(req) ? "SETTINGS" : "OTHERS";
     const operation: OperationType = isRead ? "READ" : "WRITE";
@@ -124,7 +124,7 @@ export default clerkMiddleware(async (auth, req) => {
     let response = NextResponse.next();
 
     // Get IP for geolocation
-    const clientIp = getClientIp(req);
+    const clientIp = getClientIp(req.headers);
 
     // Check for existing device ID cookie
     const cookieStore = req.cookies;
