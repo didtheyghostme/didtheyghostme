@@ -10,9 +10,6 @@ import { mpServerTrack } from "@/lib/mixpanelServer";
 
 type EndpointName = "CreateJob" | "CreateCompany" | "CreateComment" | "TrackApplication" | "ReportAdmin" | "UpdateInterviewRounds" | "UpdateComment" | "UpdateUserPreferences";
 
-// TODO: update getClientIp reeusable function stub
-// move limiter to limit user_id instad of ip for logged in users
-
 export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, endpointName: EndpointName): Promise<T> {
   const { userId: user_id } = auth();
 
@@ -37,7 +34,7 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
       OTHERS: othersLimiters,
     }[routeType];
 
-    const [burstResult, sustainedResult] = await Promise.all([limiters.burstWrite.limit(ip), limiters.sustainedWrite.limit(ip)]);
+    const [burstResult, sustainedResult] = await Promise.all([limiters.burstWrite.limit(user_id), limiters.sustainedWrite.limit(user_id)]);
 
     if (!burstResult.success || !sustainedResult.success) {
       await mpServerTrack("Rate limit exceeded", {
@@ -57,7 +54,7 @@ export async function withRateLimit<T>(action: (user_id: string) => Promise<T>, 
     // If Upstash fails, use memory cache fallback
     if (isUpstashDailyLimitError(error)) {
       // console.error("error name", error.name);
-      const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({ routeType, operation: "WRITE", ip });
+      const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({ routeType, operation: "WRITE", rateLimitKey: user_id });
 
       if (!burstFallback.success || !sustainedFallback.success) {
         const failedLimit = !burstFallback.success ? burstFallback : sustainedFallback;

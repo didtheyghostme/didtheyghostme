@@ -19,11 +19,11 @@ const isOtherRoutes = createRouteMatcher(["/api/comment(.*)", "/api/application(
 
 const isSettingsRoutes = createRouteMatcher(["/api/settings(.*)"]);
 
-async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; ip: string }): Promise<boolean> {
+async function handleFallbackRateLimiting(params: { routeType: RateLimitRouteType; operation: OperationType; rateLimitKey: string }): Promise<boolean> {
   const [burstFallback, sustainedFallback] = await createFallbackRateLimiters({
     routeType: params.routeType,
     operation: params.operation,
-    ip: params.ip,
+    rateLimitKey: params.rateLimitKey,
   });
 
   return burstFallback.success && sustainedFallback.success;
@@ -80,7 +80,7 @@ export default clerkMiddleware(async (auth, req) => {
     // const isUpstashFailed = await getUpstashFailedStatus();
 
     if (IS_UPSTASH_FAILED) {
-      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
+      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, rateLimitKey: ip });
 
       if (!isFallbackSuccess) {
         return NextResponse.json(createRateLimitResponse("fallback"), { status: 429 });
@@ -103,7 +103,7 @@ export default clerkMiddleware(async (auth, req) => {
 
       // await setUpstashFailedStatus();
 
-      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, ip });
+      const isFallbackSuccess = await handleFallbackRateLimiting({ routeType, operation, rateLimitKey: ip });
 
       if (!isFallbackSuccess) {
         return NextResponse.json(createRateLimitResponse("fallback"), { status: 429 });

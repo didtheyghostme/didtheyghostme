@@ -84,14 +84,14 @@ export function isUpstashDailyLimitError(error: unknown): boolean {
 type CreateFallbackRateLimitersProp = {
   routeType: RateLimitRouteType;
   operation: OperationType;
-  ip: string;
+  rateLimitKey: string;
 };
 
-export async function createFallbackRateLimiters({ routeType, operation, ip }: CreateFallbackRateLimitersProp) {
+export async function createFallbackRateLimiters({ routeType, operation, rateLimitKey }: CreateFallbackRateLimitersProp) {
   const burstLimiter = new FallbackRateLimiter(routeType, "BURST", operation);
   const sustainedLimiter = new FallbackRateLimiter(routeType, "SUSTAINED", operation);
 
-  return Promise.all([burstLimiter.limit(ip), sustainedLimiter.limit(ip)]);
+  return Promise.all([burstLimiter.limit(rateLimitKey), sustainedLimiter.limit(rateLimitKey)]);
 }
 
 export const sharedRedis = redis; // Reuse existing connection
