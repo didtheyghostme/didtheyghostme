@@ -139,24 +139,5 @@ export function mergeReadmeJobsTable(params: { readme: string; desiredDbRowsById
 
   const changed = nextReadme !== params.readme;
 
-  // Debug logging to find why changes are detected
-  if (changed) {
-    console.log("=== DEBUG: Why changed? ===");
-    console.log("Old length:", params.readme.length);
-    console.log("New length:", nextReadme.length);
-
-    // Find first difference
-    for (let i = 0; i < Math.max(nextReadme.length, params.readme.length); i++) {
-      if (nextReadme[i] !== params.readme[i]) {
-        console.log("First diff at index:", i);
-        console.log("Old:", JSON.stringify(params.readme.slice(Math.max(0, i - 30), i + 30)));
-        console.log("New:", JSON.stringify(nextReadme.slice(Math.max(0, i - 30), i + 30)));
-        break;
-      }
-    }
-  } else {
-    console.log("✅ No changes detected - README matches expected output");
-  }
-
   return { nextReadme, changed };
 }

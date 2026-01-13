@@ -9,9 +9,9 @@ function getSiteBaseUrl(): string {
 }
 
 const sgDateFormatter = new Intl.DateTimeFormat("en-SG", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
+  day: "2-digit", // "07"
+  month: "short", // "Sep"
+  year: "numeric", // "2025"
   timeZone: "Asia/Singapore",
 });
 

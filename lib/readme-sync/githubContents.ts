@@ -24,10 +24,6 @@ function getGithubPath(): string {
   return process.env.README_SYNC_PATH ?? "README.md";
 }
 
-function getGithubApiBaseUrl(): string {
-  return process.env.README_SYNC_GITHUB_API_BASE_URL ?? "https://api.github.com";
-}
-
 function decodeBase64ToUtf8(base64: string): string {
   // GitHub contents API may include newlines in the base64 payload
   return Buffer.from(base64.replace(/\n/g, ""), "base64").toString("utf8");
@@ -46,7 +42,8 @@ export async function getGithubReadmeFile(params?: { repo?: string; path?: strin
     .split("/")
     .map((seg) => encodeURIComponent(seg))
     .join("/");
-  const url = `${getGithubApiBaseUrl()}/repos/${repo}/contents/${encodedPath}`;
+
+  const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
 
   const res = await fetch(url, {
     method: "GET",
@@ -76,7 +73,8 @@ export async function putGithubReadmeFile(params: { newContent: string; sha: str
     .split("/")
     .map((seg) => encodeURIComponent(seg))
     .join("/");
-  const url = `${getGithubApiBaseUrl()}/repos/${repo}/contents/${encodedPath}`;
+
+  const url = `https://api.github.com/repos/${repo}/contents/${encodedPath}`;
 
   const res = await fetch(url, {
     method: "PUT",

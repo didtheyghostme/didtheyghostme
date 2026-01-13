@@ -15,7 +15,7 @@ export const useUpdateJobPostingAdmin = (job_posting_id: string) => {
           updates,
         });
 
-        return (result ?? {}) as UpdateJobPostingAdminResult;
+        return result;
       } catch (err) {
         console.error("Error updating job posting:", err);
         throw err;
