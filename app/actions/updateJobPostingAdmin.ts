@@ -52,7 +52,7 @@ const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJo
     const oldStatus = existingJob?.job_status as JobStatus | undefined;
     const newStatus = validatedData.job_status as JobStatus;
 
-    const shouldSyncReadme = oldStatus === JOB_STATUS.Verified || newStatus === JOB_STATUS.Verified || newStatus === JOB_STATUS.Closed;
+    const shouldSyncReadme = oldStatus === JOB_STATUS.Verified || newStatus === JOB_STATUS.Verified;
 
     if (!shouldSyncReadme) return {} satisfies UpdateJobPostingAdminResult;
 
