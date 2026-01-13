@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import useSWR from "swr";
 import { Input } from "@heroui/react";
+import { toast } from "sonner";
 
 import { JobPostingCard } from "./JobPostingCard";
 
@@ -11,9 +12,12 @@ import { fetcher } from "@/lib/fetcher";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { JobCategorySelect } from "@/app/api/job-category/route";
+import { CustomButton } from "@/components/CustomButton";
+import { syncReadmeSgInternTechAction } from "@/app/actions/syncReadmeSgInternTechAction";
 
 export default function AdminJobsPage() {
   const [search, setSearch] = useState("");
+  const [isSyncing, startSync] = useTransition();
   const { data: jobs, error, isLoading } = useSWR<AllJobPostingWithCompany[]>(API.ADMIN.getAllJobs, fetcher);
 
   // console.log("ADMIN job client pages....", jobs, error, isLoading);
@@ -37,7 +41,30 @@ export default function AdminJobsPage() {
   return (
     <div className="mx-auto max-w-7xl p-4">
       <div className="mb-4">
-        <Input placeholder="Search jobs by job title or company name" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Input placeholder="Search jobs by job title or company name" value={search} onChange={(e) => setSearch(e.target.value)} />
+
+          <CustomButton
+            className="w-full sm:w-auto"
+            isLoading={isSyncing}
+            variant="flat"
+            onPress={() => {
+              startSync(async () => {
+                toast.message("Syncing README…");
+                const res = await syncReadmeSgInternTechAction();
+
+                if (!res.ok) {
+                  toast.error(`README sync failed: ${res.error}`);
+
+                  return;
+                }
+                toast.success(res.didChange ? `README synced (${res.exportedCount} jobs)` : "README already up to date");
+              });
+            }}
+          >
+            Re-sync README
+          </CustomButton>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

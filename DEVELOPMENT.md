@@ -40,6 +40,20 @@ Ensure you have the `.env` file in the root directory. You can copy the `.env.ex
 cp .env.example .env
 ```
 
+### 3.1 README Sync (optional)
+
+If you want the admin workflow to sync Verified jobs to a separate GitHub repo README (Singapore + Internship + Tech), set:
+
+- `README_SYNC_GITHUB_TOKEN`: GitHub token with write access to the target repo
+- `README_SYNC_REPO`: `owner/repo` (e.g. `didtheyghostme/Summer2026-Internships`)
+- `README_SYNC_PATH`: file path (default: `README.md`)
+- `README_SYNC_SITE_URL`: base URL for internal links (default: `https://didtheyghost.me`)
+
+The target README must contain anchors:
+
+- `<!-- JOBS_TABLE_START -->`
+- `<!-- JOBS_TABLE_END -->`
+
 ## 4. Supabase setup
 Follow these steps to link your local project to your Supabase database and apply migrations. ([Supabase docs](https://supabase.com/docs/guides/local-development))
 

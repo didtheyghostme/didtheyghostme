@@ -55,9 +55,18 @@ export function JobPostingEditForm({
 
   const onSubmit = async (data: UpdateJobPostingAdminFormValues) => {
     try {
-      await updateJobPosting(data);
+      const result = await updateJobPosting(data);
+
       // console.warn("data", data);
       toast.success("Job posting updated successfully");
+
+      if (result.readmeSync?.ok === false) {
+        toast.error(`README sync failed: ${result.readmeSync.error}`);
+      }
+      if (result.readmeSync?.ok === true && result.readmeSync.didChange) {
+        toast.success(`README synced (${result.readmeSync.exportedCount} jobs)`);
+      }
+
       onClose();
     } catch (error) {
       toast.error("Failed to update job posting");
