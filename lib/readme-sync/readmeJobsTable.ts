@@ -99,7 +99,7 @@ function extractJobPostingIdFromTrackCell(cells: string[]): string | null {
 }
 
 export function renderJobsTable(params: { headerLines?: string[]; dbRows: ReadmeJobRow[]; preservedCommunityLines: string[] }): string {
-  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Apply | Added |", "|---|---|---|---|---:|"];
+  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Apply | Added |", "|---|---|---|---|:---:|"];
 
   const dbLines = params.dbRows.map((r) => `| ${r.companyMarkdown} | ${r.roleMarkdown} | ${r.trackMarkdown} | ${r.applyMarkdown} | ${r.addedMarkdown} |`);
 
