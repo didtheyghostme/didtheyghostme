@@ -45,7 +45,7 @@ export async function GET(request: Request, { params }: { params: { application_
 
   const selectString = buildSelectString(selectObject);
 
-  const { data, error } = await supabase.from(DBTable.APPLICATION).select(selectString).eq("id", params.application_id).returns<JoinedApplication>().maybeSingle();
+  const { data, error } = await supabase.from(DBTable.APPLICATION).select(selectString).eq("id", params.application_id).maybeSingle().overrideTypes<JoinedApplication, { merge: false }>();
 
   // console.warn("data in route handler application", data, error);
 

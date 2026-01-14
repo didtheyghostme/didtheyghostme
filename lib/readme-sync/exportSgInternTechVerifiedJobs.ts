@@ -80,7 +80,7 @@ export async function exportSgInternTechVerifiedJobs(): Promise<ExportReadmeJob[
     // Deterministic ordering at the source: newest first; tie-break on id.
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
-    .returns<ExportJobRow[]>();
+    .overrideTypes<ExportJobRow[], { merge: false }>();
 
   if (error) throw error;
 

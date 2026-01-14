@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: { comment_id: 
 
   const selectString = buildSelectString(selectObject);
 
-  const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("id", params.comment_id).returns<QuestionPageSelectData>().maybeSingle();
+  const { data, error } = await supabase.from(DBTable.COMMENT).select(selectString).eq("id", params.comment_id).maybeSingle().overrideTypes<QuestionPageSelectData, { merge: false }>();
 
   if (error) {
     if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
