@@ -47,14 +47,17 @@ export async function syncReadmeSgInternTechVerifiedJobs(): Promise<SyncReadmeRe
   const exportJobs = await exportSgInternTechVerifiedJobs();
 
   const desiredDbRowsById = new Map<string, ReadmeJobRow>();
+  const desiredDbSortTimestampMsById = new Map<string, number>();
   const desiredDbOrder: string[] = [];
 
   for (const job of exportJobs) {
     const trackHref = `${baseUrl}/job/${job.jobPostingId}?${UTM_PARAMS}`;
     const trackBtn = createReadmeButtonImg({ buttonType: "track", width: 160 });
     const applyBtn = createReadmeButtonImg({ buttonType: "apply", width: 160 });
+    const createdAtMs = new Date(job.createdAt).getTime();
 
     desiredDbOrder.push(job.jobPostingId);
+    if (!Number.isNaN(createdAtMs)) desiredDbSortTimestampMsById.set(job.jobPostingId, createdAtMs);
     desiredDbRowsById.set(job.jobPostingId, {
       companyMarkdown: `[${escapePipes(job.companyName)}](${baseUrl}/company/${job.companyId}?${UTM_PARAMS})`,
       roleMarkdown: escapePipes(job.title),
@@ -70,6 +73,7 @@ export async function syncReadmeSgInternTechVerifiedJobs(): Promise<SyncReadmeRe
     readme: content,
     desiredDbRowsById,
     desiredDbOrder,
+    desiredDbSortTimestampMsById,
   });
 
   if (!changed) {

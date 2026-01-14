@@ -243,7 +243,10 @@ export function renderJobsTable(params: { headerLines?: string[]; rows: ReadmeJo
   return out.join("\n");
 }
 
-export function mergeReadmeJobsTable(params: { readme: string; desiredDbRowsById: Map<string, ReadmeJobRow>; desiredDbOrder: string[] }): { nextReadme: string; changed: boolean } {
+export function mergeReadmeJobsTable(params: { readme: string; desiredDbRowsById: Map<string, ReadmeJobRow>; desiredDbOrder: string[]; desiredDbSortTimestampMsById?: Map<string, number> }): {
+  nextReadme: string;
+  changed: boolean;
+} {
   const { before, block, after } = extractAnchoredBlock(params.readme);
 
   const parsed = parseExistingRowsFromBlock(block);
@@ -257,12 +260,13 @@ export function mergeReadmeJobsTable(params: { readme: string; desiredDbRowsById
 
     if (!row) continue;
 
-    const parsedDate = parseDateAdded(row.addedMarkdown);
+    const dbSortTimestampMs = params.desiredDbSortTimestampMsById?.get(id);
+    const parsedDate = dbSortTimestampMs === undefined ? parseDateAdded(row.addedMarkdown) : null;
 
     mergedRows.push({
       ...row,
       rowKind: "db",
-      sortTimestampMs: parsedDate?.timestampMs ?? Number.POSITIVE_INFINITY,
+      sortTimestampMs: dbSortTimestampMs ?? parsedDate?.timestampMs ?? Number.POSITIVE_INFINITY,
       tieBreakIndex: i,
     });
   }
