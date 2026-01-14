@@ -17,23 +17,7 @@ export type ExistingReadmeRow = {
 function isHeaderCell(cell: string): boolean {
   const v = cell.trim().toLowerCase();
 
-  return v === "company" || v === "role" || v === "track" || v === "apply" || v === "added" || v === "date added" || v === "date posted";
-}
-
-function normalizeHeaderLines(headerLines?: string[]): string[] {
-  const fallback = ["| Company | Role | Track | Apply | Date Added |", "|---|---|---|---|:---:|"];
-
-  if (!headerLines?.length || headerLines.length < 2) return fallback;
-
-  const [header, separator, ...rest] = headerLines;
-  const headerCells = splitTableCells(header).map((c) => (c.trim().toLowerCase() === "added" ? "Date Added" : c.trim().toLowerCase() === "date added" ? "Date Added" : c));
-
-  // If the existing header isn't actually a 5-col jobs header, don't try to rewrite it.
-  if (headerCells.length !== 5) return headerLines;
-
-  const nextHeader = `| ${headerCells.join(" | ")} |`;
-
-  return [nextHeader, separator, ...rest];
+  return v === "company" || v === "role" || v === "track" || v === "apply" || v === "date added";
 }
 
 export function extractAnchoredBlock(readme: string): { before: string; block: string; after: string } {
@@ -110,7 +94,7 @@ export function parseExistingRowsFromBlock(block: string): { headerLines: string
 }
 
 function extractJobPostingIdFromTrackCell(cells: string[]): string | null {
-  // Expected columns: Company | Role | Track | Apply | Added
+  // Expected columns: Company | Role | Track | Apply | Date Added
   const trackCell = cells[2] ?? "";
   const match = trackCell.match(/\/job\/([0-9a-fA-F-]{36})/);
 
@@ -118,7 +102,7 @@ function extractJobPostingIdFromTrackCell(cells: string[]): string | null {
 }
 
 export function renderJobsTable(params: { headerLines?: string[]; dbRows: ReadmeJobRow[]; preservedCommunityLines: string[] }): string {
-  const headerLines = normalizeHeaderLines(params.headerLines);
+  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Apply | Date Added |", "|---|---|:---:|:---:|:---:|"];
 
   const dbLines = params.dbRows.map((r) => `| ${r.companyMarkdown} | ${r.roleMarkdown} | ${r.trackMarkdown} | ${r.applyMarkdown} | ${r.addedMarkdown} |`);
 

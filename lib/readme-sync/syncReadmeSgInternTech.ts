@@ -15,18 +15,11 @@ const sgDateFormatter = new Intl.DateTimeFormat("en-SG", {
   timeZone: "Asia/Singapore",
 });
 
-function createShieldButton(params: { label: string; color: string }): string {
-  const query = new URLSearchParams({
-    // Shields rejects empty `message`, so we render as a single-segment badge by
-    // leaving `label` blank and putting the button text in `message`.
-    label: "",
-    message: params.label.toUpperCase(),
-    color: params.color,
-    labelColor: params.color,
-    style: "for-the-badge",
-  });
+function createReadmeButtonImg(params: { buttonType: "track" | "apply"; width?: number }): string {
+  const src = `readme-buttons/${params.buttonType}.svg`;
+  const widthAttr = params.width ? ` width="${params.width}"` : "";
 
-  return `https://img.shields.io/static/v1?${query.toString()}`;
+  return `<img alt="${params.buttonType === "apply" ? "Apply" : "Track"}" src="${src}"${widthAttr} />`;
 }
 
 function formatDateSingapore(dateInput: string): string {
@@ -58,15 +51,15 @@ export async function syncReadmeSgInternTechVerifiedJobs(): Promise<SyncReadmeRe
 
   for (const job of exportJobs) {
     const trackHref = `${baseUrl}/job/${job.jobPostingId}?${UTM_PARAMS}`;
-    const trackBtn = createShieldButton({ label: "Track", color: "6B7280" });
-    const applyBtn = createShieldButton({ label: "Apply", color: "4B5563" });
+    const trackBtn = createReadmeButtonImg({ buttonType: "track", width: 180 });
+    const applyBtn = createReadmeButtonImg({ buttonType: "apply", width: 180 });
 
     desiredDbOrder.push(job.jobPostingId);
     desiredDbRowsById.set(job.jobPostingId, {
       companyMarkdown: `[${escapePipes(job.companyName)}](${baseUrl}/company/${job.companyId}?${UTM_PARAMS})`,
       roleMarkdown: escapePipes(job.title),
-      trackMarkdown: `<a href="${trackHref}"><img alt="Track" src="${trackBtn}" /></a>`,
-      applyMarkdown: job.applyUrl ? `<a href="${job.applyUrl}"><img alt="Apply" src="${applyBtn}" /></a>` : "-",
+      trackMarkdown: `<a href="${trackHref}">${trackBtn}</a>`,
+      applyMarkdown: job.applyUrl ? `<a href="${job.applyUrl}">${applyBtn}</a>` : "-",
       addedMarkdown: formatDateSingapore(job.createdAt),
     });
   }
