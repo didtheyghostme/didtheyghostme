@@ -51,8 +51,8 @@ export async function syncReadmeSgInternTechVerifiedJobs(): Promise<SyncReadmeRe
 
   for (const job of exportJobs) {
     const trackHref = `${baseUrl}/job/${job.jobPostingId}?${UTM_PARAMS}`;
-    const trackBtn = createReadmeButtonImg({ buttonType: "track", width: 180 });
-    const applyBtn = createReadmeButtonImg({ buttonType: "apply", width: 180 });
+    const trackBtn = createReadmeButtonImg({ buttonType: "track", width: 160 });
+    const applyBtn = createReadmeButtonImg({ buttonType: "apply", width: 160 });
 
     desiredDbOrder.push(job.jobPostingId);
     desiredDbRowsById.set(job.jobPostingId, {
