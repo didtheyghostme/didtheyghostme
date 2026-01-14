@@ -14,6 +14,28 @@ export type ExistingReadmeRow = {
   jobPostingId: string | null; // parsed from TRACK cell
 };
 
+function isHeaderCell(cell: string): boolean {
+  const v = cell.trim().toLowerCase();
+
+  return v === "company" || v === "role" || v === "track" || v === "apply" || v === "added" || v === "date added" || v === "date posted";
+}
+
+function normalizeHeaderLines(headerLines?: string[]): string[] {
+  const fallback = ["| Company | Role | Track | Apply | Date Added |", "|---|---|---|---|:---:|"];
+
+  if (!headerLines?.length || headerLines.length < 2) return fallback;
+
+  const [header, separator, ...rest] = headerLines;
+  const headerCells = splitTableCells(header).map((c) => (c.trim().toLowerCase() === "added" ? "Date Added" : c.trim().toLowerCase() === "date added" ? "Date Added" : c));
+
+  // If the existing header isn't actually a 5-col jobs header, don't try to rewrite it.
+  if (headerCells.length !== 5) return headerLines;
+
+  const nextHeader = `| ${headerCells.join(" | ")} |`;
+
+  return [nextHeader, separator, ...rest];
+}
+
 export function extractAnchoredBlock(readme: string): { before: string; block: string; after: string } {
   const startIdx = readme.indexOf(JOBS_TABLE_START);
   const endIdx = readme.indexOf(JOBS_TABLE_END);
@@ -69,10 +91,7 @@ export function parseExistingRowsFromBlock(block: string): { headerLines: string
     }
 
     const cells = splitTableCells(normalized);
-    // const looksLikeHeader = cells.some((c) => /company|role|track|apply|added/i.test(c));
-    const looksLikeHeader = cells.some((c) => /^(company|role|track|apply|added)$/i.test(c));
-    // const normalizedCells = cells.map((c) => c.trim().toLowerCase());
-    // const looksLikeHeader = normalizedCells[0] === "company" && normalizedCells[1] === "role" && normalizedCells[2] === "track" && normalizedCells[3] === "apply" && normalizedCells[4] === "added";
+    const looksLikeHeader = cells.some((c) => isHeaderCell(c));
 
     const looksLikeSeparator = cells.every((c) => /^:?-+:?$/.test(c) || c === "---");
 
@@ -99,7 +118,7 @@ function extractJobPostingIdFromTrackCell(cells: string[]): string | null {
 }
 
 export function renderJobsTable(params: { headerLines?: string[]; dbRows: ReadmeJobRow[]; preservedCommunityLines: string[] }): string {
-  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Apply | Added |", "|---|---|---|---|:---:|"];
+  const headerLines = normalizeHeaderLines(params.headerLines);
 
   const dbLines = params.dbRows.map((r) => `| ${r.companyMarkdown} | ${r.roleMarkdown} | ${r.trackMarkdown} | ${r.applyMarkdown} | ${r.addedMarkdown} |`);
 
