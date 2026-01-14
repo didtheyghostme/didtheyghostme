@@ -6,18 +6,32 @@ export type ReadmeJobRow = {
   roleMarkdown: string;
   trackMarkdown: string;
   applyMarkdown: string;
-  addedMarkdown: string; // YYYY-MM-DD
+  addedMarkdown: string; // rendered, e.g. "07 Sep 2025"
 };
 
 export type ExistingReadmeRow = {
   rawLine: string;
+  cells: string[];
   jobPostingId: string | null; // parsed from TRACK cell
+};
+
+type ParsedDate = {
+  timestampMs: number;
+  display: string;
+};
+
+type RowKind = "community" | "db";
+
+type MergedRow = ReadmeJobRow & {
+  rowKind: RowKind;
+  sortTimestampMs: number;
+  tieBreakIndex: number;
 };
 
 function isHeaderCell(cell: string): boolean {
   const v = cell.trim().toLowerCase();
 
-  return v === "company" || v === "role" || v === "track" || v === "apply" || v === "date added";
+  return v === "company" || v === "role" || v === "track" || v === "application" || v === "date added";
 }
 
 export function extractAnchoredBlock(readme: string): { before: string; block: string; after: string } {
@@ -87,31 +101,143 @@ export function parseExistingRowsFromBlock(block: string): { headerLines: string
     // Data row
     const jobPostingId = extractJobPostingIdFromTrackCell(cells);
 
-    rows.push({ rawLine: normalized, jobPostingId });
+    rows.push({ rawLine: normalized, cells, jobPostingId });
   }
 
   return { headerLines, rows, otherLines };
 }
 
 function extractJobPostingIdFromTrackCell(cells: string[]): string | null {
-  // Expected columns: Company | Role | Track | Apply | Date Added
+  // Expected columns: Company | Role | Track | Application | Date Added
   const trackCell = cells[2] ?? "";
   const match = trackCell.match(/\/job\/([0-9a-fA-F-]{36})/);
 
   return match?.[1] ?? null;
 }
 
-export function renderJobsTable(params: { headerLines?: string[]; dbRows: ReadmeJobRow[]; preservedCommunityLines: string[] }): string {
-  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Apply | Date Added |", "|---|---|:---:|:---:|:---:|"];
+const APPLY_BUTTON_IMG = '<img alt="Apply" src="readme-buttons/apply.svg" width="160" />';
+const INVALID_DATE_MARKER = "INVALID (use YYYY-MM-DD)";
 
-  const dbLines = params.dbRows.map((r) => `| ${r.companyMarkdown} | ${r.roleMarkdown} | ${r.trackMarkdown} | ${r.applyMarkdown} | ${r.addedMarkdown} |`);
+const sgDateFormatter = new Intl.DateTimeFormat("en-SG", {
+  day: "2-digit", // "07"
+  month: "short", // "Sep"
+  year: "numeric", // "2025"
+  timeZone: "Asia/Singapore",
+});
+
+function formatDateSingapore(date: Date): string {
+  if (Number.isNaN(date.getTime())) return "";
+
+  return sgDateFormatter.format(date);
+}
+
+function parseDateAdded(input: string): ParsedDate | null {
+  const raw = input.trim();
+
+  if (!raw) return null;
+
+  // ISO (contributors): YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const d = new Date(raw);
+
+    if (Number.isNaN(d.getTime())) return null;
+
+    return { timestampMs: d.getTime(), display: formatDateSingapore(d) };
+  }
+
+  // Rendered DB format: "07 Sep 2025"
+  const m = raw.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})$/);
+
+  if (m) {
+    const day = Number(m[1]);
+    const monthRaw = m[2].toLowerCase();
+    const year = Number(m[3]);
+    const monthMap: Record<string, number> = {
+      jan: 0,
+      january: 0,
+      feb: 1,
+      february: 1,
+      mar: 2,
+      march: 2,
+      apr: 3,
+      april: 3,
+      may: 4,
+      jun: 5,
+      june: 5,
+      jul: 6,
+      july: 6,
+      aug: 7,
+      august: 7,
+      sep: 8,
+      sept: 8,
+      september: 8,
+      oct: 9,
+      october: 9,
+      nov: 10,
+      november: 10,
+      dec: 11,
+      december: 11,
+    };
+    const month = monthMap[monthRaw];
+
+    if (month === undefined) return null;
+
+    const d = new Date(Date.UTC(year, month, day));
+
+    if (Number.isNaN(d.getTime())) return null;
+
+    return { timestampMs: d.getTime(), display: formatDateSingapore(d) };
+  }
+
+  return null;
+}
+
+function isPlainHttpUrl(input: string): boolean {
+  const v = input.trim();
+
+  return /^https?:\/\/\S+$/i.test(v);
+}
+
+function escapeHtmlAttr(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function normalizeCommunityApplyCellToButton(cell: string): string {
+  const trimmed = cell.trim();
+
+  if (!trimmed || trimmed === "-") return "-";
+  if (!isPlainHttpUrl(trimmed)) return trimmed;
+
+  const href = escapeHtmlAttr(trimmed);
+
+  return `<a href="${href}">${APPLY_BUTTON_IMG}</a>`;
+}
+
+function normalizeCommunityRowFromCells(cells: string[]): { row: ReadmeJobRow; parsedDate: ParsedDate | null } | null {
+  // Expected columns: Company | Role | Track | Application | Date Added
+  if (cells.length < 5) return null;
+
+  const companyMarkdown = cells[0] ?? "";
+  const roleMarkdown = cells[1] ?? "";
+  const trackMarkdown = cells[2] ?? "";
+  const applyMarkdown = normalizeCommunityApplyCellToButton(cells[3] ?? "");
+  const originalAdded = (cells[4] ?? "").trim();
+  const parsedDate = parseDateAdded(originalAdded);
+  const addedMarkdown = parsedDate?.display ?? `${INVALID_DATE_MARKER}: ${originalAdded || "EMPTY_CELL"}`;
+
+  return { row: { companyMarkdown, roleMarkdown, trackMarkdown, applyMarkdown, addedMarkdown }, parsedDate };
+}
+
+export function renderJobsTable(params: { headerLines?: string[]; rows: ReadmeJobRow[] }): string {
+  const headerLines = params.headerLines?.length && params.headerLines.length >= 2 ? params.headerLines : ["| Company | Role | Track | Application | Date Added |", "|---|---|:---:|:---:|:---:|"];
+
+  const lines = params.rows.map((r) => `| ${r.companyMarkdown} | ${r.roleMarkdown} | ${r.trackMarkdown} | ${r.applyMarkdown} | ${r.addedMarkdown} |`);
 
   const out: string[] = [];
 
   out.push("");
   out.push(...headerLines);
-  out.push(...dbLines);
-  if (params.preservedCommunityLines.length > 0) out.push(...params.preservedCommunityLines);
+  out.push(...lines);
   out.push("");
 
   return out.join("\n");
@@ -122,21 +248,49 @@ export function mergeReadmeJobsTable(params: { readme: string; desiredDbRowsById
 
   const parsed = parseExistingRowsFromBlock(block);
 
-  const preservedCommunityLines = parsed.rows.filter((r) => !r.jobPostingId).map((r) => r.rawLine);
+  const mergedRows: MergedRow[] = [];
 
-  const dbRows: ReadmeJobRow[] = [];
-
-  for (const id of params.desiredDbOrder) {
+  // DB rows (source-of-truth): deterministic order from params.desiredDbOrder
+  for (let i = 0; i < params.desiredDbOrder.length; i++) {
+    const id = params.desiredDbOrder[i];
     const row = params.desiredDbRowsById.get(id);
 
-    if (row) dbRows.push(row);
+    if (!row) continue;
+
+    const parsedDate = parseDateAdded(row.addedMarkdown);
+
+    mergedRows.push({
+      ...row,
+      rowKind: "db",
+      sortTimestampMs: parsedDate?.timestampMs ?? Number.POSITIVE_INFINITY,
+      tieBreakIndex: i,
+    });
   }
 
-  const nextBlock = renderJobsTable({
-    headerLines: parsed.headerLines,
-    dbRows,
-    preservedCommunityLines,
+  // Community rows: taken from existing README table, normalized (Application URL -> button; ISO date -> display)
+  const communityRows = parsed.rows.filter((r) => !r.jobPostingId);
+
+  for (let i = 0; i < communityRows.length; i++) {
+    const normalized = normalizeCommunityRowFromCells(communityRows[i].cells);
+
+    if (!normalized) continue;
+
+    mergedRows.push({
+      ...normalized.row,
+      rowKind: "community",
+      sortTimestampMs: normalized.parsedDate?.timestampMs ?? Number.POSITIVE_INFINITY,
+      tieBreakIndex: i,
+    });
+  }
+
+  mergedRows.sort((a, b) => {
+    if (a.sortTimestampMs !== b.sortTimestampMs) return b.sortTimestampMs - a.sortTimestampMs;
+    if (a.rowKind !== b.rowKind) return a.rowKind === "community" ? -1 : 1; // community first on ties
+
+    return a.tieBreakIndex - b.tieBreakIndex;
   });
+
+  const nextBlock = renderJobsTable({ headerLines: parsed.headerLines, rows: mergedRows });
 
   const nextReadme = `${before}${nextBlock}${after}`;
 
