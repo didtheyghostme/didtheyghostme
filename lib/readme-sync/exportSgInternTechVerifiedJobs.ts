@@ -73,15 +73,21 @@ export async function exportSgInternTechVerifiedJobs(): Promise<ExportReadmeJob[
 
   const selectString = buildSelectString(selectObject);
 
-  const { data, error } = await supabase.from(DBTable.JOB_POSTING).select(selectString).eq("job_status", JOB_STATUS.Verified).returns<ExportJobRow[]>();
+  const { data, error } = await supabase
+    .from(DBTable.JOB_POSTING)
+    .select(selectString)
+    .eq("job_status", JOB_STATUS.Verified)
+    // Deterministic ordering at the source: newest first; tie-break on id.
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .returns<ExportJobRow[]>();
 
   if (error) throw error;
 
   const filtered = (data ?? [])
     .filter((job) => hasCountry(job, "Singapore"))
     .filter((job) => hasExperienceLevel(job, "Internship"))
-    .filter((job) => hasJobCategory(job, "Tech"))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    .filter((job) => hasJobCategory(job, "Tech"));
 
   return filtered.map((job) => ({
     jobPostingId: job.id,
