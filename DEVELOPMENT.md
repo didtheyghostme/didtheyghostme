@@ -40,19 +40,43 @@ Ensure you have the `.env` file in the root directory. You can copy the `.env.ex
 cp .env.example .env
 ```
 
+
+
 ### 3.1 README Sync (optional)
 
-If you want the admin workflow to sync Verified jobs to a separate GitHub repo README (Singapore + Internship + Tech), set:
+If you want the admin workflow to sync `Verified` jobs into a separate GitHub repository README (useful for maintaining public job lists like [`didtheyghostme/Singapore-Summer2026-TechInternships`](https://github.com/didtheyghostme/Singapore-Summer2026-TechInternships)), set:
 
-- `README_SYNC_GITHUB_TOKEN`: GitHub token with write access to the target repo
-- `README_SYNC_REPO`: `owner/repo` (e.g. `didtheyghostme/Summer2026-Internships`)
-- `README_SYNC_PATH`: file path (default: `README.md`)
-- `README_SYNC_SITE_URL`: base URL for internal links (default: `https://didtheyghost.me`)
+- `README_SYNC_GITHUB_TOKEN`  
+  Create a fine-grained personal access token at **GitHub Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**. Select the target repository (`README_SYNC_REPO`), then under **Repository permissions**, enable **Contents: Read & Write**.
+  
+- `README_SYNC_REPO`  
+  Target repository in `owner/repo` format  
+  (e.g. `didtheyghostme/Singapore-Summer2026-TechInternships`)
 
-The target README must contain anchors:
+- `README_SYNC_PATH`  
+  File path to update (default: `README.md`)
 
-- `<!-- JOBS_TABLE_START -->`
-- `<!-- JOBS_TABLE_END -->`
+- `README_SYNC_SITE_URL`  
+  Base URL used for internal links  
+  (default: `https://didtheyghost.me`)
+
+**Note:** The current implementation filters for jobs matching:
+- Country: `Singapore`
+- Experience Level: `Internship`
+- Job Category: `Tech`
+- Job Status: `Verified`
+
+To customize these filters (e.g., for different countries, experience levels, or job categories), modify the filtering logic in `lib/readme-sync/exportSgInternTechVerifiedJobs.ts`.
+
+The target README **must** include the following markers:
+
+```md
+<!-- JOBS_TABLE_START -->
+<!-- JOBS_TABLE_END -->
+```
+
+
+
 
 ## 4. Supabase setup
 Follow these steps to link your local project to your Supabase database and apply migrations. ([Supabase docs](https://supabase.com/docs/guides/local-development))
