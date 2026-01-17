@@ -35,6 +35,16 @@ function escapePipes(text: string): string {
   return text.replaceAll("|", "\\|");
 }
 
+function escapeHtmlAttr(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function sanitizeHrefForReadmeTable(url: string): string {
+  // Avoid raw pipes in the Markdown row (`|` is the table delimiter).
+  // Also HTML-escape so `href="..."` can't be broken by special characters.
+  return escapeHtmlAttr(url.replaceAll("|", "%7C"));
+}
+
 export type SyncReadmeResult = {
   didChange: boolean;
   exportedCount: number;
@@ -62,7 +72,7 @@ export async function syncReadmeSgInternTechVerifiedJobs(): Promise<SyncReadmeRe
       companyMarkdown: `[${escapePipes(job.companyName)}](${baseUrl}/company/${job.companyId}?${UTM_PARAMS})`,
       roleMarkdown: escapePipes(job.title),
       trackMarkdown: `<a href="${trackHref}">${trackBtn}</a>`,
-      applyMarkdown: job.applyUrl ? `<a href="${job.applyUrl}">${applyBtn}</a>` : "-",
+      applyMarkdown: job.applyUrl ? `<a href="${sanitizeHrefForReadmeTable(job.applyUrl)}">${applyBtn}</a>` : "-",
       addedMarkdown: formatDateSingapore(job.createdAt),
     });
   }

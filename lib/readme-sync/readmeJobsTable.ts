@@ -59,13 +59,35 @@ function isTableRowLine(line: string): boolean {
   return t.startsWith("|") && t.endsWith("|") && t.split("|").length >= 3;
 }
 
+function isEscapedPipe(s: string, pipeIndex: number): boolean {
+  // Markdown tables use `|` as delimiter, but `\|` is a literal pipe.
+  // A pipe is escaped when it has an odd number of backslashes immediately before it.
+  let backslashes = 0;
+  for (let i = pipeIndex - 1; i >= 0 && s[i] === "\\"; i--) backslashes++;
+
+  return backslashes % 2 === 1;
+}
+
 function splitTableCells(line: string): string[] {
   // "| a | b |" -> ["a","b"]
-  return line
-    .trim()
-    .slice(1, -1)
-    .split("|")
-    .map((c) => c.trim());
+  const s = line.trim().slice(1, -1); // remove outer pipes
+  const cells: string[] = [];
+  let cur = "";
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i] ?? "";
+
+    if (ch === "|" && !isEscapedPipe(s, i)) {
+      cells.push(cur.trim());
+      cur = "";
+      continue;
+    }
+
+    cur += ch;
+  }
+
+  cells.push(cur.trim());
+  return cells;
 }
 
 export function parseExistingRowsFromBlock(block: string): { headerLines: string[]; rows: ExistingReadmeRow[]; otherLines: string[] } {
@@ -208,7 +230,8 @@ function normalizeCommunityApplyCellToButton(cell: string): string {
   if (!trimmed || trimmed === "-") return "-";
   if (!isPlainHttpUrl(trimmed)) return trimmed;
 
-  const href = escapeHtmlAttr(trimmed);
+  // Avoid raw pipes in the Markdown row (`|` is the table delimiter).
+  const href = escapeHtmlAttr(trimmed.replaceAll("|", "%7C"));
 
   return `<a href="${href}">${APPLY_BUTTON_IMG}</a>`;
 }
