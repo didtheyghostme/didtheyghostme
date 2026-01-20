@@ -63,6 +63,7 @@ function isEscapedPipe(s: string, pipeIndex: number): boolean {
   // Markdown tables use `|` as delimiter, but `\|` is a literal pipe.
   // A pipe is escaped when it has an odd number of backslashes immediately before it.
   let backslashes = 0;
+
   for (let i = pipeIndex - 1; i >= 0 && s[i] === "\\"; i--) backslashes++;
 
   return backslashes % 2 === 1;
@@ -87,6 +88,7 @@ function splitTableCells(line: string): string[] {
   }
 
   cells.push(cur.trim());
+
   return cells;
 }
 
