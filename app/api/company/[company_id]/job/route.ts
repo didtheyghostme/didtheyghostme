@@ -37,8 +37,8 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     .select(selectString)
     .eq("company_id", params.company_id)
     .neq("job_status", JOB_STATUS.Rejected)
-    .order("job_posted_date", { ascending: false })
-    .order("updated_at", { ascending: false });
+    .order("job_posted_date", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false, nullsFirst: false });
 
   if (error) {
     if (error.code === ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
