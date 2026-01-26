@@ -37,7 +37,7 @@ export async function GET(request: Request, { params }: { params: { company_id: 
     .select(selectString)
     .eq("company_id", params.company_id)
     .neq("job_status", JOB_STATUS.Rejected)
-    .order("job_posted_date", { ascending: true })
+    .order("job_posted_date", { ascending: false })
     .order("updated_at", { ascending: false });
 
   if (error) {
