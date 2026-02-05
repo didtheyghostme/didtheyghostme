@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import { useCreateCompany } from "@/lib/hooks/useCreateCompany";
 import { ERROR_MESSAGES, getErrorMessage, isRateLimitError } from "@/lib/errorHandling";
@@ -16,6 +17,7 @@ type CreateCompanyModalProps = {
 };
 
 export function CreateCompanyModal({ isOpen, onClose, onSubmitSuccess }: CreateCompanyModalProps) {
+  const router = useRouter();
   const { createCompany, isCreating } = useCreateCompany();
 
   const {
@@ -36,9 +38,14 @@ export function CreateCompanyModal({ isOpen, onClose, onSubmitSuccess }: CreateC
 
   const onSubmit = async (data: CompanyFormData) => {
     try {
-      await createCompany(data);
+      const { company_id } = await createCompany(data);
 
-      toast.success("Company created successfully");
+      toast.success("Company created successfully", {
+        action: {
+          label: "View",
+          onClick: () => router.push(`/company/${company_id}`),
+        },
+      });
 
       reset();
       onSubmitSuccess();
