@@ -96,7 +96,7 @@ export function JobPostingCard({
 
             <p>
               Internal URL:{" "}
-              <Link className="text-primary underline" href={`/job/${jobPosting.id}`}>
+              <Link className="text-primary underline" href={`/job/${jobPosting.id}`} target="_blank">
                 View
               </Link>
             </p>
