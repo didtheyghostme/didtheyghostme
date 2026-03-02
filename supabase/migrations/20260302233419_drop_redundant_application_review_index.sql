@@ -1,0 +1,1 @@
+drop index if exists "public"."idx_application_review_application_id";
