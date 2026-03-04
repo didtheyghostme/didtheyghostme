@@ -1,10 +1,12 @@
+import type { GetApplicationReviewResponse } from "@/app/api/application/[application_id]/review/route";
+import type { GetAllReviewsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/review/route";
+import type { PutApplicationReviewBody } from "@/lib/schema/applicationReviewSchema";
+
 import useSWR from "swr";
 
 import { API } from "@/lib/constants/apiRoutes";
-import { ClerkAuthUserId, mutateWithAuthKey, useSWRMutationWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { fetcher } from "@/lib/fetcher";
-import { GetAllReviewsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/review/route";
-import { GetApplicationReviewResponse } from "@/app/api/application/[application_id]/review/route";
+import { mutateWithAuthKey, useSWRMutationWithAuthKey, useSWRWithAuthKey, type ClerkAuthUserId } from "@/lib/hooks/useSWRWithAuthKey";
 
 async function putJson<TBody, TResult>(url: string, body: TBody): Promise<TResult> {
   const res = await fetch(url, {
@@ -33,7 +35,7 @@ export function useApplicationReview(application_id: string, userId: ClerkAuthUs
 }
 
 export function useUpsertApplicationReview(application_id: string, userId: ClerkAuthUserId) {
-  const { trigger, isMutating } = useSWRMutationWithAuthKey<{ content: string }, GetApplicationReviewResponse>(
+  const { trigger, isMutating } = useSWRMutationWithAuthKey<PutApplicationReviewBody, GetApplicationReviewResponse>(
     userId ? API.REVIEW.getByApplicationId(application_id) : null,
     userId,
     async (url, { arg }) => putJson<typeof arg, GetApplicationReviewResponse>(url, arg),

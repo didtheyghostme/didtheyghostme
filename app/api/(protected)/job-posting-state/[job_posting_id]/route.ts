@@ -3,9 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { jobPostingStateActionSchema, JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
+import { jobPostingStateActionSchema, type JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
 
 export type GetJobPostingStateResponse = Pick<UserJobPostingStateTable, "job_posting_id" | "to_apply_at" | "skipped_at" | "note" | "created_at" | "updated_at"> | null;
+
+type JobPostingStateNote = Extract<JobPostingStateAction, { action: "set_note" }>["note"];
 
 export async function GET(_request: NextRequest, { params }: { params: { job_posting_id: string } }) {
   const { userId } = auth();
@@ -32,11 +34,10 @@ export async function PUT(request: NextRequest, { params }: { params: { job_post
 
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const json: unknown = await request.json();
-  const parsed = jobPostingStateActionSchema.safeParse(json);
+  const parsed = jobPostingStateActionSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
-  const body: JobPostingStateAction = parsed.data;
+  const body = parsed.data;
 
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -55,11 +56,7 @@ export async function PUT(request: NextRequest, { params }: { params: { job_post
     clear_to_apply: () => ({ ...base, to_apply_at: null }),
     set_skipped: () => ({ ...base, skipped_at: nowIso, to_apply_at: null }),
     clear_skipped: () => ({ ...base, skipped_at: null }),
-    set_note: (note: string | null) => {
-      const normalized = note?.trim() ?? "";
-
-      return { ...base, note: normalized.length > 0 ? normalized : null };
-    },
+    set_note: (note: JobPostingStateNote) => ({ ...base, note }),
   } as const;
 
   const upsertData: UpsertUserJobPostingStatePatch = body.action === "set_note" ? handlers.set_note(body.note) : handlers[body.action]();

@@ -121,7 +121,7 @@ type UserJobPostingStateTable = {
   updated_at: string;
 } & BaseUser;
 
-type InsertUserJobPostingState = Omit<UserJobPostingStateTable, "id" | "created_at" | "updated_at">;
+type InsertUserJobPostingState = Pick<UserJobPostingStateTable, "user_id" | "job_posting_id"> & Partial<Pick<UserJobPostingStateTable, "to_apply_at" | "skipped_at" | "note">>;
 
 type ApplicationReviewTable = {
   id: string;
@@ -131,7 +131,7 @@ type ApplicationReviewTable = {
   updated_at: string;
 } & BaseUser;
 
-type InsertApplicationReview = Omit<ApplicationReviewTable, "id" | "created_at" | "updated_at">;
+type InsertApplicationReview = Pick<ApplicationReviewTable, "user_id" | "application_id" | "content">;
 
 type InterviewTag = "Online Assessment" | "HR/Recruiter" | "Technical" | "Behavioral" | "Hiring Manager" | "Final Round";
 

@@ -3,12 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
+import { putApplicationReviewSchema } from "@/lib/schema/applicationReviewSchema";
 
 export type GetApplicationReviewResponse = Pick<ApplicationReviewTable, "id" | "application_id" | "user_id" | "content" | "created_at" | "updated_at"> | null;
-
-type PutApplicationReviewBody = {
-  content: string;
-};
 
 export async function GET(_request: NextRequest, { params }: { params: { application_id: string } }) {
   const { userId } = auth();
@@ -35,9 +32,10 @@ export async function PUT(request: NextRequest, { params }: { params: { applicat
 
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = (await request.json()) as PutApplicationReviewBody;
+  const parsed = putApplicationReviewSchema.safeParse(await request.json().catch(() => null));
 
-  if (!body?.content || body.content.trim().length === 0) return NextResponse.json({ error: "Content is required" }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  const body = parsed.data;
 
   const supabase = await createClerkSupabaseClientSsr();
 
@@ -47,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: { params: { applicat
       {
         application_id: params.application_id,
         user_id: userId,
-        content: body.content.trim(),
+        content: body.content,
       } satisfies InsertApplicationReview,
       { onConflict: "application_id" },
     )
