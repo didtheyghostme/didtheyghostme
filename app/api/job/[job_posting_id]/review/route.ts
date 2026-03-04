@@ -7,9 +7,7 @@ import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 
 export type GetAllReviewsByJobPostingIdResponse = Array<
   Pick<ApplicationReviewTable, "id" | "content" | "created_at" | "updated_at"> & {
-    [DBTable.APPLICATION]: Pick<ApplicationTable, "id" | "job_posting_id" | "created_at"> & {
-      [DBTable.USER_DATA]: Pick<UserDataTable, "full_name" | "profile_pic_url">;
-    };
+    [DBTable.APPLICATION]: Pick<ApplicationTable, "id" | "job_posting_id" | "created_at"> & JoinedUser;
   }
 >;
 

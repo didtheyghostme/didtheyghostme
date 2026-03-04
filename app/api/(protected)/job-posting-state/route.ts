@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
 
   const selectString = buildSelectString(selectObject);
 
-  let query = supabase.from(DBTable.USER_JOB_POSTING_STATE).select(selectString).eq("user_id", userId).overrideTypes<JobPostingStateListItem[], { merge: false }>();
+  let query = supabase.from(DBTable.USER_JOB_POSTING_STATE).select(selectString).eq("user_id", userId);
 
   if (kind === "to_apply") query = query.not("to_apply_at", "is", null).is("skipped_at", null);
   if (kind === "skipped") query = query.not("skipped_at", "is", null);
   if (kind === "notes") query = query.not("note", "is", null);
 
-  const { data, error } = await query.order("updated_at", { ascending: false });
+  const { data, error } = await query.order("updated_at", { ascending: false }).overrideTypes<JobPostingStateListItem[], { merge: false }>();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
