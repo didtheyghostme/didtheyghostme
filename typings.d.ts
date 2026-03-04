@@ -111,6 +111,28 @@ type ApplicationTable = {
   job_posting_id: string;
 } & BaseUser;
 
+type UserJobPostingStateTable = {
+  id: string;
+  job_posting_id: string;
+  to_apply_at: string | null;
+  skipped_at: string | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+} & BaseUser;
+
+type InsertUserJobPostingState = Omit<UserJobPostingStateTable, "id" | "created_at" | "updated_at">;
+
+type ApplicationReviewTable = {
+  id: string;
+  application_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+} & BaseUser;
+
+type InsertApplicationReview = Omit<ApplicationReviewTable, "id" | "created_at" | "updated_at">;
+
 type InterviewTag = "Online Assessment" | "HR/Recruiter" | "Technical" | "Behavioral" | "Hiring Manager" | "Final Round";
 
 type InterviewTagTable = {

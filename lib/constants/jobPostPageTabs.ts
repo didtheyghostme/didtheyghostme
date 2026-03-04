@@ -3,4 +3,5 @@ export const JOB_POST_PAGE_TABS = {
   ONLINE_ASSESSMENT: "Online Assessment",
   INTERVIEW_EXPERIENCE: "Interview Experience",
   QUESTIONS: "Questions",
+  REVIEWS: "Reviews",
 } as const;

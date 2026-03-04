@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Spacer } from "@heroui/react";
-import { useState } from "react";
+import { Card, CardBody, CardHeader, Divider, Spacer, Textarea } from "@heroui/react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
 import { useAuth } from "@clerk/nextjs";
@@ -25,6 +25,7 @@ import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
+import { useApplicationReview, useUpsertApplicationReview } from "@/lib/hooks/useApplicationReview";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams<{ application_id: string }>();
@@ -46,6 +47,19 @@ export default function InterviewExperiencePage() {
 
   // local states
   const [isEditing, setIsEditing] = useState(false);
+  const { data: applicationReview } = useApplicationReview(application_id, userId);
+  const { upsertApplicationReview, isUpdating: isUpdatingReview } = useUpsertApplicationReview(application_id, userId);
+  const [reviewDraft, setReviewDraft] = useState("");
+  const [hasHydratedReview, setHasHydratedReview] = useState(false);
+
+  useEffect(() => {
+    if (hasHydratedReview) return;
+    if (!userId) return;
+    if (applicationReview === undefined) return;
+
+    setReviewDraft(applicationReview?.content ?? "");
+    setHasHydratedReview(true);
+  }, [applicationReview, hasHydratedReview, userId]);
 
   if (isLoading || interviewRoundsLoading) return <LoadingContent />;
   if (error || interviewRoundsError) {
@@ -131,6 +145,37 @@ export default function InterviewExperiencePage() {
           </>
         )}
       </div>
+
+      {applicationDetails.isCurrentUserItem && (
+        <Card className="mb-8">
+          <CardHeader>
+            <div>
+              <p className="text-base font-semibold">Public review</p>
+              <p className="text-sm text-default-500">Share a short review for other applicants. This will be visible publicly.</p>
+            </div>
+          </CardHeader>
+          <Divider />
+          <CardBody className="flex flex-col gap-3">
+            <Textarea minRows={4} placeholder="Write your review…" value={reviewDraft} onValueChange={setReviewDraft} />
+            <div className="flex justify-end">
+              <CustomButton
+                color="primary"
+                isLoading={isUpdatingReview}
+                onPress={async () => {
+                  try {
+                    await upsertApplicationReview(reviewDraft);
+                    toast.success("Review saved");
+                  } catch {
+                    toast.error("Failed to save review");
+                  }
+                }}
+              >
+                Save review
+              </CustomButton>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {isEditing ? (
         <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} onSave={handleSaveForm} />
