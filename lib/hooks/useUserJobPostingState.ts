@@ -1,6 +1,7 @@
 import { API } from "@/lib/constants/apiRoutes";
 import { ClerkAuthUserId, mutateWithAuthKey, useSWRMutationWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { GetJobPostingStateResponse } from "@/app/api/(protected)/job-posting-state/[job_posting_id]/route";
+import { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
 
 type JobPostingStateListKind = "to_apply" | "skipped" | "notes";
 
@@ -41,7 +42,7 @@ export function useJobPostingStateList(kind: JobPostingStateListKind, userId: Cl
 }
 
 export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAuthUserId) {
-  const { trigger, isMutating } = useSWRMutationWithAuthKey<Partial<Pick<UserJobPostingStateTable, "to_apply_at" | "skipped_at" | "note">>, GetJobPostingStateResponse>(
+  const { trigger, isMutating } = useSWRMutationWithAuthKey<JobPostingStateAction, GetJobPostingStateResponse>(
     userId ? API.PROTECTED.getJobPostingStateByJobPostingId(job_posting_id) : null,
     userId,
     async (url, { arg }) => putJson<typeof arg, GetJobPostingStateResponse>(url, arg),
@@ -54,7 +55,7 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
   };
 
   return {
-    upsertJobPostingState: async (arg: Partial<Pick<UserJobPostingStateTable, "to_apply_at" | "skipped_at" | "note">>) => {
+    upsertJobPostingState: async (arg: JobPostingStateAction) => {
       if (!userId) throw new Error("Unauthorized");
       const result = await trigger(arg);
 

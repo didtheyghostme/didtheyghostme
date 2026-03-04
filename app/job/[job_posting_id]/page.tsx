@@ -434,12 +434,8 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={async () => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
-                    const nowIso = new Date().toISOString();
 
-                    await upsertJobPostingState({
-                      to_apply_at: isToApply ? null : nowIso,
-                      skipped_at: null,
-                    });
+                    await upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" });
                   }}
                 >
                   {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
@@ -452,12 +448,8 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={async () => {
                     const isSkipped = !!jobPostingState?.skipped_at;
-                    const nowIso = new Date().toISOString();
 
-                    await upsertJobPostingState({
-                      skipped_at: isSkipped ? null : nowIso,
-                      to_apply_at: null,
-                    });
+                    await upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" });
                   }}
                 >
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
@@ -478,7 +470,7 @@ export default function JobDetailsPage() {
 
                     if (nextNote === prevNote) return;
 
-                    await upsertJobPostingState({ note: nextNote });
+                    await upsertJobPostingState({ action: "set_note", note: nextNote });
                   }}
                 />
               </div>
