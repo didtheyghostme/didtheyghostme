@@ -42,6 +42,10 @@ export const API = {
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/application`, // return all applications for a job posting
     getByApplicationId: (application_id: string) => `/api/application/${application_id}`, // return one application by id
   },
+  REVIEW: {
+    getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/review`, // return all public reviews for a job posting
+    getByApplicationId: (application_id: string) => `/api/application/${application_id}/review`, // return current user's review for an application
+  },
   INTERVIEW: {
     getAllByApplicationId: (application_id: string) => `/api/application/${application_id}/interview`, // return all interviews for an application
     getAllByJobPostingId: (job_posting_id: string) => `/api/job/${job_posting_id}/interview`, // return all interviews for a job posting
@@ -53,6 +57,8 @@ export const API = {
   },
   PROTECTED: {
     getByCurrentUser: "/api/applications", // return all applications for the current user
+    getJobPostingStateByJobPostingId: (job_posting_id: string) => `/api/job-posting-state/${job_posting_id}`,
+    getJobPostingStateList: ({ kind }: { kind: "to_apply" | "skipped" | "notes" }) => `/api/job-posting-state?kind=${kind}`,
     getSettings: "/api/settings", // return user preferences settings for the current user
     getJobSearchSettings: "/api/settings/job-search", // return user preferences settings for the current user
     getInsertJobSettings: "/api/settings/insert-job", // return user preferences settings for the current user

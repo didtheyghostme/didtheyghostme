@@ -2,9 +2,9 @@
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs } from "@heroui/react";
+import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { Key } from "react";
+import { Key, useEffect, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import mixpanel from "mixpanel-browser";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { InterviewExperienceContent } from "./InterviewExperienceContent";
 import { OnlineAssessmentContent } from "./OnlineAssessmentContent";
 import { QuestionContent } from "./QuestionContent";
 import { SuggestLinkModal } from "./SuggestLinkModal";
+import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
 import { ArrowLeftIcon, FlagIcon, PlusIcon } from "@/components/icons";
@@ -33,6 +34,7 @@ import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
 import { JobDetails } from "@/app/api/job/[job_posting_id]/route";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
+import { useJobPostingState, useUpsertJobPostingState } from "@/lib/hooks/useUserJobPostingState";
 
 // Define the tab mapping
 const TABS = {
@@ -51,6 +53,10 @@ const TABS = {
   [JOB_POST_PAGE_TABS.QUESTIONS]: {
     title: JOB_POST_PAGE_TABS.QUESTIONS,
     content: (job_posting_id: string) => <QuestionContent job_posting_id={job_posting_id} />,
+  },
+  [JOB_POST_PAGE_TABS.REVIEWS]: {
+    title: JOB_POST_PAGE_TABS.REVIEWS,
+    content: (job_posting_id: string) => <ReviewContent job_posting_id={job_posting_id} />,
   },
 } as const;
 
@@ -83,6 +89,20 @@ export default function JobDetailsPage() {
     error: applicationsError,
     isLoading: applicationsIsLoading,
   } = useSWRWithAuthKey<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id), userId);
+
+  const { data: jobPostingState } = useJobPostingState(job_posting_id, userId);
+  const { upsertJobPostingState, isUpdating: isUpdatingJobPostingState } = useUpsertJobPostingState(job_posting_id, userId);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [hasHydratedNote, setHasHydratedNote] = useState(false);
+
+  useEffect(() => {
+    if (hasHydratedNote) return;
+    if (!userId) return;
+    if (jobPostingState === undefined) return;
+
+    setNoteDraft(jobPostingState?.note ?? "");
+    setHasHydratedNote(true);
+  }, [hasHydratedNote, jobPostingState, userId]);
 
   // console.warn("applications", applications);
 
@@ -404,6 +424,59 @@ export default function JobDetailsPage() {
         <Divider />
 
         <CardBody>
+          <SignedIn>
+            <div className="mb-4 flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <CustomButton
+                  color="primary"
+                  isLoading={isUpdatingJobPostingState}
+                  size="sm"
+                  variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
+                  onPress={async () => {
+                    const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
+
+                    await upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" });
+                  }}
+                >
+                  {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
+                </CustomButton>
+
+                <CustomButton
+                  color="default"
+                  isLoading={isUpdatingJobPostingState}
+                  size="sm"
+                  variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
+                  onPress={async () => {
+                    const isSkipped = !!jobPostingState?.skipped_at;
+
+                    await upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" });
+                  }}
+                >
+                  {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
+                </CustomButton>
+              </div>
+
+              <div>
+                <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>
+                <Textarea
+                  minRows={3}
+                  placeholder="Add a private note for this job posting…"
+                  value={noteDraft}
+                  onValueChange={setNoteDraft}
+                  onBlur={async () => {
+                    const normalized = noteDraft.trim();
+                    const nextNote = normalized.length > 0 ? normalized : null;
+                    const prevNote = jobPostingState?.note ?? null;
+
+                    if (nextNote === prevNote) return;
+
+                    await upsertJobPostingState({ action: "set_note", note: nextNote });
+                  }}
+                />
+              </div>
+            </div>
+          </SignedIn>
+
           <SignedIn>
             {applications.currentUserItemId ? (
               <CustomButton
