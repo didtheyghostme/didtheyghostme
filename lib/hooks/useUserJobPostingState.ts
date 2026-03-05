@@ -2,7 +2,7 @@ import type { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSc
 
 import { GetJobPostingStateResponse } from "@/app/api/(protected)/job-posting-state/[job_posting_id]/route";
 import { API } from "@/lib/constants/apiRoutes";
-import { ClerkAuthUserId, mutateWithAuthKey, useSWRMutationWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
+import { ClerkAuthUserId, useSWRMutationWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 
 type JobPostingStateListKind = "to_apply" | "skipped" | "notes";
 
@@ -83,48 +83,6 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
     async (url, { arg }) => putJson<typeof arg, GetJobPostingStateResponse>(url, arg),
   );
 
-  const revalidateList = (kind: JobPostingStateListKind) => mutateWithAuthKey(API.PROTECTED.getJobPostingStateList({ kind }), userId);
-
-  const revalidateListsForAction = (action: JobPostingStateAction["action"], nextState: GetJobPostingStateResponse) => {
-    if (!nextState) return;
-
-    switch (action) {
-      case "set_to_apply":
-        revalidateList("to_apply");
-        revalidateList("skipped");
-
-        return;
-      case "clear_to_apply":
-        revalidateList("to_apply");
-
-        return;
-      case "set_skipped":
-        revalidateList("to_apply");
-        revalidateList("skipped");
-
-        return;
-      case "clear_skipped":
-        revalidateList("skipped");
-
-        return;
-      case "set_note": {
-        revalidateList("notes");
-
-        if (nextState.skipped_at) {
-          revalidateList("skipped");
-
-          return;
-        }
-
-        if (nextState.to_apply_at && !nextState.skipped_at) {
-          revalidateList("to_apply");
-        }
-
-        return;
-      }
-    }
-  };
-
   return {
     upsertJobPostingState: async (arg: JobPostingStateAction) => {
       if (!userId) throw new Error("Unauthorized");
@@ -141,8 +99,6 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
         populateCache: true,
         revalidate: false,
       });
-
-      revalidateListsForAction(arg.action, result);
 
       return result;
     },
