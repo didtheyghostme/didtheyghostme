@@ -24,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: { params: { job_pos
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data ?? null);
+  return NextResponse.json(data);
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { job_posting_id: string } }) {
