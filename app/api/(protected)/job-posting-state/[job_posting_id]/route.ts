@@ -3,38 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
-import { jobPostingStateActionSchema, type JobPostingStateAction, type JobPostingStateNote } from "@/lib/schema/jobPostingStateActionSchema";
+import { buildUpsertPatch, jobPostingStateActionSchema } from "@/lib/schema/jobPostingStateActionSchema";
 
 export type GetJobPostingStateResponse = Pick<UserJobPostingStateTable, "job_posting_id" | "to_apply_at" | "skipped_at" | "note" | "created_at" | "updated_at"> | null;
-
-type BasePatch = Pick<InsertUserJobPostingState, "user_id" | "job_posting_id">;
-
-type PatchByAction = {
-  set_to_apply: BasePatch & { to_apply_at: string; skipped_at: null };
-  clear_to_apply: BasePatch & { to_apply_at: null };
-  set_skipped: BasePatch & { skipped_at: string; to_apply_at: null };
-  clear_skipped: BasePatch & { skipped_at: null };
-  set_note: BasePatch & { note: JobPostingStateNote };
-};
-
-type UpsertUserJobPostingStatePatch = PatchByAction[keyof PatchByAction];
-
-function buildUpsertPatch({ body, userId, jobPostingId, nowIso }: { body: JobPostingStateAction; userId: string; jobPostingId: string; nowIso: string }): UpsertUserJobPostingStatePatch {
-  const base = { user_id: userId, job_posting_id: jobPostingId } satisfies BasePatch;
-
-  switch (body.action) {
-    case "set_to_apply":
-      return { ...base, to_apply_at: nowIso, skipped_at: null };
-    case "clear_to_apply":
-      return { ...base, to_apply_at: null };
-    case "set_skipped":
-      return { ...base, skipped_at: nowIso, to_apply_at: null };
-    case "clear_skipped":
-      return { ...base, skipped_at: null };
-    case "set_note":
-      return { ...base, note: body.note };
-  }
-}
 
 export async function GET(_request: NextRequest, { params }: { params: { job_posting_id: string } }) {
   const { userId } = auth();

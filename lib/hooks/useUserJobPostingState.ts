@@ -1,7 +1,8 @@
+import type { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
+
+import { GetJobPostingStateResponse } from "@/app/api/(protected)/job-posting-state/[job_posting_id]/route";
 import { API } from "@/lib/constants/apiRoutes";
 import { ClerkAuthUserId, mutateWithAuthKey, useSWRMutationWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
-import { GetJobPostingStateResponse } from "@/app/api/(protected)/job-posting-state/[job_posting_id]/route";
-import { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
 
 type JobPostingStateListKind = "to_apply" | "skipped" | "notes";
 
