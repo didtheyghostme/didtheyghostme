@@ -435,7 +435,15 @@ export default function JobDetailsPage() {
                   onPress={async () => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
 
-                    await upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" });
+                    try {
+                      await upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" });
+
+                      toast.success(isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
+                    } catch (err) {
+                      toast.error("Failed to update To Apply", {
+                        description: getErrorMessage(err),
+                      });
+                    }
                   }}
                 >
                   {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
@@ -449,7 +457,15 @@ export default function JobDetailsPage() {
                   onPress={async () => {
                     const isSkipped = !!jobPostingState?.skipped_at;
 
-                    await upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" });
+                    try {
+                      await upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" });
+
+                      toast.success(isSkipped ? "Job removed from your Skipped list" : "Job added to your Skipped list");
+                    } catch (err) {
+                      toast.error("Failed to update Skipped", {
+                        description: getErrorMessage(err),
+                      });
+                    }
                   }}
                 >
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
