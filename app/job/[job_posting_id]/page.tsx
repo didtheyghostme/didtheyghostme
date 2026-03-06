@@ -1,5 +1,7 @@
 "use client";
 
+import type { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSchema";
+
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
@@ -258,6 +260,24 @@ export default function JobDetailsPage() {
     });
   };
 
+  const submitJobPostingStateAction = (action: JobPostingStateAction, successMessage: string) => {
+    const seq = ++jobPostingStateMutationSeqRef.current;
+
+    toast.success(successMessage, {
+      id: jobPostingStateToastId,
+      description: "Saving…",
+    });
+
+    upsertJobPostingState(action).catch((err) => {
+      if (jobPostingStateMutationSeqRef.current !== seq) return;
+
+      toast.error("Couldn’t save — reverted", {
+        id: jobPostingStateToastId,
+        description: getErrorMessage(err),
+      });
+    });
+  };
+
   return (
     <div className="">
       <CustomButton className="mb-4 px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
@@ -443,22 +463,11 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
+                    const action: JobPostingStateAction = {
+                      action: isToApply ? "clear_to_apply" : "set_to_apply",
+                    };
 
-                    const seq = ++jobPostingStateMutationSeqRef.current;
-
-                    toast.success(isToApply ? "Removed from To Apply" : "Added to To Apply", {
-                      id: jobPostingStateToastId,
-                      description: "Saving…",
-                    });
-
-                    upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" }).catch((err) => {
-                      if (jobPostingStateMutationSeqRef.current !== seq) return;
-
-                      toast.error("Couldn’t save — reverted", {
-                        id: jobPostingStateToastId,
-                        description: getErrorMessage(err),
-                      });
-                    });
+                    submitJobPostingStateAction(action, isToApply ? "Removed from To Apply" : "Added to To Apply");
                   }}
                 >
                   {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
@@ -470,22 +479,11 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
+                    const action: JobPostingStateAction = {
+                      action: isSkipped ? "clear_skipped" : "set_skipped",
+                    };
 
-                    const seq = ++jobPostingStateMutationSeqRef.current;
-
-                    toast.success(isSkipped ? "Removed from Skipped" : "Added to Skipped", {
-                      id: jobPostingStateToastId,
-                      description: "Saving…",
-                    });
-
-                    upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" }).catch((err) => {
-                      if (jobPostingStateMutationSeqRef.current !== seq) return;
-
-                      toast.error("Couldn’t save — reverted", {
-                        id: jobPostingStateToastId,
-                        description: getErrorMessage(err),
-                      });
-                    });
+                    submitJobPostingStateAction(action, isSkipped ? "Removed from Skipped" : "Added to Skipped");
                   }}
                 >
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
