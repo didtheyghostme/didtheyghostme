@@ -4,7 +4,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { Key, useEffect, useState } from "react";
+import { Key, useEffect, useRef, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import mixpanel from "mixpanel-browser";
 import { toast } from "sonner";
@@ -91,18 +91,28 @@ export default function JobDetailsPage() {
   } = useSWRWithAuthKey<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id), userId);
 
   const { data: jobPostingState } = useJobPostingState(job_posting_id, userId);
-  const { upsertJobPostingState, isUpdating: isUpdatingJobPostingState } = useUpsertJobPostingState(job_posting_id, userId);
+  const { upsertJobPostingState } = useUpsertJobPostingState(job_posting_id, userId, jobDetails ? { id: jobDetails.id, title: jobDetails.title, company: jobDetails.company } : null);
   const [noteDraft, setNoteDraft] = useState("");
-  const [hasHydratedNote, setHasHydratedNote] = useState(false);
+  const [isNoteDirty, setIsNoteDirty] = useState(false);
+  const jobPostingStateToastId = `jobPostingState:${job_posting_id}`;
+  const jobPostingStateMutationSeqRef = useRef(0);
+  const lastSyncedNoteRef = useRef("");
 
   useEffect(() => {
-    if (hasHydratedNote) return;
     if (!userId) return;
     if (jobPostingState === undefined) return;
 
-    setNoteDraft(jobPostingState?.note ?? "");
-    setHasHydratedNote(true);
-  }, [hasHydratedNote, jobPostingState, userId]);
+    const nextSyncedNote = jobPostingState?.note ?? "";
+    const previousSyncedNote = lastSyncedNoteRef.current;
+    const hasUncommittedEdits = isNoteDirty && noteDraft !== previousSyncedNote;
+
+    lastSyncedNoteRef.current = nextSyncedNote;
+
+    if (hasUncommittedEdits) return;
+
+    setNoteDraft(nextSyncedNote);
+    setIsNoteDirty(false);
+  }, [isNoteDirty, jobPostingState, noteDraft, userId]);
 
   // console.warn("applications", applications);
 
@@ -429,21 +439,26 @@ export default function JobDetailsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <CustomButton
                   color="primary"
-                  isLoading={isUpdatingJobPostingState}
                   size="sm"
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
-                  onPress={async () => {
+                  onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
 
-                    try {
-                      await upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" });
+                    const seq = ++jobPostingStateMutationSeqRef.current;
 
-                      toast.success(isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
-                    } catch (err) {
-                      toast.error("Failed to update To Apply", {
+                    toast.success(isToApply ? "Removed from To Apply" : "Added to To Apply", {
+                      id: jobPostingStateToastId,
+                      description: "Saving…",
+                    });
+
+                    upsertJobPostingState({ action: isToApply ? "clear_to_apply" : "set_to_apply" }).catch((err) => {
+                      if (jobPostingStateMutationSeqRef.current !== seq) return;
+
+                      toast.error("Couldn’t save — reverted", {
+                        id: jobPostingStateToastId,
                         description: getErrorMessage(err),
                       });
-                    }
+                    });
                   }}
                 >
                   {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
@@ -451,21 +466,26 @@ export default function JobDetailsPage() {
 
                 <CustomButton
                   color="default"
-                  isLoading={isUpdatingJobPostingState}
                   size="sm"
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
-                  onPress={async () => {
+                  onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
 
-                    try {
-                      await upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" });
+                    const seq = ++jobPostingStateMutationSeqRef.current;
 
-                      toast.success(isSkipped ? "Job removed from your Skipped list" : "Job added to your Skipped list");
-                    } catch (err) {
-                      toast.error("Failed to update Skipped", {
+                    toast.success(isSkipped ? "Removed from Skipped" : "Added to Skipped", {
+                      id: jobPostingStateToastId,
+                      description: "Saving…",
+                    });
+
+                    upsertJobPostingState({ action: isSkipped ? "clear_skipped" : "set_skipped" }).catch((err) => {
+                      if (jobPostingStateMutationSeqRef.current !== seq) return;
+
+                      toast.error("Couldn’t save — reverted", {
+                        id: jobPostingStateToastId,
                         description: getErrorMessage(err),
                       });
-                    }
+                    });
                   }}
                 >
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
@@ -478,15 +498,25 @@ export default function JobDetailsPage() {
                   minRows={3}
                   placeholder="Add a private note for this job posting…"
                   value={noteDraft}
-                  onValueChange={setNoteDraft}
                   onBlur={async () => {
                     const normalized = noteDraft.trim();
                     const nextNote = normalized.length > 0 ? normalized : null;
                     const prevNote = jobPostingState?.note ?? null;
 
-                    if (nextNote === prevNote) return;
+                    if (nextNote === prevNote) {
+                      setNoteDraft(prevNote ?? "");
+                      setIsNoteDirty(false);
+
+                      return;
+                    }
 
                     await upsertJobPostingState({ action: "set_note", note: nextNote });
+                    setNoteDraft(nextNote ?? "");
+                    setIsNoteDirty(false);
+                  }}
+                  onValueChange={(value) => {
+                    setNoteDraft(value);
+                    setIsNoteDirty(value !== lastSyncedNoteRef.current);
                   }}
                 />
               </div>
