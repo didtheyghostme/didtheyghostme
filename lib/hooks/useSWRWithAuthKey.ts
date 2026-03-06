@@ -1,4 +1,4 @@
-import useSWR, { mutate, SWRConfiguration } from "swr";
+import useSWR, { mutate, MutatorCallback, MutatorOptions, SWRConfiguration } from "swr";
 import useSWRMutation, { SWRMutationConfiguration } from "swr/mutation";
 
 import { fetcher } from "@/lib/fetcher";
@@ -22,7 +22,7 @@ export const authDependentFetcher = async <T = any>([url, _userId]: AuthDependen
  * SWR hook that includes auth state in the cache key
  *
  * @param url - The API endpoint to fetch data from
- * @param userId - The current user's ID (will use ANON_USER_ID if not authenticated)
+ * @param userId - The current user's ID (will use {@link ANON_USER_ID} if not authenticated)
  * @param options - Standard SWR configuration options
  * @returns SWR response with data, error, and other SWR properties
  *
@@ -44,7 +44,7 @@ export const useSWRWithAuthKey = <T>(url: RequestInfo | null | undefined, userId
  * SWR mutation hook that includes auth state in the cache key
  *
  * @param url - The API endpoint for the mutation
- * @param userId - The current user's ID (will use ANON_USER_ID if not authenticated)
+ * @param userId - The current user's ID (will use {@link ANON_USER_ID} if not authenticated)
  * @param mutationFn - The mutation function to execute
  * @param options - Standard SWR mutation configuration options
  * @returns SWR mutation response with trigger, isMutating, and other SWR mutation properties
@@ -70,10 +70,21 @@ export const useSWRMutationWithAuthKey = <TArg, TResult, TError = Error>(
 };
 
 /**
- * Mutate function that uses the same cache key format as `useSWRWithAuthKey`
+ * Mutate function that uses the same cache key format as {@link useSWRWithAuthKey}
  * @param url - The API endpoint to invalidate
- * @param userId - The current user's ID (will use ANON_USER_ID if not authenticated)
+ * @param userId - The current user's ID (will use {@link ANON_USER_ID} if not authenticated)
  */
-export const mutateWithAuthKey = (url: string, userId: ClerkAuthUserId) => {
-  return mutate([url, userId ?? ANON_USER_ID]);
-};
+export function mutateWithAuthKey<Data = any>(url: string, userId: ClerkAuthUserId): Promise<Data | undefined>;
+export function mutateWithAuthKey<Data = any>(
+  url: string,
+  userId: ClerkAuthUserId,
+  data: Data | Promise<Data> | MutatorCallback<Data>,
+  options?: boolean | MutatorOptions<Data>,
+): Promise<Data | undefined>;
+export function mutateWithAuthKey<Data = any>(url: string, userId: ClerkAuthUserId, data?: Data | Promise<Data> | MutatorCallback<Data>, options?: boolean | MutatorOptions<Data>) {
+  const key = [url, userId ?? ANON_USER_ID] as const;
+
+  if (arguments.length === 2) return mutate<Data>(key);
+
+  return mutate<Data>(key, data as Data | Promise<Data> | MutatorCallback<Data>, options);
+}

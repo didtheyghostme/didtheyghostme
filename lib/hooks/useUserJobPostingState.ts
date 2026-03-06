@@ -7,12 +7,12 @@ import { API } from "@/lib/constants/apiRoutes";
 import { ClerkAuthUserId, mutateWithAuthKey, useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 
 type JobPostingStateListKind = "to_apply" | "skipped" | "notes";
-type JobPostingStateSyncListKind = "to_apply" | "skipped";
 type JobPostingStateToggleAction = Exclude<JobPostingStateAction, { action: "set_note" }>;
 type JobPostingStateNoteAction = Extract<JobPostingStateAction, { action: "set_note" }>;
 
 const JOB_POSTING_STATE_SYNC_CHANNEL_NAME = "job-posting-state-sync";
-const JOB_POSTING_STATE_SYNC_LIST_KINDS = ["to_apply", "skipped"] as const satisfies readonly JobPostingStateSyncListKind[];
+const JOB_POSTING_STATE_TOGGLE_SYNC_KINDS = ["to_apply", "skipped"] as const satisfies readonly JobPostingStateListKind[];
+const JOB_POSTING_STATE_NOTE_SYNC_KINDS = ["notes"] as const satisfies readonly JobPostingStateListKind[];
 const JOB_POSTING_STATE_SYNC_PHASE_RANK: Record<JobPostingStateSyncPhase, number> = {
   optimistic: 1,
   confirmed: 2,
@@ -35,7 +35,7 @@ type JobPostingStateSyncPhase = "optimistic" | "confirmed" | "rollback";
 type JobPostingStateSyncMessage = {
   type: "job-posting-state-sync";
   phase: JobPostingStateSyncPhase;
-  kinds: readonly JobPostingStateSyncListKind[];
+  kinds: readonly JobPostingStateListKind[];
   mutationSeq: number;
   originId: string;
   sentAtMs: number;
@@ -46,7 +46,7 @@ type JobPostingStateSyncMessage = {
 };
 type JobPostingStateInvalidationMessage = {
   type: "job-posting-state-invalidated";
-  kinds: readonly JobPostingStateSyncListKind[];
+  kinds: readonly JobPostingStateListKind[];
   originId: string;
   jobPostingId: string;
   userId: string;
@@ -77,15 +77,17 @@ function getJobPostingStateSyncOriginId() {
   if (cachedJobPostingStateSyncOriginId) return cachedJobPostingStateSyncOriginId;
   if (typeof window === "undefined") return null;
 
-  const nextOriginId = window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+  const nextOriginId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
 
   cachedJobPostingStateSyncOriginId = nextOriginId;
 
   return nextOriginId;
 }
 
-function isSyncListKind(kind: JobPostingStateListKind): kind is JobPostingStateSyncListKind {
-  return kind !== "notes";
+function createJobPostingStateChannel() {
+  if (typeof BroadcastChannel === "undefined") return null;
+
+  return new BroadcastChannel(JOB_POSTING_STATE_SYNC_CHANNEL_NAME);
 }
 
 function compareJobPostingStateSyncMarkers(
@@ -126,7 +128,7 @@ function shouldApplyJobPostingStateSyncMessage(latestSyncMarkersByJobPostingId: 
   return true;
 }
 
-function isJobPostingStateInListKind(state: JobPostingStateKnownState, kind: JobPostingStateSyncListKind) {
+function isJobPostingStateInListKind(state: JobPostingStateKnownState, kind: JobPostingStateListKind) {
   if (!state) return false;
 
   switch (kind) {
@@ -134,6 +136,8 @@ function isJobPostingStateInListKind(state: JobPostingStateKnownState, kind: Job
       return !!state.to_apply_at && !state.skipped_at;
     case "skipped":
       return !!state.skipped_at;
+    case "notes":
+      return !!state.note;
   }
 }
 
@@ -152,7 +156,7 @@ function applyJobPostingStateToList({
   jobPosting,
 }: {
   current: JobPostingStateListResponse | undefined;
-  kind: JobPostingStateSyncListKind;
+  kind: JobPostingStateListKind;
   jobPostingId: string;
   state: GetJobPostingStateResponse;
   jobPosting: JobPostingStateListJobPosting;
@@ -168,7 +172,7 @@ function applyJobPostingStateToList({
   return [nextItem, ...filteredItems];
 }
 
-function syncJobPostingStateDetailCache({ jobPostingId, state, userId }: { jobPostingId: string; state: JobPostingStateCacheState; userId: string }) {
+function applyJobPostingStateToDetailCache({ jobPostingId, state, userId }: { jobPostingId: string; state: JobPostingStateCacheState; userId: string }) {
   const detailUrl = API.PROTECTED.getJobPostingStateByJobPostingId(jobPostingId);
 
   if (state === undefined) {
@@ -182,26 +186,28 @@ function syncJobPostingStateDetailCache({ jobPostingId, state, userId }: { jobPo
   });
 }
 
-function syncJobPostingStateToggleListCaches({
+function applyJobPostingStateToListCaches({
   jobPostingId,
   state,
   jobPosting,
+  kinds,
   userId,
 }: {
   jobPostingId: string;
   state: JobPostingStateCacheState;
   jobPosting: JobPostingStateListJobPosting;
+  kinds: readonly JobPostingStateListKind[];
   userId: string;
 }) {
   if (state === undefined) {
-    for (const kind of JOB_POSTING_STATE_SYNC_LIST_KINDS) {
+    for (const kind of kinds) {
       void mutateWithAuthKey<JobPostingStateListResponse>(API.PROTECTED.getJobPostingStateList({ kind }), userId);
     }
 
     return;
   }
 
-  for (const kind of JOB_POSTING_STATE_SYNC_LIST_KINDS) {
+  for (const kind of kinds) {
     const listUrl = API.PROTECTED.getJobPostingStateList({ kind });
 
     void mutateWithAuthKey<JobPostingStateListResponse>(
@@ -220,14 +226,41 @@ function syncJobPostingStateToggleListCaches({
   }
 }
 
+function applyStateToCaches({
+  jobPostingId,
+  state,
+  jobPosting,
+  kinds,
+  userId,
+}: {
+  jobPostingId: string;
+  state: JobPostingStateCacheState;
+  jobPosting: JobPostingStateListJobPosting | null;
+  kinds: readonly JobPostingStateListKind[];
+  userId: string;
+}) {
+  applyJobPostingStateToDetailCache({
+    jobPostingId,
+    state,
+    userId,
+  });
+
+  if (!jobPosting) return;
+
+  applyJobPostingStateToListCaches({
+    jobPostingId,
+    state,
+    jobPosting,
+    kinds,
+    userId,
+  });
+}
+
 function broadcastJobPostingStateSync({ phase, mutationSeq, sentAtMs, jobPostingId, state, jobPosting, kinds, userId }: Omit<JobPostingStateSyncMessage, "originId" | "type">) {
-  if (typeof window === "undefined" || typeof window.BroadcastChannel === "undefined") return;
-
   const originId = getJobPostingStateSyncOriginId();
+  const channel = createJobPostingStateChannel();
 
-  if (!originId) return;
-
-  const channel = new window.BroadcastChannel(JOB_POSTING_STATE_SYNC_CHANNEL_NAME);
+  if (!originId || !channel) return;
 
   channel.postMessage({
     type: "job-posting-state-sync",
@@ -245,13 +278,10 @@ function broadcastJobPostingStateSync({ phase, mutationSeq, sentAtMs, jobPosting
 }
 
 function broadcastJobPostingStateInvalidation({ jobPostingId, kinds, userId }: Omit<JobPostingStateInvalidationMessage, "originId" | "type">) {
-  if (typeof window === "undefined" || typeof window.BroadcastChannel === "undefined") return;
-
   const originId = getJobPostingStateSyncOriginId();
+  const channel = createJobPostingStateChannel();
 
-  if (!originId) return;
-
-  const channel = new window.BroadcastChannel(JOB_POSTING_STATE_SYNC_CHANNEL_NAME);
+  if (!originId || !channel) return;
 
   channel.postMessage({
     type: "job-posting-state-invalidated",
@@ -303,13 +333,11 @@ export function useJobPostingState(job_posting_id: string, userId: ClerkAuthUser
 
   useEffect(() => {
     if (!url || !userId) return;
-    if (typeof window === "undefined" || typeof window.BroadcastChannel === "undefined") return;
 
     const currentOriginId = getJobPostingStateSyncOriginId();
+    const channel = createJobPostingStateChannel();
 
-    if (!currentOriginId) return;
-
-    const channel = new window.BroadcastChannel(JOB_POSTING_STATE_SYNC_CHANNEL_NAME);
+    if (!currentOriginId || !channel) return;
     const handleMessage = (event: MessageEvent<JobPostingStateChannelMessage>) => {
       const message = event.data;
 
@@ -347,14 +375,12 @@ export function useJobPostingStateList(kind: JobPostingStateListKind, userId: Cl
   const latestSyncMarkersByJobPostingIdRef = useRef<Map<string, JobPostingStateSyncMarker>>(new Map());
 
   useEffect(() => {
-    if (!url || !userId || !isSyncListKind(kind)) return;
-    if (typeof window === "undefined" || typeof window.BroadcastChannel === "undefined") return;
+    if (!url || !userId) return;
 
     const currentOriginId = getJobPostingStateSyncOriginId();
+    const channel = createJobPostingStateChannel();
 
-    if (!currentOriginId) return;
-
-    const channel = new window.BroadcastChannel(JOB_POSTING_STATE_SYNC_CHANNEL_NAME);
+    if (!currentOriginId || !channel) return;
     const handleMessage = (event: MessageEvent<JobPostingStateChannelMessage>) => {
       const message = event.data;
 
@@ -405,6 +431,7 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
   const pendingNoteActionRef = useRef<JobPostingStateNoteAction | null>(null);
   const inFlightRef = useRef<Promise<GetJobPostingStateResponse> | null>(null);
   const toggleMutationSeqRef = useRef(0);
+  const broadcastMutationSeqRef = useRef(0);
   const visibleStateRef = useRef<JobPostingStateCacheState>(undefined);
   const toggleBaseStateRef = useRef<JobPostingStateCacheState>(undefined);
   const lastSuccessfulServerStateRef = useRef<JobPostingStateCacheState>(undefined);
@@ -422,28 +449,21 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
     return currentState;
   }
 
-  function syncLocalState(state: JobPostingStateCacheState) {
+  function applyStateToLocalCaches(state: JobPostingStateCacheState, kinds: readonly JobPostingStateListKind[]) {
     if (!userId) return;
 
     visibleStateRef.current = state;
 
-    syncJobPostingStateDetailCache({
-      jobPostingId: job_posting_id,
-      state,
-      userId,
-    });
-
-    if (!jobPosting) return;
-
-    syncJobPostingStateToggleListCaches({
+    applyStateToCaches({
       jobPostingId: job_posting_id,
       state,
       jobPosting,
+      kinds,
       userId,
     });
   }
 
-  function broadcastToggleSyncState(phase: JobPostingStateSyncPhase, mutationSeq: number, sentAtMs: number, state: GetJobPostingStateResponse) {
+  function broadcastStateSync(phase: JobPostingStateSyncPhase, mutationSeq: number, sentAtMs: number, state: GetJobPostingStateResponse, kinds: readonly JobPostingStateListKind[]) {
     if (!userId || !jobPosting) return;
 
     broadcastJobPostingStateSync({
@@ -453,17 +473,17 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
       jobPostingId: job_posting_id,
       state,
       jobPosting,
-      kinds: JOB_POSTING_STATE_SYNC_LIST_KINDS,
+      kinds,
       userId,
     });
   }
 
-  function broadcastToggleInvalidation() {
+  function broadcastStateInvalidation(kinds: readonly JobPostingStateListKind[]) {
     if (!userId) return;
 
     broadcastJobPostingStateInvalidation({
       jobPostingId: job_posting_id,
-      kinds: JOB_POSTING_STATE_SYNC_LIST_KINDS,
+      kinds,
       userId,
     });
   }
@@ -511,74 +531,79 @@ export function useUpsertJobPostingState(job_posting_id: string, userId: ClerkAu
     return inFlightRef.current;
   }
 
+  async function upsertJobPostingState(action: JobPostingStateToggleAction) {
+    if (!userId) throw new Error("Unauthorized");
+
+    const startedNewMutationChain = !inFlightRef.current;
+    const visibleState = resolveVisibleState();
+    const mutationSeq = ++toggleMutationSeqRef.current;
+    const broadcastMutationSeq = ++broadcastMutationSeqRef.current;
+    const sentAtMs = Date.now();
+    const optimisticState = buildOptimisticJobPostingState({
+      current: visibleState,
+      action,
+      jobPostingId: job_posting_id,
+      nowIso: new Date().toISOString(),
+    });
+
+    if (startedNewMutationChain) lastSuccessfulServerStateRef.current = undefined;
+    if (toggleBaseStateRef.current === undefined) toggleBaseStateRef.current = visibleState;
+
+    applyStateToLocalCaches(optimisticState, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+    broadcastStateSync("optimistic", broadcastMutationSeq, sentAtMs, optimisticState, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+
+    try {
+      const result = await runQueuedMutation(action);
+
+      if (toggleMutationSeqRef.current !== mutationSeq) return result;
+
+      applyStateToLocalCaches(result, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+      broadcastStateSync("confirmed", broadcastMutationSeq, sentAtMs, result, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+
+      return result;
+    } catch (err) {
+      if (toggleMutationSeqRef.current !== mutationSeq) throw err;
+
+      const fallbackState = lastSuccessfulServerStateRef.current !== undefined ? lastSuccessfulServerStateRef.current : toggleBaseStateRef.current;
+
+      applyStateToLocalCaches(fallbackState, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+
+      if (fallbackState === undefined) broadcastStateInvalidation(JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+      else broadcastStateSync("rollback", broadcastMutationSeq, sentAtMs, fallbackState, JOB_POSTING_STATE_TOGGLE_SYNC_KINDS);
+
+      throw err;
+    } finally {
+      if (toggleMutationSeqRef.current === mutationSeq) {
+        toggleBaseStateRef.current = undefined;
+        lastSuccessfulServerStateRef.current = undefined;
+      }
+    }
+  }
+
+  async function saveJobPostingStateNote(note: JobPostingStateNoteAction["note"]) {
+    if (!userId) throw new Error("Unauthorized");
+
+    const startedNewMutationChain = !inFlightRef.current;
+
+    if (startedNewMutationChain) {
+      lastSuccessfulServerStateRef.current = undefined;
+      toggleBaseStateRef.current = undefined;
+    }
+
+    const result = await runQueuedMutation({
+      action: "set_note",
+      note,
+    });
+
+    applyStateToLocalCaches(result, JOB_POSTING_STATE_NOTE_SYNC_KINDS);
+
+    broadcastStateSync("confirmed", ++broadcastMutationSeqRef.current, Date.now(), result, JOB_POSTING_STATE_NOTE_SYNC_KINDS);
+
+    return result;
+  }
+
   return {
-    upsertJobPostingState: async (action: JobPostingStateAction) => {
-      if (!userId) throw new Error("Unauthorized");
-
-      const startedNewMutationChain = !inFlightRef.current;
-      const visibleState = resolveVisibleState();
-      const optimisticState = buildOptimisticJobPostingState({
-        current: visibleState,
-        action,
-        jobPostingId: job_posting_id,
-        nowIso: new Date().toISOString(),
-      });
-
-      if (startedNewMutationChain) lastSuccessfulServerStateRef.current = undefined;
-
-      if (action.action === "set_note") {
-        const noteBaseState = visibleState;
-
-        syncLocalState(optimisticState);
-
-        try {
-          const result = await runQueuedMutation(action);
-
-          syncLocalState(result);
-
-          return result;
-        } catch (err) {
-          const fallbackState = lastSuccessfulServerStateRef.current !== undefined ? lastSuccessfulServerStateRef.current : noteBaseState;
-
-          syncLocalState(fallbackState);
-          throw err;
-        }
-      }
-
-      const mutationSeq = ++toggleMutationSeqRef.current;
-      const sentAtMs = Date.now();
-
-      if (startedNewMutationChain) toggleBaseStateRef.current = visibleState;
-
-      syncLocalState(optimisticState);
-      broadcastToggleSyncState("optimistic", mutationSeq, sentAtMs, optimisticState);
-
-      try {
-        const result = await runQueuedMutation(action);
-
-        if (toggleMutationSeqRef.current !== mutationSeq) return result;
-
-        syncLocalState(result);
-        broadcastToggleSyncState("confirmed", mutationSeq, sentAtMs, result);
-
-        return result;
-      } catch (err) {
-        if (toggleMutationSeqRef.current !== mutationSeq) throw err;
-
-        const fallbackState = lastSuccessfulServerStateRef.current !== undefined ? lastSuccessfulServerStateRef.current : toggleBaseStateRef.current;
-
-        syncLocalState(fallbackState);
-
-        if (fallbackState === undefined) broadcastToggleInvalidation();
-        else broadcastToggleSyncState("rollback", mutationSeq, sentAtMs, fallbackState);
-
-        throw err;
-      } finally {
-        if (toggleMutationSeqRef.current === mutationSeq) {
-          toggleBaseStateRef.current = undefined;
-          lastSuccessfulServerStateRef.current = undefined;
-        }
-      }
-    },
+    upsertJobPostingState,
+    saveJobPostingStateNote,
   };
 }

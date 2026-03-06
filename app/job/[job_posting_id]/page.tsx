@@ -63,8 +63,9 @@ const TABS = {
 } as const;
 
 type TabKey = keyof typeof TABS;
-
 const tabKeys = Object.keys(TABS) as TabKey[];
+
+type JobPostingStateToggleAction = Exclude<JobPostingStateAction, { action: "set_note" }>;
 
 export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
@@ -93,9 +94,15 @@ export default function JobDetailsPage() {
   } = useSWRWithAuthKey<GetAllApplicationsByJobPostingIdResponse>(API.APPLICATION.getAllByJobPostingId(job_posting_id), userId);
 
   const { data: jobPostingState } = useJobPostingState(job_posting_id, userId);
-  const { upsertJobPostingState } = useUpsertJobPostingState(job_posting_id, userId, jobDetails ? { id: jobDetails.id, title: jobDetails.title, company: jobDetails.company } : null);
+  const { upsertJobPostingState, saveJobPostingStateNote } = useUpsertJobPostingState(
+    job_posting_id,
+    userId,
+    jobDetails ? { id: jobDetails.id, title: jobDetails.title, company: jobDetails.company } : null,
+  );
   const [noteDraft, setNoteDraft] = useState("");
   const [isNoteDirty, setIsNoteDirty] = useState(false);
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [noteSaveError, setNoteSaveError] = useState<string | null>(null);
   const jobPostingStateToastId = `jobPostingState:${job_posting_id}`;
   const jobPostingStateMutationSeqRef = useRef(0);
   const lastSyncedNoteRef = useRef("");
@@ -260,12 +267,11 @@ export default function JobDetailsPage() {
     });
   };
 
-  const submitJobPostingStateAction = (action: JobPostingStateAction, successMessage: string) => {
+  const submitToggleAction = (action: JobPostingStateToggleAction, successMessage: string) => {
     const seq = ++jobPostingStateMutationSeqRef.current;
 
     toast.success(successMessage, {
       id: jobPostingStateToastId,
-      description: "Saving…",
     });
 
     upsertJobPostingState(action).catch((err) => {
@@ -276,6 +282,43 @@ export default function JobDetailsPage() {
         description: getErrorMessage(err),
       });
     });
+  };
+
+  const handleCancelNote = () => {
+    const syncedNote = jobPostingState?.note ?? "";
+
+    lastSyncedNoteRef.current = syncedNote;
+    setNoteDraft(syncedNote);
+    setIsNoteDirty(false);
+    setNoteSaveError(null);
+  };
+
+  const handleSaveNote = async () => {
+    const normalized = noteDraft.trim();
+    const nextNote = normalized.length > 0 ? normalized : null;
+    const prevNote = jobPostingState?.note ?? null;
+
+    if (nextNote === prevNote) {
+      handleCancelNote();
+
+      return;
+    }
+
+    setIsSavingNote(true);
+    setNoteSaveError(null);
+
+    try {
+      const result = await saveJobPostingStateNote(nextNote);
+      const confirmedNote = result?.note ?? "";
+
+      lastSyncedNoteRef.current = confirmedNote;
+      setNoteDraft(confirmedNote);
+      setIsNoteDirty(false);
+    } catch (err) {
+      setNoteSaveError(getErrorMessage(err));
+    } finally {
+      setIsSavingNote(false);
+    }
   };
 
   return (
@@ -463,11 +506,11 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
-                    const action: JobPostingStateAction = {
+                    const action: JobPostingStateToggleAction = {
                       action: isToApply ? "clear_to_apply" : "set_to_apply",
                     };
 
-                    submitJobPostingStateAction(action, isToApply ? "Removed from To Apply" : "Added to To Apply");
+                    submitToggleAction(action, isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
                   }}
                 >
                   {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
@@ -479,11 +522,11 @@ export default function JobDetailsPage() {
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
-                    const action: JobPostingStateAction = {
+                    const action: JobPostingStateToggleAction = {
                       action: isSkipped ? "clear_skipped" : "set_skipped",
                     };
 
-                    submitJobPostingStateAction(action, isSkipped ? "Removed from Skipped" : "Added to Skipped");
+                    submitToggleAction(action, isSkipped ? "Job removed from your Skipped list" : "Job added to your Skipped list");
                   }}
                 >
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
@@ -493,30 +536,27 @@ export default function JobDetailsPage() {
               <div>
                 <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>
                 <Textarea
+                  isDisabled={isSavingNote}
                   minRows={3}
                   placeholder="Add a private note for this job posting…"
                   value={noteDraft}
-                  onBlur={async () => {
-                    const normalized = noteDraft.trim();
-                    const nextNote = normalized.length > 0 ? normalized : null;
-                    const prevNote = jobPostingState?.note ?? null;
-
-                    if (nextNote === prevNote) {
-                      setNoteDraft(prevNote ?? "");
-                      setIsNoteDirty(false);
-
-                      return;
-                    }
-
-                    await upsertJobPostingState({ action: "set_note", note: nextNote });
-                    setNoteDraft(nextNote ?? "");
-                    setIsNoteDirty(false);
-                  }}
                   onValueChange={(value) => {
                     setNoteDraft(value);
                     setIsNoteDirty(value !== lastSyncedNoteRef.current);
+                    setNoteSaveError(null);
                   }}
                 />
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
+                    Save note
+                  </CustomButton>
+                  <CustomButton color="secondary" isDisabled={!isNoteDirty || isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
+                    Cancel
+                  </CustomButton>
+                  {isSavingNote ? <p className="text-xs text-default-500">Saving note…</p> : null}
+                  {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
+                  {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
+                </div>
               </div>
             </div>
           </SignedIn>
