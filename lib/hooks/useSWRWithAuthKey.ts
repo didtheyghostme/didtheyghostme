@@ -7,7 +7,7 @@ export const ANON_USER_ID = "anonymous"; // Sentinel value for anonymous users -
 
 export type ClerkAuthUserId = string | null | undefined;
 
-type AuthDependentKey = readonly [RequestInfo, ClerkAuthUserId];
+type AuthDependentKey = readonly [RequestInfo, string];
 type AuthDependentMutationKey = readonly [string, string];
 
 /**
@@ -35,7 +35,7 @@ export const useSWRWithAuthKey = <T>(url: RequestInfo | null | undefined, userId
   // Create a stable cache key that changes when auth state changes.
   // Use the sentinel value for anonymous users to ensure consistency.
   // If userId is undefined, it means the user is anonymous.
-  const swrKey: AuthDependentKey | null = url ? ([url, userId ?? ANON_USER_ID] as const) : null;
+  const swrKey: AuthDependentKey | null = url ? [url, userId ?? ANON_USER_ID] : null;
 
   return useSWR<T>(swrKey, authDependentFetcher, options);
 };
@@ -64,27 +64,42 @@ export const useSWRMutationWithAuthKey = <TArg, TResult, TError = Error>(
   mutationFn: (url: string, opts: { arg: TArg }) => Promise<TResult>,
   options?: SWRMutationConfiguration<TResult, TError, AuthDependentMutationKey, TArg>,
 ) => {
-  const swrKey: AuthDependentMutationKey | null = url ? ([url, userId ?? ANON_USER_ID] as const) : null;
+  const swrKey: AuthDependentMutationKey | null = url ? [url, userId ?? ANON_USER_ID] : null;
 
   return useSWRMutation(swrKey, async ([url]: AuthDependentMutationKey, opts: { arg: TArg }) => mutationFn(url, opts), options);
 };
 
+type MutateWithAuthKeyData<Data> = Data | Promise<Data> | MutatorCallback<Data>;
+
 /**
- * Mutate function that uses the same cache key format as {@link useSWRWithAuthKey}
+ * SWR mutate helper that uses the same auth-aware cache key format as `useSWRWithAuthKey`.
+ *
  * @param url - The API endpoint to invalidate
  * @param userId - The current user's ID (will use {@link ANON_USER_ID} if not authenticated)
+ * @param [data] - Optional. Data to set, or updater function
+ * @param [options] - Optional. Mutator options (e.g. `{ revalidate: false }`)
+ *
+ * @example
+ * // Call with only `url` and `userId` to revalidate the cache entry.
+ * mutateWithAuthKey("/api/job-posting-state/123", userId);
+ *
+ * // Call with `data` and optional `options` to update the cache directly.
+ * mutateWithAuthKey("/api/job-posting-state/123", userId, nextState, { revalidate: false });
  */
-export function mutateWithAuthKey<Data = any>(url: string, userId: ClerkAuthUserId): Promise<Data | undefined>;
-export function mutateWithAuthKey<Data = any>(
+export function mutateWithAuthKey<Data = unknown>(url: string, userId: ClerkAuthUserId): Promise<Data | undefined>;
+export function mutateWithAuthKey<Data = unknown>(url: string, userId: ClerkAuthUserId, data: MutateWithAuthKeyData<Data>, options?: boolean | MutatorOptions<Data>): Promise<Data | undefined>;
+export function mutateWithAuthKey<Data = unknown>(
   url: string,
   userId: ClerkAuthUserId,
-  data: Data | Promise<Data> | MutatorCallback<Data>,
-  options?: boolean | MutatorOptions<Data>,
-): Promise<Data | undefined>;
-export function mutateWithAuthKey<Data = any>(url: string, userId: ClerkAuthUserId, data?: Data | Promise<Data> | MutatorCallback<Data>, options?: boolean | MutatorOptions<Data>) {
-  const key = [url, userId ?? ANON_USER_ID] as const;
+  ...args: [] | [data: MutateWithAuthKeyData<Data>, options?: boolean | MutatorOptions<Data>]
+): Promise<Data | undefined> {
+  const key: AuthDependentMutationKey = [url, userId ?? ANON_USER_ID];
 
-  if (arguments.length === 2) return mutate<Data>(key);
+  if (args.length === 0) {
+    return mutate<Data>(key);
+  }
 
-  return mutate<Data>(key, data as Data | Promise<Data> | MutatorCallback<Data>, options);
+  const [data, options] = args;
+
+  return mutate<Data>(key, data, options);
 }
