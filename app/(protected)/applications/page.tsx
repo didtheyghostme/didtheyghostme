@@ -51,11 +51,25 @@ export default function MyApplicationsPage() {
     });
   };
 
-  const mixpanelTrackViewJobPostButtonClick = (jobId: string, clickType: ClickType) => {
+  const mixpanelTrackViewJobPostButtonClick = (jobId: string, clickType: ClickType, tab?: "to_apply" | "applied" | "skipped") => {
     mixpanel.track("My Applications Page", {
       action: "view_job_post_button_clicked",
       job_id: jobId,
       click_type: clickType,
+      tab,
+    });
+  };
+
+  const mixpanelTrackViewJobsWithNotesClick = () => {
+    mixpanel.track("My Applications Page", {
+      action: "view_jobs_with_notes_clicked",
+    });
+  };
+
+  const mixpanelTrackTabChange = (tab: "to_apply" | "applied" | "skipped") => {
+    mixpanel.track("My Applications Page", {
+      action: "tab_changed",
+      tab,
     });
   };
 
@@ -71,12 +85,20 @@ export default function MyApplicationsPage() {
     <>
       <div className="mb-8 flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold sm:text-2xl">My Job Applications</h1>
-        <CustomButton as={NextLink} color="secondary" href="/notes" variant="flat">
+        <CustomButton as={NextLink} color="secondary" href="/notes" variant="flat" onPress={mixpanelTrackViewJobsWithNotesClick}>
           View jobs with notes
         </CustomButton>
       </div>
 
-      <Tabs selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(key as typeof selectedTab)}>
+      <Tabs
+        selectedKey={selectedTab}
+        onSelectionChange={(key) => {
+          const tab = key as typeof selectedTab;
+
+          setSelectedTab(tab);
+          mixpanelTrackTabChange(tab);
+        }}
+      >
         <Tab key="to_apply" title="To Apply">
           {filteredToApplyItems.length === 0 ? (
             <DataNotFoundMessage message="No jobs in your To Apply list yet." title="To Apply is empty" />
@@ -109,7 +131,19 @@ export default function MyApplicationsPage() {
                     <div className="flex flex-col gap-2">
                       {item.note && <p className="line-clamp-2 text-sm text-default-600">{item.note}</p>}
                       <div className="flex gap-2">
-                        <CustomButton as={NextLink} color="secondary" href={`/job/${item.job_posting.id}`} variant="flat">
+                        <CustomButton
+                          as={NextLink}
+                          color="secondary"
+                          href={`/job/${item.job_posting.id}`}
+                          variant="flat"
+                          onContextMenu={() => mixpanelTrackViewJobPostButtonClick(item.job_posting.id, "right_clicked", "to_apply")}
+                          onPress={(e) => mixpanelTrackViewJobPostButtonClick(item.job_posting.id, getClickType(e), "to_apply")}
+                          onAuxClick={(e) => {
+                            if (isMiddleClick(e)) {
+                              mixpanelTrackViewJobPostButtonClick(item.job_posting.id, "middle_clicked", "to_apply");
+                            }
+                          }}
+                        >
                           View Job Post
                         </CustomButton>
                       </div>
@@ -171,11 +205,11 @@ export default function MyApplicationsPage() {
                           color="secondary"
                           href={`/job/${application.job_posting.id}`}
                           variant="flat"
-                          onContextMenu={() => mixpanelTrackViewJobPostButtonClick(application.job_posting.id, "right_clicked")}
-                          onPress={(e) => mixpanelTrackViewJobPostButtonClick(application.job_posting.id, getClickType(e))}
+                          onContextMenu={() => mixpanelTrackViewJobPostButtonClick(application.job_posting.id, "right_clicked", "applied")}
+                          onPress={(e) => mixpanelTrackViewJobPostButtonClick(application.job_posting.id, getClickType(e), "applied")}
                           onAuxClick={(e) => {
                             if (isMiddleClick(e)) {
-                              mixpanelTrackViewJobPostButtonClick(application.job_posting.id, "middle_clicked");
+                              mixpanelTrackViewJobPostButtonClick(application.job_posting.id, "middle_clicked", "applied");
                             }
                           }}
                         >
@@ -238,7 +272,19 @@ export default function MyApplicationsPage() {
                     <div className="flex flex-col gap-2">
                       {item.note && <p className="line-clamp-2 text-sm text-default-600">{item.note}</p>}
                       <div className="flex gap-2">
-                        <CustomButton as={NextLink} color="secondary" href={`/job/${item.job_posting.id}`} variant="flat">
+                        <CustomButton
+                          as={NextLink}
+                          color="secondary"
+                          href={`/job/${item.job_posting.id}`}
+                          variant="flat"
+                          onContextMenu={() => mixpanelTrackViewJobPostButtonClick(item.job_posting.id, "right_clicked", "skipped")}
+                          onPress={(e) => mixpanelTrackViewJobPostButtonClick(item.job_posting.id, getClickType(e), "skipped")}
+                          onAuxClick={(e) => {
+                            if (isMiddleClick(e)) {
+                              mixpanelTrackViewJobPostButtonClick(item.job_posting.id, "middle_clicked", "skipped");
+                            }
+                          }}
+                        >
                           View Job Post
                         </CustomButton>
                       </div>

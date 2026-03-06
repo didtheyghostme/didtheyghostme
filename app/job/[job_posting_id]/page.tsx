@@ -270,6 +270,13 @@ export default function JobDetailsPage() {
   const submitToggleAction = (action: JobPostingStateToggleAction, successMessage: string) => {
     const seq = ++jobPostingStateMutationSeqRef.current;
 
+    mixpanel.track("Job Posting Page - Job State Toggle", {
+      action: action.action,
+      job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
+    });
+
     toast.success(successMessage, {
       id: jobPostingStateToastId,
     });
@@ -310,6 +317,15 @@ export default function JobDetailsPage() {
     try {
       const result = await saveJobPostingStateNote(nextNote);
       const confirmedNote = result?.note ?? "";
+
+      const noteTransition = !prevNote && nextNote ? "added" : prevNote && !nextNote ? "cleared" : "updated";
+
+      mixpanel.track("Job Posting Page - Note Saved", {
+        job_id: job_posting_id,
+        job_title: jobDetails.title,
+        company_name: jobDetails.company.company_name,
+        note_transition: noteTransition,
+      });
 
       lastSyncedNoteRef.current = confirmedNote;
       setNoteDraft(confirmedNote);

@@ -62,6 +62,12 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
   const handleSubmitEditComment = async (content: string) => {
     try {
       await updateComment(content);
+      mixpanel.track("Comment Updated", {
+        entity_type,
+        entity_id,
+        comment_id: editingComment?.id,
+        content,
+      });
       toast.success("Comment updated successfully");
       setEditingComment(null);
     } catch (error) {
@@ -84,6 +90,11 @@ export function CommentSection({ entity_type, entity_id }: CommentSectionProps) 
   const onSubmit = async (data: AddCommentFormValues) => {
     try {
       await createComment(data.content);
+      mixpanel.track("Comment Added", {
+        entity_type,
+        entity_id,
+        content: data.content,
+      });
       reset();
       toast.success("Comment added successfully");
     } catch (error) {

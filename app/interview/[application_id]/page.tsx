@@ -119,6 +119,26 @@ export default function InterviewExperiencePage() {
     setIsEditing(true);
   };
 
+  const handleSaveReview = async () => {
+    try {
+      await upsertApplicationReview(reviewDraft);
+      const reviewTransition = applicationReview?.content ? (reviewDraft ? "updated" : "cleared") : "added";
+
+      mixpanel.track("Interview Experience Page - Public Review Saved", {
+        action: "review_saved",
+        application_id: application_id,
+        job_id: applicationDetails.job_posting_id,
+        job_title: applicationDetails.job_posting.title,
+        company_name: applicationDetails.job_posting.company.company_name,
+        review_content: reviewDraft,
+        review_transition: reviewTransition,
+      });
+      toast.success("Review saved");
+    } catch {
+      toast.error("Failed to save review");
+    }
+  };
+
   return (
     <div className="">
       <CustomButton className="px-0" color="primary" startContent={<ArrowLeftIcon />} variant="light" onPress={handleBackClick}>
@@ -158,18 +178,7 @@ export default function InterviewExperiencePage() {
           <CardBody className="flex flex-col gap-3">
             <Textarea minRows={4} placeholder="Write your review…" value={reviewDraft} onValueChange={setReviewDraft} />
             <div className="flex justify-end">
-              <CustomButton
-                color="primary"
-                isLoading={isUpdatingReview}
-                onPress={async () => {
-                  try {
-                    await upsertApplicationReview(reviewDraft);
-                    toast.success("Review saved");
-                  } catch {
-                    toast.error("Failed to save review");
-                  }
-                }}
-              >
+              <CustomButton color="primary" isLoading={isUpdatingReview} onPress={handleSaveReview}>
                 Save review
               </CustomButton>
             </div>

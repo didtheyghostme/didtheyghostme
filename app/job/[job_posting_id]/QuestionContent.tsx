@@ -53,6 +53,11 @@ export function QuestionContent({ job_posting_id }: QuestionContentProps) {
   const onSubmit = async (data: AddQuestionFormValues) => {
     try {
       await createComment(data.content);
+      mixpanel.track("Question Content Tab", {
+        action: "question_created_success",
+        job_id: job_posting_id,
+        question_content: data.content,
+      });
       reset();
       setIsModalOpen(false);
       toast.success("Question created successfully");

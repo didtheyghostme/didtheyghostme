@@ -100,12 +100,12 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
 
   // #region mixpanel tracking functions
 
-  const trackStatusChange = (value: string) => {
+  const trackStatusChange = (newStatus: string, previousStatus: string) => {
     mixpanel.track("Interview Experience Edit", {
       action: "status_changed",
       application_id: applicationDetails.id,
-      previous_status: methods.getValues("status"),
-      new_status: value,
+      previous_status: previousStatus,
+      new_status: newStatus,
     });
   };
 
@@ -188,8 +188,10 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                     placeholder="Select application status"
                     selectedKeys={[field.value]}
                     onChange={(e) => {
+                      const previousStatus = methods.getValues("status");
+
                       field.onChange(e.target.value);
-                      trackStatusChange(e.target.value);
+                      trackStatusChange(e.target.value, previousStatus);
                     }}
                   >
                     {Object.values(APPLICATION_STATUS).map((value) => (
