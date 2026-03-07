@@ -11,9 +11,11 @@ import { extractDomain } from "@/lib/extractDomain";
 import { mpServerTrack } from "@/lib/mixpanelServer";
 import { ServerActionResult } from "@/lib/sharedTypes";
 
+export type CreateCompanyResult = { company_id: string };
+
 // TODO Aug: use safeParse instead of parse. refactor rate limit, remove try catch outer
 
-const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<ServerActionResult> => {
+const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<ServerActionResult<CreateCompanyResult>> => {
   try {
     return await withRateLimit(async (user_id) => {
       const supabase = await createClerkSupabaseClientSsr();
@@ -28,7 +30,7 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
           user_id,
         };
 
-        const { error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select();
+        const { data, error } = await supabase.from(DBTable.COMPANY).insert(dataToInsert).select("id").single();
 
         if (error) {
           console.error("Create Company error duplicate:", error);
@@ -58,7 +60,7 @@ const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: Comp
           user_id,
         });
 
-        return { isSuccess: true };
+        return { isSuccess: true, data: { company_id: data.id } };
       } catch (err) {
         // Add general error tracking for non-duplicate errors
         console.error("Create Company error:", err);

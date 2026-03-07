@@ -13,9 +13,10 @@ const useCreateCompany = () => {
       const result = await trigger(newCompany);
 
       if (!result.isSuccess) {
-        // Create an error object with the returned error message
         throw new Error(result.error);
       }
+
+      return result.data;
     },
     isCreating: isMutating,
   };
