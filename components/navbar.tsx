@@ -10,6 +10,7 @@ import mixpanel from "mixpanel-browser";
 
 import { ClerkUserButton } from "./ClerkUserButton";
 import { GithubIcon } from "./icons";
+import { NumberTicker } from "./NumberTicker";
 
 import { siteConfig } from "@/config/site";
 import { CustomButton } from "@/components/CustomButton";
@@ -158,7 +159,7 @@ export const Navbar = () => {
             onPress={handleGithubClick}
           >
             <GithubIcon />
-            <span className="hidden md:inline"> Star {githubLoading ? "" : githubStars}</span>
+            <span className="hidden md:inline"> Star {!githubLoading && githubStars > 0 && <NumberTicker value={githubStars} />}</span>
           </Link>
         </NavbarItem>
 
