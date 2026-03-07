@@ -12,7 +12,7 @@ import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { DBTable } from "@/lib/constants/dbTables";
-import { formatHowLongAgo, isRecentDate } from "@/lib/formatDateUtils";
+import { formatHowLongAgo, isRecentDate, formatClosingDate } from "@/lib/formatDateUtils";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { isRateLimitError } from "@/lib/errorHandling";
 import { RateLimitErrorMessage } from "@/components/RateLimitErrorMessage";
@@ -150,7 +150,7 @@ export function AllJobSearchResult() {
                           )}
                           {job.closed_date && (
                             <CustomChip color="warning" size="sm" variant="flat">
-                              Closing {formatHowLongAgo(job.closed_date)}
+                              {formatClosingDate(job.closed_date)}
                             </CustomChip>
                           )}
                         </div>
