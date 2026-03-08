@@ -4,7 +4,7 @@ import { createClerkSupabaseClientSsr } from "@/lib/supabase";
 import { DBTable } from "@/lib/constants/dbTables";
 import { withRateLimit } from "@/lib/withRateLimit";
 
-const actionUpdateComment = async (key: string, { arg }: { arg: { comment_id: string; content: string } }) => {
+const actionUpdateComment = async (_key: string, { arg }: { arg: { comment_id: string; content: string } }) => {
   return await withRateLimit(async (user_id) => {
     const supabase = await createClerkSupabaseClientSsr();
     const { comment_id, content } = arg;

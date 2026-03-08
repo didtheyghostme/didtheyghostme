@@ -16,7 +16,7 @@ export type CreateJobArgs = Pick<JobPostingTable, "company_id"> & {
   company_name: string;
 };
 
-const actionCreateJob = async (key: string, { arg }: { arg: CreateJobArgs }): Promise<ServerActionResult> => {
+const actionCreateJob = async (_key: string, { arg }: { arg: CreateJobArgs }): Promise<ServerActionResult> => {
   try {
     return await withRateLimit(async (user_id) => {
       const supabase = await createClerkSupabaseClientSsr();

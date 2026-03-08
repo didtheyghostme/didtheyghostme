@@ -17,7 +17,7 @@ export type UpdateJobPostingAdminResult = {
   readmeSync?: { ok: true; didChange: boolean; exportedCount: number; commitMessage?: string } | { ok: false; error: string };
 };
 
-const actionUpdateJobPostingAdmin = async (key: string, { arg }: { arg: UpdateJobPostingAdminArgs }) => {
+const actionUpdateJobPostingAdmin = async (_key: string, { arg }: { arg: UpdateJobPostingAdminArgs }) => {
   const isAdmin = await checkRole("admin");
 
   if (!isAdmin) {

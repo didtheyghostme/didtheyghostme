@@ -13,7 +13,7 @@ export type CreateApplicationArgs = Pick<ApplicationTable, "job_posting_id" | "a
   company_name: string;
 };
 
-const actionCreateApplication = async (key: string, { arg }: { arg: CreateApplicationArgs }): Promise<ServerActionResult> => {
+const actionCreateApplication = async (_key: string, { arg }: { arg: CreateApplicationArgs }): Promise<ServerActionResult> => {
   return await withRateLimit(async (user_id) => {
     const { job_posting_id, applied_date, job_title, company_name } = arg;
     const supabase = await createClerkSupabaseClientSsr();

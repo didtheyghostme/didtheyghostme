@@ -5,7 +5,7 @@ import { DBTable } from "@/lib/constants/dbTables";
 import { ServerCreateCommentArgs } from "@/lib/hooks/useCreateComment";
 import { withRateLimit } from "@/lib/withRateLimit";
 
-const actionCreateComment = async (key: string, { arg }: { arg: ServerCreateCommentArgs }) => {
+const actionCreateComment = async (_key: string, { arg }: { arg: ServerCreateCommentArgs }) => {
   return await withRateLimit(async (user_id) => {
     const supabase = await createClerkSupabaseClientSsr();
 

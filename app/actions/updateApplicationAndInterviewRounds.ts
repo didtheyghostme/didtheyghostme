@@ -5,7 +5,7 @@ import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { withRateLimit } from "@/lib/withRateLimit";
 
-const actionUpdateApplicationAndInterviewRounds = async (key: string, { arg }: { arg: InterviewExperienceFormValues & { application_id: string } }) => {
+const actionUpdateApplicationAndInterviewRounds = async (_key: string, { arg }: { arg: InterviewExperienceFormValues & { application_id: string } }) => {
   return await withRateLimit(async (user_id) => {
     const { application_id, applied_date, first_response_date, status, interviewRounds } = arg;
     const supabase = await createClerkSupabaseClientSsr();

@@ -13,7 +13,7 @@ import { ServerActionResult } from "@/lib/sharedTypes";
 
 // TODO Aug: use safeParse instead of parse. refactor rate limit, remove try catch outer
 
-const actionCreateCompany = async (key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<ServerActionResult> => {
+const actionCreateCompany = async (_key: string, { arg: newCompany }: { arg: CompanyFormData }): Promise<ServerActionResult> => {
   try {
     return await withRateLimit(async (user_id) => {
       const supabase = await createClerkSupabaseClientSsr();

@@ -6,7 +6,7 @@ import { withRateLimit } from "@/lib/withRateLimit";
 
 export type CreateReportAdminArgs = Pick<ReportAdminTable, "entity_type" | "entity_id" | "report_type" | "report_message">;
 
-const actionCreateReportAdmin = async (key: string, { arg }: { arg: CreateReportAdminArgs }): Promise<void> => {
+const actionCreateReportAdmin = async (_key: string, { arg }: { arg: CreateReportAdminArgs }): Promise<void> => {
   return await withRateLimit(async (user_id) => {
     const supabase = await createClerkSupabaseClientSsr();
 

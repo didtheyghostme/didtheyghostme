@@ -5,7 +5,7 @@ import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { UpdateUserPreferenceFormValues } from "@/lib/schema/updateUserPreferenceSchema";
 
-const actionUpdateUserPreferences = async (key: string, { arg }: { arg: UpdateUserPreferenceFormValues }) => {
+const actionUpdateUserPreferences = async (_key: string, { arg }: { arg: UpdateUserPreferenceFormValues }) => {
   return await withRateLimit(async (user_id) => {
     const { default_countries, default_job_categories, default_experience_levels, insert_default_countries, insert_default_job_categories, insert_default_experience_levels } = arg;
 
