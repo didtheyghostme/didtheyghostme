@@ -44,6 +44,12 @@ export function formatHowLongAgo(date: Date | string | number) {
     if (compareDate.compare(todayDate) === 0) {
       return "today";
     }
+
+    const tomorrowDate = todayDate.add({ days: 1 });
+
+    if (compareDate.compare(tomorrowDate) === 0) {
+      return "tomorrow";
+    }
   }
 
   return formatDistanceToNowStrict(new Date(date), {
