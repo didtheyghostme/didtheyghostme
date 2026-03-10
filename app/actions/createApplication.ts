@@ -1,8 +1,7 @@
 "use server";
 
 import { createClerkSupabaseClientSsr } from "@/lib/supabase";
-import { DBTable } from "@/lib/constants/dbTables";
-import { APPLICATION_STATUS } from "@/lib/constants/applicationStatus";
+import { DB_RPC } from "@/lib/constants/apiRoutes";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { ERROR_CODES, ERROR_MESSAGES } from "@/lib/errorHandling";
 import { mpServerTrack } from "@/lib/mixpanelServer";
@@ -19,16 +18,11 @@ const actionCreateApplication = async (_key: string, { arg }: { arg: CreateAppli
     const supabase = await createClerkSupabaseClientSsr();
 
     try {
-      const { error } = await supabase
-        .from(DBTable.APPLICATION)
-        .insert<InsertApplication>({
-          status: APPLICATION_STATUS.APPLIED,
-          applied_date,
-          user_id,
-          job_posting_id,
-        })
-        .select()
-        .single();
+      const { error } = await supabase.rpc(DB_RPC.TRACK_APPLICATION, {
+        p_user_id: user_id,
+        p_job_posting_id: job_posting_id,
+        p_applied_date: applied_date,
+      });
 
       if (error) {
         console.error("Insert error fail for createApplication:", error);

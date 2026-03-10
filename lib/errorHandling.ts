@@ -8,13 +8,20 @@ export class APINotFoundError extends Error {
 export const ERROR_CODES = {
   UNIQUE_VIOLATION: "23505",
   INVALID_TEXT_REPRESENTATION: "22P02",
+  RAISE_EXCEPTION: "P0001",
 };
+
+export const ERROR_DETAILS = {
+  TRACKED_JOB_STATE_CONFLICT: "TRACKED_JOB_STATE_CONFLICT",
+  INVALID_JOB_POSTING_STATE_ACTION: "INVALID_JOB_POSTING_STATE_ACTION",
+} as const;
 
 export const ERROR_MESSAGES = {
   NOT_FOUND: "Not found",
   DUPLICATE_URL: "A company with this URL already exists.",
   DUPLICATE_NAME: "A company with this name already exists.",
   DUPLICATE_APPLICATION: "You have already applied to this job.",
+  TRACKED_JOB_STATE_CONFLICT: "Tracked jobs cannot also be in To Apply or Skipped.",
   // Add other error messages here
   TOO_MANY_REQUESTS: "Too many requests. Please try again later.",
 };

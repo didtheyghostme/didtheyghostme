@@ -137,6 +137,7 @@ export default function JobDetailsPage() {
   }
   if (!jobDetails) return <DataNotFoundMessage message="Job not found" />;
   if (!applications?.data) return <DataNotFoundMessage message="Applications not found" />;
+  const hasTrackedApplication = !!applications.currentUserItemId;
 
   const handleBackClick = () => {
     mixpanel.track("back_button_clicked", {
@@ -284,7 +285,7 @@ export default function JobDetailsPage() {
     upsertJobPostingState(action).catch((err) => {
       if (jobPostingStateMutationSeqRef.current !== seq) return;
 
-      toast.error("Couldn’t save — reverted", {
+      toast.error(err instanceof Error && err.message === ERROR_MESSAGES.TRACKED_JOB_STATE_CONFLICT ? "Couldn’t save" : "Couldn’t save — reverted", {
         id: jobPostingStateToastId,
         description: getErrorMessage(err),
       });
@@ -518,6 +519,7 @@ export default function JobDetailsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <CustomButton
                   color="primary"
+                  isDisabled={hasTrackedApplication}
                   size="sm"
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
@@ -534,6 +536,7 @@ export default function JobDetailsPage() {
 
                 <CustomButton
                   color="default"
+                  isDisabled={hasTrackedApplication}
                   size="sm"
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
@@ -548,6 +551,7 @@ export default function JobDetailsPage() {
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
                 </CustomButton>
               </div>
+              {hasTrackedApplication ? <p className="text-xs text-default-500">Tracked jobs cannot be added to To Apply or Skipped.</p> : null}
 
               <div>
                 <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>

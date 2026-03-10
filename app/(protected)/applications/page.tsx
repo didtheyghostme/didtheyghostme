@@ -1,13 +1,11 @@
 "use client";
 
-import useSWR from "swr";
 import { Card, CardBody, CardHeader, Link, Tab, Tabs } from "@heroui/react";
 import mixpanel from "mixpanel-browser";
 import NextLink from "next/link";
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
-import { fetcher } from "@/lib/fetcher";
 import { API } from "@/lib/constants/apiRoutes";
 import { formatDateDayMonthYear } from "@/lib/formatDateUtils";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -18,6 +16,7 @@ import { CustomChip } from "@/components/CustomChip";
 import { CustomButton } from "@/components/CustomButton";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { ClickType, getClickType, isMiddleClick } from "@/lib/getClickType";
+import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { useJobPostingStateList } from "@/lib/hooks/useUserJobPostingState";
 
 export type MyApplicationResponse = Pick<ApplicationTable, "id" | "status" | "applied_date" | "first_response_date" | "created_at"> & {
@@ -30,7 +29,7 @@ export default function MyApplicationsPage() {
   const { userId } = useAuth();
   const [selectedTab, setSelectedTab] = useState<"to_apply" | "applied" | "skipped">("applied");
 
-  const { data: applications, error, isLoading } = useSWR<MyApplicationResponse[]>(API.PROTECTED.getByCurrentUser, fetcher);
+  const { data: applications, error, isLoading } = useSWRWithAuthKey<MyApplicationResponse[]>(API.PROTECTED.getByCurrentUser, userId);
   const { data: toApplyItems, error: toApplyError, isLoading: toApplyLoading } = useJobPostingStateList("to_apply", userId);
   const { data: skippedItems, error: skippedError, isLoading: skippedLoading } = useJobPostingStateList("skipped", userId);
 
@@ -42,6 +41,7 @@ export default function MyApplicationsPage() {
 
   const appliedJobPostingIds = new Set(applications.map((a) => a.job_posting.id));
   const filteredToApplyItems = toApplyItems.filter((item) => !appliedJobPostingIds.has(item.job_posting.id));
+  const filteredSkippedItems = skippedItems.filter((item) => !appliedJobPostingIds.has(item.job_posting.id));
 
   const mixpanelTrackViewInterviewDetailsButtonClick = (applicationId: string, clickType: ClickType) => {
     mixpanel.track("My Applications Page", {
@@ -241,11 +241,11 @@ export default function MyApplicationsPage() {
         </Tab>
 
         <Tab key="skipped" title="Skipped">
-          {skippedItems.length === 0 ? (
+          {filteredSkippedItems.length === 0 ? (
             <DataNotFoundMessage message="No skipped jobs yet." title="Skipped is empty" />
           ) : (
             <div className="flex flex-col gap-4">
-              {skippedItems.map((item) => (
+              {filteredSkippedItems.map((item) => (
                 <Card key={item.job_posting.id} className="w-full">
                   <CardHeader className="flex flex-row items-start justify-between gap-2">
                     <div className="flex flex-1 items-start gap-3">

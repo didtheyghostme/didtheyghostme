@@ -83,6 +83,8 @@ export const API = {
 } as const;
 
 export const DB_RPC = {
+  TRACK_APPLICATION: "track_application",
+  SET_JOB_POSTING_STATE: "set_job_posting_state",
   UPDATE_APPLICATION_AND_INTERVIEW_ROUNDS: "update_application_and_interview_rounds",
   GET_QUESTIONS_WITH_REPLY_COUNTS: "get_questions_with_reply_counts",
   GET_APPLICATIONS_WITH_INTERVIEW_STATS: "get_applications_with_interview_stats",
