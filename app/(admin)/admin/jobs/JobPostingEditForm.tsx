@@ -52,6 +52,16 @@ export function JobPostingEditForm({
   // console.warn("experience levels", experienceLevels, "current", jobPosting.job_posting_experience_level);
 
   const { updateJobPosting, isUpdating } = useUpdateJobPostingAdmin(jobPosting.id);
+  const todayDate = today(getLocalTimeZone());
+  const todayValue = todayDate.toString();
+
+  const renderCalendarFooter = (onSelectToday: () => void) => (
+    <div className="border-t border-default-100 px-2 py-2">
+      <CustomButton className="w-full" color="primary" size="sm" type="button" variant="flat" onPress={onSelectToday}>
+        Today
+      </CustomButton>
+    </div>
+  );
 
   const onSubmit = async (data: UpdateJobPostingAdminFormValues) => {
     try {
@@ -225,10 +235,11 @@ export function JobPostingEditForm({
             name="job_posted_date"
             render={({ field, fieldState }) => (
               <DatePicker
+                CalendarBottomContent={renderCalendarFooter(() => field.onChange(todayValue))}
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Posted Date"
-                maxValue={today(getLocalTimeZone())}
+                maxValue={todayDate}
                 value={field.value ? parseDate(field.value) : null}
                 className={cn({
                   [DIRTY_INPUT_CLASS]: fieldState.isDirty,
@@ -243,6 +254,7 @@ export function JobPostingEditForm({
             name="closed_date"
             render={({ field, fieldState }) => (
               <DatePicker
+                CalendarBottomContent={renderCalendarFooter(() => field.onChange(todayValue))}
                 description="Leave blank if the job is still open"
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
