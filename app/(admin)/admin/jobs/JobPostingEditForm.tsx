@@ -54,6 +54,20 @@ export function JobPostingEditForm({
   const { updateJobPosting, isUpdating } = useUpdateJobPostingAdmin(jobPosting.id);
   const todayDate = today(getLocalTimeZone());
   const todayValue = todayDate.toString();
+  const renderTodayTrigger = (onSelectToday: () => void) => (
+    <CustomButton
+      className="h-6 min-w-0 shrink-0 px-2 text-xs font-medium"
+      color="primary"
+      radius="full"
+      size="sm"
+      type="button"
+      variant="flat"
+      onMouseDown={(event) => event.preventDefault()}
+      onPress={onSelectToday}
+    >
+      Today
+    </CustomButton>
+  );
 
   const renderCalendarFooter = (onSelectToday: () => void) => (
     <div className="border-t border-default-100 px-2 py-2">
@@ -235,15 +249,13 @@ export function JobPostingEditForm({
             name="job_posted_date"
             render={({ field, fieldState }) => (
               <DatePicker
-                CalendarBottomContent={renderCalendarFooter(() => field.onChange(todayValue))}
+                className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Posted Date"
                 maxValue={todayDate}
+                startContent={renderTodayTrigger(() => field.onChange(todayValue))}
                 value={field.value ? parseDate(field.value) : null}
-                className={cn({
-                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
-                })}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
@@ -254,15 +266,13 @@ export function JobPostingEditForm({
             name="closed_date"
             render={({ field, fieldState }) => (
               <DatePicker
-                CalendarBottomContent={renderCalendarFooter(() => field.onChange(todayValue))}
+                className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                 description="Leave blank if the job is still open"
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
+                startContent={renderTodayTrigger(() => field.onChange(todayValue))}
                 value={field.value ? parseDate(field.value) : null}
-                className={cn({
-                  [DIRTY_INPUT_CLASS]: fieldState.isDirty,
-                })}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
             )}
