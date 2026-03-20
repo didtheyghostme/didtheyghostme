@@ -1,6 +1,5 @@
 "use client";
 
-import { cloneElement, isValidElement, useMemo, type MouseEvent, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { parseDate, getLocalTimeZone, today } from "@internationalized/date";
 import { DatePicker, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, cn } from "@heroui/react";
@@ -12,75 +11,11 @@ import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";
 import { updateJobPostingAdminSchema } from "@/lib/schema/updateJobPostingAdminSchema";
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 import { CustomButton } from "@/components/CustomButton";
-import { CalendarIcon } from "@/components/icons";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { JobCategorySelect } from "@/app/api/job-category/route";
 
 const DIRTY_INPUT_CLASS = "bg-orange-50 border-l-4 border-orange-400 dark:bg-orange-900/20";
-
-type DualActionDatePickerProps = DatePickerProps<DateValue> & {
-  todayAction: ReactNode;
-};
-
-function DualActionDatePicker({ todayAction, ...props }: DualActionDatePickerProps) {
-  const {
-    state,
-    endContent,
-    selectorIcon,
-    showTimeField,
-    isCalendarHeaderExpanded,
-    getDateInputProps,
-    getPopoverProps,
-    getTimeInputProps,
-    getSelectorButtonProps,
-    getSelectorIconProps,
-    getCalendarProps,
-    CalendarTopContent,
-    CalendarBottomContent,
-  } = useDatePicker(props);
-
-  const selectorContent = isValidElement(selectorIcon) ? cloneElement(selectorIcon, getSelectorIconProps()) : <CalendarIcon {...getSelectorIconProps()} />;
-  const calendarBottomContent = useMemo(() => {
-    if (isCalendarHeaderExpanded) return null;
-
-    return showTimeField ? (
-      <>
-        <TimeInput {...getTimeInputProps()} />
-        {CalendarBottomContent}
-      </>
-    ) : (
-      CalendarBottomContent
-    );
-  }, [CalendarBottomContent, getTimeInputProps, isCalendarHeaderExpanded, showTimeField]);
-  const calendarTopContent = useMemo(() => {
-    if (isCalendarHeaderExpanded) return null;
-
-    return CalendarTopContent;
-  }, [CalendarTopContent, isCalendarHeaderExpanded]);
-  const popoverContent = state.isOpen ? (
-    <FreeSoloPopover {...getPopoverProps()}>
-      <Calendar {...getCalendarProps()} bottomContent={calendarBottomContent} topContent={calendarTopContent} />
-    </FreeSoloPopover>
-  ) : null;
-  const dateInputProps = {
-    ...getDateInputProps(),
-    endContent: (
-      <div className="ml-auto flex items-center gap-1.5">
-        {todayAction}
-        {endContent}
-        <Button {...getSelectorButtonProps()}>{selectorContent}</Button>
-      </div>
-    ),
-  };
-
-  return (
-    <>
-      <DateInput {...dateInputProps} />
-      {popoverContent}
-    </>
-  );
-}
 
 export function JobPostingEditForm({
   jobPosting,
@@ -122,14 +57,6 @@ export function JobPostingEditForm({
     <CustomButton className="h-10 min-w-[88px] px-4 text-sm font-medium" color="primary" radius="md" type="button" variant="flat" onPress={onSelectToday}>
       Today
     </CustomButton>
-  );
-
-  const renderCalendarFooter = (onSelectToday: () => void) => (
-    <div className="border-t border-default-100 px-2 py-2">
-      <CustomButton className="w-full" color="primary" size="sm" type="button" variant="flat" onPress={onSelectToday}>
-        Today
-      </CustomButton>
-    </div>
   );
 
   const onSubmit = async (data: UpdateJobPostingAdminFormValues) => {
@@ -324,19 +251,21 @@ export function JobPostingEditForm({
             control={control}
             name="closed_date"
             render={({ field, fieldState }) => (
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3">
-                <div className="min-w-0">
-                  <DatePicker
-                    className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
-                    errorMessage={fieldState.error?.message}
-                    isInvalid={!!fieldState.error}
-                    label="Closed Date"
-                    value={field.value ? parseDate(field.value) : null}
-                    onChange={(date) => field.onChange(date ? date.toString() : null)}
-                  />
-                  {!fieldState.error && <p className="px-1 pt-1 text-tiny text-foreground-400">Leave blank if the job is still open</p>}
+              <div className="space-y-1">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
+                  <div className="min-w-0">
+                    <DatePicker
+                      className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
+                      errorMessage={fieldState.error?.message}
+                      isInvalid={!!fieldState.error}
+                      label="Closed Date"
+                      value={field.value ? parseDate(field.value) : null}
+                      onChange={(date) => field.onChange(date ? date.toString() : null)}
+                    />
+                  </div>
+                  {renderTodayTrigger(() => field.onChange(todayDate.toString()))}
                 </div>
-                <div className="flex h-10 items-center">{renderTodayTrigger(() => field.onChange(todayDate.toString()))}</div>
+                {!fieldState.error && <p className="px-1 text-tiny text-foreground-400">Leave blank if the job is still open</p>}
               </div>
             )}
           />
