@@ -230,15 +230,17 @@ export function JobPostingEditForm({
             control={control}
             name="job_posted_date"
             render={({ field, fieldState }) => (
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
-                <div className="min-w-0">
+              <div className="flex items-center gap-x-3">
+                <div className="min-w-0 flex-1">
                   <DatePicker
-                    className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                     errorMessage={fieldState.error?.message}
                     isInvalid={!!fieldState.error}
                     label="Posted Date"
                     maxValue={todayDate}
                     value={field.value ? parseDate(field.value) : null}
+                    className={cn({
+                      [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                    })}
                     onChange={(date) => field.onChange(date ? date.toString() : null)}
                   />
                 </div>
@@ -252,14 +254,16 @@ export function JobPostingEditForm({
             name="closed_date"
             render={({ field, fieldState }) => (
               <div className="space-y-1">
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
-                  <div className="min-w-0">
+                <div className="flex items-center gap-x-3">
+                  <div className="min-w-0 flex-1">
                     <DatePicker
-                      className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                       errorMessage={fieldState.error?.message}
                       isInvalid={!!fieldState.error}
                       label="Closed Date"
                       value={field.value ? parseDate(field.value) : null}
+                      className={cn({
+                        [DIRTY_INPUT_CLASS]: fieldState.isDirty,
+                      })}
                       onChange={(date) => field.onChange(date ? date.toString() : null)}
                     />
                   </div>
