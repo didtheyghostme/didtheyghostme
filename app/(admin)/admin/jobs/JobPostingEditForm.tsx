@@ -2,8 +2,8 @@
 
 import { cloneElement, isValidElement, useMemo, type MouseEvent, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { parseDate, getLocalTimeZone, today, DateValue } from "@internationalized/date";
-import { Button, Calendar, DateInput, DatePicker, DatePickerProps, FreeSoloPopover, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, TimeInput, cn, useDatePicker } from "@heroui/react";
+import { parseDate, getLocalTimeZone, today } from "@internationalized/date";
+import { DatePicker, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, cn } from "@heroui/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -324,19 +324,19 @@ export function JobPostingEditForm({
             control={control}
             name="closed_date"
             render={({ field, fieldState }) => (
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3">
                 <div className="min-w-0">
                   <DatePicker
                     className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
-                    description="Leave blank if the job is still open"
                     errorMessage={fieldState.error?.message}
                     isInvalid={!!fieldState.error}
                     label="Closed Date"
                     value={field.value ? parseDate(field.value) : null}
                     onChange={(date) => field.onChange(date ? date.toString() : null)}
                   />
+                  {!fieldState.error && <p className="px-1 pt-1 text-tiny text-foreground-400">Leave blank if the job is still open</p>}
                 </div>
-                {renderTodayTrigger(() => field.onChange(todayDate.toString()))}
+                <div className="flex h-10 items-center">{renderTodayTrigger(() => field.onChange(todayDate.toString()))}</div>
               </div>
             )}
           />
