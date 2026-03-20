@@ -2,8 +2,8 @@
 
 import { cloneElement, isValidElement, useMemo, type MouseEvent, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { DateValue, parseDate, getLocalTimeZone, today } from "@internationalized/date";
-import { Button, Calendar, DateInput, FreeSoloPopover, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, TimeInput, cn, useDatePicker, type DatePickerProps } from "@heroui/react";
+import { parseDate, getLocalTimeZone, today, DateValue } from "@internationalized/date";
+import { Button, Calendar, DateInput, DatePicker, DatePickerProps, FreeSoloPopover, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, TimeInput, cn, useDatePicker } from "@heroui/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -118,23 +118,8 @@ export function JobPostingEditForm({
 
   const { updateJobPosting, isUpdating } = useUpdateJobPostingAdmin(jobPosting.id);
   const todayDate = today(getLocalTimeZone());
-  const handleTodayClick = (event: MouseEvent<HTMLButtonElement>) => event.stopPropagation();
-  const handleTodayMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
   const renderTodayTrigger = (onSelectToday: () => void) => (
-    <CustomButton
-      className="h-6 min-w-0 shrink-0 px-2 text-xs font-medium"
-      color="primary"
-      radius="full"
-      size="sm"
-      type="button"
-      variant="flat"
-      onClick={handleTodayClick}
-      onMouseDown={handleTodayMouseDown}
-      onPress={onSelectToday}
-    >
+    <CustomButton className="h-10 min-w-[88px] px-4 text-sm font-medium" color="primary" radius="md" type="button" variant="flat" onPress={onSelectToday}>
       Today
     </CustomButton>
   );
@@ -318,16 +303,20 @@ export function JobPostingEditForm({
             control={control}
             name="job_posted_date"
             render={({ field, fieldState }) => (
-              <DualActionDatePicker
-                className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
-                errorMessage={fieldState.error?.message}
-                isInvalid={!!fieldState.error}
-                label="Posted Date"
-                maxValue={todayDate}
-                todayAction={renderTodayTrigger(() => field.onChange(todayDate.toString()))}
-                value={field.value ? parseDate(field.value) : null}
-                onChange={(date) => field.onChange(date ? date.toString() : null)}
-              />
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
+                <div className="min-w-0">
+                  <DatePicker
+                    className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
+                    errorMessage={fieldState.error?.message}
+                    isInvalid={!!fieldState.error}
+                    label="Posted Date"
+                    maxValue={todayDate}
+                    value={field.value ? parseDate(field.value) : null}
+                    onChange={(date) => field.onChange(date ? date.toString() : null)}
+                  />
+                </div>
+                {renderTodayTrigger(() => field.onChange(todayDate.toString()))}
+              </div>
             )}
           />
 
@@ -335,16 +324,20 @@ export function JobPostingEditForm({
             control={control}
             name="closed_date"
             render={({ field, fieldState }) => (
-              <DualActionDatePicker
-                className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
-                description="Leave blank if the job is still open"
-                errorMessage={fieldState.error?.message}
-                isInvalid={!!fieldState.error}
-                label="Closed Date"
-                todayAction={renderTodayTrigger(() => field.onChange(todayDate.toString()))}
-                value={field.value ? parseDate(field.value) : null}
-                onChange={(date) => field.onChange(date ? date.toString() : null)}
-              />
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
+                <div className="min-w-0">
+                  <DatePicker
+                    className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
+                    description="Leave blank if the job is still open"
+                    errorMessage={fieldState.error?.message}
+                    isInvalid={!!fieldState.error}
+                    label="Closed Date"
+                    value={field.value ? parseDate(field.value) : null}
+                    onChange={(date) => field.onChange(date ? date.toString() : null)}
+                  />
+                </div>
+                {renderTodayTrigger(() => field.onChange(todayDate.toString()))}
+              </div>
             )}
           />
         </div>
