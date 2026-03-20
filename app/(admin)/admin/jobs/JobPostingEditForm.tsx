@@ -1,21 +1,86 @@
 "use client";
 
+import { cloneElement, isValidElement, useMemo, type MouseEvent, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Input, Select, ModalHeader, ModalBody, ModalFooter, SelectItem, DatePicker, cn } from "@heroui/react";
+import { DateValue, parseDate, getLocalTimeZone, today } from "@internationalized/date";
+import { Button, Calendar, DateInput, FreeSoloPopover, Input, ModalBody, ModalFooter, ModalHeader, Select, SelectItem, TimeInput, cn, useDatePicker, type DatePickerProps } from "@heroui/react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseDate, getLocalTimeZone, today } from "@internationalized/date";
 
 import { UpdateJobPostingAdminFormValues } from "@/lib/schema/updateJobPostingAdminSchema";
 import { useUpdateJobPostingAdmin } from "@/lib/hooks/useUpdateJobPostingAdmin";
 import { updateJobPostingAdminSchema } from "@/lib/schema/updateJobPostingAdminSchema";
 import { JOB_STATUS } from "@/lib/constants/jobPostingStatus";
 import { CustomButton } from "@/components/CustomButton";
+import { CalendarIcon } from "@/components/icons";
 import { AllJobPostingWithCompany } from "@/app/api/(admin)/admin/job/route";
 import { ExperienceLevelSelect } from "@/app/api/experience-level/route";
 import { JobCategorySelect } from "@/app/api/job-category/route";
 
 const DIRTY_INPUT_CLASS = "bg-orange-50 border-l-4 border-orange-400 dark:bg-orange-900/20";
+
+type DualActionDatePickerProps = DatePickerProps<DateValue> & {
+  todayAction: ReactNode;
+};
+
+function DualActionDatePicker({ todayAction, ...props }: DualActionDatePickerProps) {
+  const {
+    state,
+    endContent,
+    selectorIcon,
+    showTimeField,
+    isCalendarHeaderExpanded,
+    getDateInputProps,
+    getPopoverProps,
+    getTimeInputProps,
+    getSelectorButtonProps,
+    getSelectorIconProps,
+    getCalendarProps,
+    CalendarTopContent,
+    CalendarBottomContent,
+  } = useDatePicker(props);
+
+  const selectorContent = isValidElement(selectorIcon) ? cloneElement(selectorIcon, getSelectorIconProps()) : <CalendarIcon {...getSelectorIconProps()} />;
+  const calendarBottomContent = useMemo(() => {
+    if (isCalendarHeaderExpanded) return null;
+
+    return showTimeField ? (
+      <>
+        <TimeInput {...getTimeInputProps()} />
+        {CalendarBottomContent}
+      </>
+    ) : (
+      CalendarBottomContent
+    );
+  }, [CalendarBottomContent, getTimeInputProps, isCalendarHeaderExpanded, showTimeField]);
+  const calendarTopContent = useMemo(() => {
+    if (isCalendarHeaderExpanded) return null;
+
+    return CalendarTopContent;
+  }, [CalendarTopContent, isCalendarHeaderExpanded]);
+  const popoverContent = state.isOpen ? (
+    <FreeSoloPopover {...getPopoverProps()}>
+      <Calendar {...getCalendarProps()} bottomContent={calendarBottomContent} topContent={calendarTopContent} />
+    </FreeSoloPopover>
+  ) : null;
+  const dateInputProps = {
+    ...getDateInputProps(),
+    endContent: (
+      <div className="ml-auto flex items-center gap-1.5">
+        {todayAction}
+        {endContent}
+        <Button {...getSelectorButtonProps()}>{selectorContent}</Button>
+      </div>
+    ),
+  };
+
+  return (
+    <>
+      <DateInput {...dateInputProps} />
+      {popoverContent}
+    </>
+  );
+}
 
 export function JobPostingEditForm({
   jobPosting,
@@ -53,7 +118,11 @@ export function JobPostingEditForm({
 
   const { updateJobPosting, isUpdating } = useUpdateJobPostingAdmin(jobPosting.id);
   const todayDate = today(getLocalTimeZone());
-  const todayValue = todayDate.toString();
+  const handleTodayClick = (event: MouseEvent<HTMLButtonElement>) => event.stopPropagation();
+  const handleTodayMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
   const renderTodayTrigger = (onSelectToday: () => void) => (
     <CustomButton
       className="h-6 min-w-0 shrink-0 px-2 text-xs font-medium"
@@ -62,7 +131,8 @@ export function JobPostingEditForm({
       size="sm"
       type="button"
       variant="flat"
-      onMouseDown={(event) => event.preventDefault()}
+      onClick={handleTodayClick}
+      onMouseDown={handleTodayMouseDown}
       onPress={onSelectToday}
     >
       Today
@@ -248,13 +318,13 @@ export function JobPostingEditForm({
             control={control}
             name="job_posted_date"
             render={({ field, fieldState }) => (
-              <DatePicker
+              <DualActionDatePicker
                 className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Posted Date"
                 maxValue={todayDate}
-                startContent={renderTodayTrigger(() => field.onChange(todayValue))}
+                todayAction={renderTodayTrigger(() => field.onChange(todayDate.toString()))}
                 value={field.value ? parseDate(field.value) : null}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
@@ -265,13 +335,13 @@ export function JobPostingEditForm({
             control={control}
             name="closed_date"
             render={({ field, fieldState }) => (
-              <DatePicker
+              <DualActionDatePicker
                 className={fieldState.isDirty ? DIRTY_INPUT_CLASS : undefined}
                 description="Leave blank if the job is still open"
                 errorMessage={fieldState.error?.message}
                 isInvalid={!!fieldState.error}
                 label="Closed Date"
-                startContent={renderTodayTrigger(() => field.onChange(todayValue))}
+                todayAction={renderTodayTrigger(() => field.onChange(todayDate.toString()))}
                 value={field.value ? parseDate(field.value) : null}
                 onChange={(date) => field.onChange(date ? date.toString() : null)}
               />
