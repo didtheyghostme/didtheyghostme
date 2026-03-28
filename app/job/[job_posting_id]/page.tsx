@@ -22,7 +22,7 @@ import { SuggestLinkModal } from "./SuggestLinkModal";
 import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
-import { ArrowLeftIcon, BookmarkIcon, EditIcon, EyeOffIcon, FlagIcon, PlusIcon } from "@/components/icons";
+import { ArrowLeftIcon, BookmarkIcon, ChevronDownIcon, EditIcon, FlagIcon, PinIcon, PlusIcon, StarIcon, XCircleIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
@@ -67,12 +67,84 @@ const tabKeys = Object.keys(TABS) as TabKey[];
 
 type JobPostingStateToggleAction = Exclude<JobPostingStateAction, { action: "set_note" }>;
 
+const EDIT_STYLE_OPTIONS = ["hover", "click"] as const;
+const TO_APPLY_ICON_OPTIONS = ["bookmark", "star", "pin"] as const;
+
+type EditStyle = (typeof EDIT_STYLE_OPTIONS)[number];
+type ToApplyIconOption = (typeof TO_APPLY_ICON_OPTIONS)[number];
+
+function DevTogglePanel({
+  editStyle,
+  setEditStyle,
+  toApplyIcon,
+  setToApplyIcon,
+}: {
+  editStyle: EditStyle;
+  setEditStyle: (v: EditStyle) => void;
+  toApplyIcon: ToApplyIconOption;
+  setToApplyIcon: (v: ToApplyIconOption) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div className="mb-4 rounded-lg border border-dashed border-warning-300 bg-warning-50/50 dark:bg-warning-50/10">
+      <button
+        className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-warning-600"
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+      >
+        Dev Toggles
+        <span className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+          <ChevronDownIcon />
+        </span>
+      </button>
+      {isOpen && (
+        <div className="flex flex-col gap-3 border-t border-dashed border-warning-300 px-3 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="min-w-[80px] text-xs text-default-500">Edit style:</span>
+            {EDIT_STYLE_OPTIONS.map((opt) => (
+              <CustomButton
+                key={opt}
+                className="capitalize"
+                color="warning"
+                size="sm"
+                variant={editStyle === opt ? "solid" : "bordered"}
+                onPress={() => setEditStyle(opt)}
+              >
+                {opt}
+              </CustomButton>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="min-w-[80px] text-xs text-default-500">Apply icon:</span>
+            {TO_APPLY_ICON_OPTIONS.map((opt) => (
+              <CustomButton
+                key={opt}
+                className="capitalize"
+                color="warning"
+                size="sm"
+                startContent={opt === "star" ? <StarIcon /> : opt === "pin" ? <PinIcon /> : <BookmarkIcon />}
+                variant={toApplyIcon === opt ? "solid" : "bordered"}
+                onPress={() => setToApplyIcon(opt)}
+              >
+                {opt}
+              </CustomButton>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
   const { theme } = useTheme();
 
   const { job_posting_id } = useParams<{ job_posting_id: string }>();
   const [selectedTab, setSelectedTab] = useQueryState("tab", parseAsStringLiteral(tabKeys).withDefault("Applied"));
+  const [editStyle, setEditStyle] = useQueryState("editStyle", parseAsStringLiteral(["hover", "click"] as const).withDefault("hover"));
+  const [toApplyIcon, setToApplyIcon] = useQueryState("toApplyIcon", parseAsStringLiteral(["bookmark", "star", "pin"] as const).withDefault("bookmark"));
 
   const { userId } = useAuth();
 
@@ -347,6 +419,10 @@ export default function JobDetailsPage() {
         Back to {jobDetails.company.company_name}
       </CustomButton>
 
+      {process.env.NODE_ENV === "development" && (
+        <DevTogglePanel editStyle={editStyle} setEditStyle={setEditStyle} setToApplyIcon={setToApplyIcon} toApplyIcon={toApplyIcon} />
+      )}
+
       <Card className="mb-8">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Mobile Layout */}
@@ -524,7 +600,7 @@ export default function JobDetailsPage() {
                   color="primary"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  startContent={<BookmarkIcon />}
+                  startContent={toApplyIcon === "star" ? <StarIcon /> : toApplyIcon === "pin" ? <PinIcon /> : <BookmarkIcon />}
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
@@ -542,7 +618,7 @@ export default function JobDetailsPage() {
                   color="default"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  startContent={<EyeOffIcon />}
+                  startContent={<XCircleIcon />}
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
@@ -627,20 +703,42 @@ export default function JobDetailsPage() {
                   </div>
                 </div>
               ) : noteDraft ? (
-                <div className="group relative rounded-lg border border-default-200 p-3">
-                  <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
-                  <CustomButton className="mt-2 gap-1" color="default" size="sm" startContent={<EditIcon />} variant="flat" onPress={() => setIsNoteEditing(true)}>
-                    Edit
-                  </CustomButton>
-                </div>
+                editStyle === "click" ? (
+                  <div
+                    className="group relative cursor-pointer rounded-lg border border-default-200 p-3 transition-colors hover:border-default-400 hover:bg-default-50"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setIsNoteEditing(true)}
+                    onKeyDown={(e) => e.key === "Enter" && setIsNoteEditing(true)}
+                  >
+                    <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
+                    <span className="absolute right-2 top-2 text-default-400 opacity-0 transition-opacity group-hover:opacity-100">
+                      <EditIcon />
+                    </span>
+                  </div>
+                ) : (
+                  <div className="group relative rounded-lg border border-default-200 p-3">
+                    <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
+                    <CustomButton
+                      isIconOnly
+                      className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+                      color="default"
+                      size="sm"
+                      variant="light"
+                      onPress={() => setIsNoteEditing(true)}
+                    >
+                      <EditIcon />
+                    </CustomButton>
+                  </div>
+                )
               ) : (
                 <button
-                  type="button"
-                  onClick={() => setIsNoteEditing(true)}
                   className={
                     "flex w-full items-center gap-2 rounded-lg border border-dashed border-default-300 " +
                     "p-3 text-left text-sm text-default-400 transition-colors hover:border-default-400 hover:text-default-500"
                   }
+                  type="button"
+                  onClick={() => setIsNoteEditing(true)}
                 >
                   <EditIcon />
                   Add a private note for this job posting…
