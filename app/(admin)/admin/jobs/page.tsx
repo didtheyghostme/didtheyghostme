@@ -50,7 +50,7 @@ export default function AdminJobsPage() {
             variant="flat"
             onPress={() => {
               startSync(async () => {
-                toast.message("Syncing README…");
+                toast.message("Syncing README...");
                 const res = await syncReadmeSgInternTechAction();
 
                 if (!res.ok) {

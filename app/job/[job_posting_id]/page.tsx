@@ -66,6 +66,18 @@ type TabKey = keyof typeof TABS;
 const tabKeys = Object.keys(TABS) as TabKey[];
 
 type JobPostingStateToggleAction = Exclude<JobPostingStateAction, { action: "set_note" }>;
+type NoteEditEntryPoint = "empty_state_cta" | "existing_note_edit_button";
+type NoteEditSession = {
+  entryPoint: NoteEditEntryPoint;
+  hadExistingNote: boolean;
+};
+
+function getNoteTransition(prevNote: string | null, nextNote: string | null) {
+  if (!prevNote && nextNote) return "added";
+  if (prevNote && !nextNote) return "cleared";
+
+  return "updated";
+}
 
 export default function JobDetailsPage() {
   const pathname = usePathname(); // Get current path
@@ -103,10 +115,11 @@ export default function JobDetailsPage() {
   const [isNoteDirty, setIsNoteDirty] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaveError, setNoteSaveError] = useState<string | null>(null);
-  const [isNoteEditing, setIsNoteEditing] = useState(false);
+  const [noteEditSession, setNoteEditSession] = useState<NoteEditSession | null>(null);
   const jobPostingStateToastId = `jobPostingState:${job_posting_id}`;
   const jobPostingStateMutationSeqRef = useRef(0);
   const lastSyncedNoteRef = useRef("");
+  const isNoteEditing = noteEditSession !== null;
 
   useEffect(() => {
     if (!userId) return;
@@ -138,8 +151,10 @@ export default function JobDetailsPage() {
   }
   if (!jobDetails) return <DataNotFoundMessage message="Job not found" />;
   if (!applications?.data) return <DataNotFoundMessage message="Applications not found" />;
+
   const hasTrackedApplication = !!applications.currentUserItemId;
   const isSkipped = !!jobPostingState?.skipped_at;
+  const isToApply = !!jobPostingState?.to_apply_at && !isSkipped;
 
   const handleBackClick = () => {
     mixpanel.track("back_button_clicked", {
@@ -287,30 +302,77 @@ export default function JobDetailsPage() {
     upsertJobPostingState(action).catch((err) => {
       if (jobPostingStateMutationSeqRef.current !== seq) return;
 
-      toast.error(err instanceof Error && err.message === ERROR_MESSAGES.TRACKED_JOB_STATE_CONFLICT ? "Couldn’t save" : "Couldn’t save — reverted", {
+      toast.error(err instanceof Error && err.message === ERROR_MESSAGES.TRACKED_JOB_STATE_CONFLICT ? "Couldn't save" : "Couldn't save — reverted", {
         id: jobPostingStateToastId,
         description: getErrorMessage(err),
       });
     });
   };
 
-  const handleCancelNote = () => {
-    const syncedNote = jobPostingState?.note ?? "";
+  const trackNoteEvent = (eventName: string, properties: Record<string, unknown> = {}) => {
+    mixpanel.track(eventName, {
+      job_id: job_posting_id,
+      job_title: jobDetails.title,
+      company_name: jobDetails.company.company_name,
+      job_state: hasTrackedApplication ? "tracked" : isToApply ? "to_apply" : isSkipped ? "skipped" : "no_state",
+      ...properties,
+    });
+  };
 
+  const resetNoteEditor = (syncedNote: string) => {
     lastSyncedNoteRef.current = syncedNote;
     setNoteDraft(syncedNote);
     setIsNoteDirty(false);
     setNoteSaveError(null);
-    setIsNoteEditing(false);
+    setNoteEditSession(null);
+  };
+
+  const startNoteEditing = (entryPoint: NoteEditEntryPoint) => {
+    if (noteEditSession) return;
+
+    const session = {
+      entryPoint,
+      hadExistingNote: Boolean(lastSyncedNoteRef.current),
+    } satisfies NoteEditSession;
+
+    setNoteSaveError(null);
+    setNoteEditSession(session);
+    trackNoteEvent("Job Posting Page - Note Edit Started", {
+      entry_point: session.entryPoint,
+      had_existing_note: session.hadExistingNote,
+    });
+  };
+
+  const handleCancelNote = () => {
+    const syncedNote = jobPostingState?.note ?? "";
+    const currentSession = noteEditSession;
+
+    if (currentSession) {
+      trackNoteEvent("Job Posting Page - Note Edit Cancelled", {
+        entry_point: currentSession.entryPoint,
+        had_existing_note: currentSession.hadExistingNote,
+        had_unsaved_changes: isNoteDirty,
+        draft_length: noteDraft.length,
+      });
+    }
+
+    resetNoteEditor(syncedNote);
   };
 
   const handleSaveNote = async () => {
     const normalized = noteDraft.trim();
     const nextNote = normalized.length > 0 ? normalized : null;
     const prevNote = jobPostingState?.note ?? null;
+    const noteTransition = getNoteTransition(prevNote, nextNote);
+    const currentSession = noteEditSession;
+    const noteSaveEventProps = {
+      entry_point: currentSession?.entryPoint ?? null,
+      note_transition: noteTransition,
+      note_length: nextNote?.length ?? 0,
+    };
 
     if (nextNote === prevNote) {
-      handleCancelNote();
+      resetNoteEditor(prevNote ?? "");
 
       return;
     }
@@ -322,21 +384,20 @@ export default function JobDetailsPage() {
       const result = await saveJobPostingStateNote(nextNote);
       const confirmedNote = result?.note ?? "";
 
-      const noteTransition = !prevNote && nextNote ? "added" : prevNote && !nextNote ? "cleared" : "updated";
+      trackNoteEvent("Job Posting Page - Note Saved", noteSaveEventProps);
 
-      mixpanel.track("Job Posting Page - Note Saved", {
-        job_id: job_posting_id,
-        job_title: jobDetails.title,
-        company_name: jobDetails.company.company_name,
-        note_transition: noteTransition,
+      resetNoteEditor(confirmedNote);
+
+      toast.success("Note saved successfully");
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
+
+      trackNoteEvent("Job Posting Page - Note Save Failed", {
+        ...noteSaveEventProps,
+        error_message: errorMessage,
       });
 
-      lastSyncedNoteRef.current = confirmedNote;
-      setNoteDraft(confirmedNote);
-      setIsNoteDirty(false);
-      setIsNoteEditing(false);
-    } catch (err) {
-      setNoteSaveError(getErrorMessage(err));
+      setNoteSaveError(errorMessage);
     } finally {
       setIsSavingNote(false);
     }
@@ -529,12 +590,11 @@ export default function JobDetailsPage() {
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <CustomButton
-                    color={jobPostingState?.to_apply_at ? "primary" : "default"}
+                    color={isToApply ? "primary" : "default"}
                     size="sm"
-                    startContent={jobPostingState?.to_apply_at ? <BookmarkFilledIcon /> : <BookmarkIcon />}
-                    variant={jobPostingState?.to_apply_at ? "flat" : "bordered"}
+                    startContent={isToApply ? <BookmarkFilledIcon /> : <BookmarkIcon />}
+                    variant={isToApply ? "flat" : "bordered"}
                     onPress={() => {
-                      const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
                       const action: JobPostingStateToggleAction = {
                         action: isToApply ? "clear_to_apply" : "set_to_apply",
                       };
@@ -561,7 +621,6 @@ export default function JobDetailsPage() {
                     {isSkipped ? "Skipped" : "Skip"}
                   </CustomButton>
                 </div>
-                {isSkipped ? <p className="text-xs text-default-400">You can still track this job, doing so will remove it from Skipped.</p> : null}
               </div>
             )}
           </SignedIn>
@@ -595,7 +654,7 @@ export default function JobDetailsPage() {
               <CustomButton
                 className="w-full transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground sm:w-auto"
                 color="primary"
-                variant="solid"
+                variant="bordered"
                 onPress={mixpanelTrackSignInToTrackJobClick}
               >
                 Sign in to track this job
@@ -612,7 +671,7 @@ export default function JobDetailsPage() {
                   <Textarea
                     isDisabled={isSavingNote}
                     minRows={3}
-                    placeholder={isSkipped ? "Why did you skip this job? (optional)" : "Add a private note for this job posting…"}
+                    placeholder={isSkipped ? "Why did you skip this job? (optional)" : "Add a private note for this job posting..."}
                     value={noteDraft}
                     onValueChange={(value) => {
                       setNoteDraft(value);
@@ -620,43 +679,43 @@ export default function JobDetailsPage() {
                       setNoteSaveError(null);
                     }}
                   />
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+                    {isSavingNote ? <p className="text-xs text-default-500">Saving...</p> : null}
+                    {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
+                    {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
                     <CustomButton color="default" isDisabled={isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
                       Cancel
                     </CustomButton>
                     <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
                       Save note
                     </CustomButton>
-                    {isSavingNote ? <p className="text-xs text-default-500">Saving…</p> : null}
-                    {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
-                    {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
                   </div>
                 </div>
               ) : noteDraft ? (
-                <div className="group relative rounded-lg border border-default-200 p-3">
-                  <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}abc</p>
+                <div className="relative rounded-lg border border-default-200 p-3">
+                  <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
                   <CustomButton
                     isIconOnly
-                    className="absolute right-2 top-2 opacity-40 transition-opacity group-hover:opacity-100"
+                    className="absolute right-2 top-2 opacity-40 transition-opacity hover:opacity-100"
                     color="default"
                     size="sm"
                     variant="light"
-                    onPress={() => setIsNoteEditing(true)}
+                    onPress={() => startNoteEditing("existing_note_edit_button")}
                   >
                     <EditIcon />
                   </CustomButton>
                 </div>
               ) : (
                 <button
-                  className={
-                    "flex w-full items-center gap-2 rounded-lg border border-dashed border-default-300 " +
-                    "p-3 text-left text-sm text-default-400 transition-colors hover:border-default-400 hover:text-default-500"
-                  }
                   type="button"
-                  onClick={() => setIsNoteEditing(true)}
+                  className={
+                    "flex w-full items-center gap-2 rounded-lg border border-default-200 " +
+                    "px-3 py-2 text-left text-sm text-default-400 transition-colors hover:bg-default-100 hover:text-default-500"
+                  }
+                  onClick={() => startNoteEditing("empty_state_cta")}
                 >
                   <EditIcon />
-                  {isSkipped ? "Note why you skipped this job…" : "Add a private note for this job posting…"}
+                  {isSkipped ? "Note why you skipped this job..." : "Add a private note for this job posting..."}
                 </button>
               )}
             </div>

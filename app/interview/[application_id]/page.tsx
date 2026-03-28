@@ -176,7 +176,7 @@ export default function InterviewExperiencePage() {
           </CardHeader>
           <Divider />
           <CardBody className="flex flex-col gap-3">
-            <Textarea minRows={4} placeholder="Write your review…" value={reviewDraft} onValueChange={setReviewDraft} />
+            <Textarea minRows={4} placeholder="Write your review..." value={reviewDraft} onValueChange={setReviewDraft} />
             <div className="flex justify-end">
               <CustomButton color="primary" isLoading={isUpdatingReview} onPress={handleSaveReview}>
                 Save review
