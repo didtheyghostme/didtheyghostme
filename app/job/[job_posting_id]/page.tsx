@@ -4,7 +4,7 @@ import type { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSc
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, cn, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
+import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key, useEffect, useRef, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
@@ -22,7 +22,7 @@ import { SuggestLinkModal } from "./SuggestLinkModal";
 import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
-import { AlertCircleIcon, ArrowLeftIcon, BookmarkFilledIcon, BookmarkIcon, FlagIcon, PlusIcon, XCircleIcon } from "@/components/icons";
+import { ArrowLeftIcon, ChevronDownIcon, FlagIcon, PlusIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
@@ -34,7 +34,6 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
-import { CustomChip } from "@/components/CustomChip";
 import { JobDetails } from "@/app/api/job/[job_posting_id]/route";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { useJobPostingState, useUpsertJobPostingState } from "@/lib/hooks/useUserJobPostingState";
@@ -104,6 +103,8 @@ export default function JobDetailsPage() {
   const [isNoteDirty, setIsNoteDirty] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaveError, setNoteSaveError] = useState<string | null>(null);
+  const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const noteExpandedInitRef = useRef(false);
   const jobPostingStateToastId = `jobPostingState:${job_posting_id}`;
   const jobPostingStateMutationSeqRef = useRef(0);
   const lastSyncedNoteRef = useRef("");
@@ -117,6 +118,11 @@ export default function JobDetailsPage() {
     const hasUncommittedEdits = isNoteDirty && noteDraft !== previousSyncedNote;
 
     lastSyncedNoteRef.current = nextSyncedNote;
+
+    if (!noteExpandedInitRef.current && nextSyncedNote.length > 0) {
+      noteExpandedInitRef.current = true;
+      setIsNoteExpanded(true);
+    }
 
     if (hasUncommittedEdits) return;
 
@@ -514,17 +520,15 @@ export default function JobDetailsPage() {
 
         <Divider />
 
-        <CardBody>
+        <CardBody className="gap-4">
           <SignedIn>
-            <div className="mb-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <CustomButton
-                  className={cn("min-w-[100px] transition-all duration-200", jobPostingState?.to_apply_at && "animate-scale-in bg-primary/15 font-medium text-primary")}
-                  color={jobPostingState?.to_apply_at ? "primary" : "default"}
+                  color="primary"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  startContent={jobPostingState?.to_apply_at ? <BookmarkFilledIcon size={14} /> : <BookmarkIcon size={14} />}
-                  variant={jobPostingState?.to_apply_at ? "flat" : "bordered"}
+                  variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
@@ -534,16 +538,14 @@ export default function JobDetailsPage() {
                     submitToggleAction(action, isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
                   }}
                 >
-                  To Apply
+                  {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
                 </CustomButton>
 
                 <CustomButton
-                  className={cn("min-w-[80px] transition-all duration-200", jobPostingState?.skipped_at && "animate-scale-in bg-default-100 font-medium text-default-600")}
                   color="default"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  startContent={<XCircleIcon size={14} />}
-                  variant={jobPostingState?.skipped_at ? "flat" : "bordered"}
+                  variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
@@ -556,37 +558,7 @@ export default function JobDetailsPage() {
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
                 </CustomButton>
               </div>
-              {hasTrackedApplication ? (
-                <CustomChip color="warning" size="sm" startContent={<AlertCircleIcon size={12} />} variant="flat">
-                  Tracked jobs cannot be added to To Apply or Skipped.
-                </CustomChip>
-              ) : null}
-
-              <div>
-                <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>
-                <Textarea
-                  isDisabled={isSavingNote}
-                  minRows={3}
-                  placeholder="Add a private note for this job posting…"
-                  value={noteDraft}
-                  onValueChange={(value) => {
-                    setNoteDraft(value);
-                    setIsNoteDirty(value !== lastSyncedNoteRef.current);
-                    setNoteSaveError(null);
-                  }}
-                />
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
-                    Save note
-                  </CustomButton>
-                  <CustomButton color="secondary" isDisabled={!isNoteDirty || isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
-                    Cancel
-                  </CustomButton>
-                  {isSavingNote ? <p className="text-xs text-default-500">Saving note…</p> : null}
-                  {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
-                  {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
-                </div>
-              </div>
+              {hasTrackedApplication ? <p className="text-xs text-default-500">Tracked jobs cannot be added to To Apply or Skipped.</p> : null}
             </div>
           </SignedIn>
 
@@ -594,7 +566,7 @@ export default function JobDetailsPage() {
             {applications.currentUserItemId ? (
               <CustomButton
                 as={Link}
-                className="transition-all duration-200 hover:bg-success/40 hover:text-success-foreground"
+                className="w-full transition-all duration-200 hover:bg-success/40 hover:text-success-foreground sm:w-auto"
                 color="success"
                 href={`/interview/${applications.currentUserItemId}`}
                 variant="flat"
@@ -604,9 +576,9 @@ export default function JobDetailsPage() {
               </CustomButton>
             ) : (
               <CustomButton
-                className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
+                className="w-full transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground sm:w-auto"
                 color="primary"
-                variant="bordered"
+                variant="solid"
                 onPress={handleTrackThisJobClick}
               >
                 Track this job
@@ -617,15 +589,62 @@ export default function JobDetailsPage() {
           <SignedOut>
             <SignInButton fallbackRedirectUrl={pathname} mode="modal">
               <CustomButton
-                className="border-primary text-primary transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground"
+                className="w-full transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground sm:w-auto"
                 color="primary"
-                variant="bordered"
+                variant="solid"
                 onPress={mixpanelTrackSignInToTrackJobClick}
               >
                 Sign in to track this job
               </CustomButton>
             </SignInButton>
           </SignedOut>
+
+          <SignedIn>
+            <div className="border-t border-divider pt-3">
+              <button
+                className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-left transition-colors hover:bg-default-100"
+                type="button"
+                onClick={() => setIsNoteExpanded((prev) => !prev)}
+              >
+                <ChevronDownIcon
+                  className={`h-4 w-4 text-default-500 transition-transform duration-200 ${isNoteExpanded ? "rotate-0" : "-rotate-90"}`}
+                />
+                <span className="text-sm font-medium text-default-600">My note (private)</span>
+                {!isNoteExpanded && noteDraft && (
+                  <span className="ml-1 truncate text-xs text-default-400">&mdash; {noteDraft}</span>
+                )}
+              </button>
+
+              {isNoteExpanded && (
+                <div className="mt-2 pl-6">
+                  <Textarea
+                    isDisabled={isSavingNote}
+                    minRows={3}
+                    placeholder="Add a private note for this job posting…"
+                    value={noteDraft}
+                    onValueChange={(value) => {
+                      setNoteDraft(value);
+                      setIsNoteDirty(value !== lastSyncedNoteRef.current);
+                      setNoteSaveError(null);
+                    }}
+                  />
+                  {(isNoteDirty || isSavingNote || noteSaveError) && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
+                        Save note
+                      </CustomButton>
+                      <CustomButton color="default" isDisabled={!isNoteDirty || isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
+                        Cancel
+                      </CustomButton>
+                      {isSavingNote ? <p className="text-xs text-default-500">Saving…</p> : null}
+                      {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
+                      {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </SignedIn>
         </CardBody>
       </Card>
 
