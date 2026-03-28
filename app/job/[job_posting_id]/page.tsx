@@ -4,7 +4,7 @@ import type { JobPostingStateAction } from "@/lib/schema/jobPostingStateActionSc
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Card, CardBody, CardHeader, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
+import { Card, CardBody, CardHeader, cn, Divider, LinkIcon, Link, useDisclosure, Tab, Tabs, Textarea } from "@heroui/react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Key, useEffect, useRef, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
@@ -22,7 +22,7 @@ import { SuggestLinkModal } from "./SuggestLinkModal";
 import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
-import { ArrowLeftIcon, FlagIcon, PlusIcon } from "@/components/icons";
+import { AlertCircleIcon, ArrowLeftIcon, BookmarkFilledIcon, BookmarkIcon, FlagIcon, PlusIcon, XCircleIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
@@ -34,6 +34,7 @@ import { LoadingContent } from "@/components/LoadingContent";
 import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
+import { CustomChip } from "@/components/CustomChip";
 import { JobDetails } from "@/app/api/job/[job_posting_id]/route";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { useJobPostingState, useUpsertJobPostingState } from "@/lib/hooks/useUserJobPostingState";
@@ -518,10 +519,12 @@ export default function JobDetailsPage() {
             <div className="mb-4 flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <CustomButton
-                  color="primary"
+                  className={cn("min-w-[100px] transition-all duration-200", jobPostingState?.to_apply_at && "animate-scale-in bg-primary/15 font-medium text-primary")}
+                  color={jobPostingState?.to_apply_at ? "primary" : "default"}
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
+                  startContent={jobPostingState?.to_apply_at ? <BookmarkFilledIcon size={14} /> : <BookmarkIcon size={14} />}
+                  variant={jobPostingState?.to_apply_at ? "flat" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
@@ -531,14 +534,16 @@ export default function JobDetailsPage() {
                     submitToggleAction(action, isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
                   }}
                 >
-                  {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
+                  To Apply
                 </CustomButton>
 
                 <CustomButton
+                  className={cn("min-w-[80px] transition-all duration-200", jobPostingState?.skipped_at && "animate-scale-in bg-default-100 font-medium text-default-600")}
                   color="default"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
+                  startContent={<XCircleIcon size={14} />}
+                  variant={jobPostingState?.skipped_at ? "flat" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
@@ -551,7 +556,11 @@ export default function JobDetailsPage() {
                   {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
                 </CustomButton>
               </div>
-              {hasTrackedApplication ? <p className="text-xs text-default-500">Tracked jobs cannot be added to To Apply or Skipped.</p> : null}
+              {hasTrackedApplication ? (
+                <CustomChip color="warning" size="sm" startContent={<AlertCircleIcon size={12} />} variant="flat">
+                  Tracked jobs cannot be added to To Apply or Skipped.
+                </CustomChip>
+              ) : null}
 
               <div>
                 <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>

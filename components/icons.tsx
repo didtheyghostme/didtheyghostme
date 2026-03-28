@@ -200,3 +200,22 @@ export function FilterIcon(props: { size?: number; className?: string }) {
     </svg>
   );
 }
+
+export const BookmarkIcon: React.FC<IconSvgProps> = ({ size = 16, width, height, ...props }) => (
+  <svg aria-hidden="true" fill="none" focusable="false" height={size || height} role="presentation" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={size || width} {...props}>
+    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const BookmarkFilledIcon: React.FC<IconSvgProps> = ({ size = 16, width, height, ...props }) => (
+  <svg aria-hidden="true" fill="currentColor" focusable="false" height={size || height} role="presentation" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={size || width} {...props}>
+    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const XCircleIcon: React.FC<IconSvgProps> = ({ size = 16, width, height, ...props }) => (
+  <svg aria-hidden="true" fill="none" focusable="false" height={size || height} role="presentation" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={size || width} {...props}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="m15 9-6 6M9 9l6 6" />
+  </svg>
+);
