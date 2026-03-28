@@ -22,7 +22,7 @@ import { SuggestLinkModal } from "./SuggestLinkModal";
 import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
-import { ArrowLeftIcon, ChevronDownIcon, FlagIcon, PlusIcon } from "@/components/icons";
+import { ArrowLeftIcon, BookmarkIcon, EditIcon, EyeOffIcon, FlagIcon, PlusIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
@@ -103,8 +103,7 @@ export default function JobDetailsPage() {
   const [isNoteDirty, setIsNoteDirty] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [noteSaveError, setNoteSaveError] = useState<string | null>(null);
-  const [isNoteExpanded, setIsNoteExpanded] = useState(false);
-  const noteExpandedInitRef = useRef(false);
+  const [isNoteEditing, setIsNoteEditing] = useState(false);
   const jobPostingStateToastId = `jobPostingState:${job_posting_id}`;
   const jobPostingStateMutationSeqRef = useRef(0);
   const lastSyncedNoteRef = useRef("");
@@ -118,11 +117,6 @@ export default function JobDetailsPage() {
     const hasUncommittedEdits = isNoteDirty && noteDraft !== previousSyncedNote;
 
     lastSyncedNoteRef.current = nextSyncedNote;
-
-    if (!noteExpandedInitRef.current && nextSyncedNote.length > 0) {
-      noteExpandedInitRef.current = true;
-      setIsNoteExpanded(true);
-    }
 
     if (hasUncommittedEdits) return;
 
@@ -306,6 +300,7 @@ export default function JobDetailsPage() {
     setNoteDraft(syncedNote);
     setIsNoteDirty(false);
     setNoteSaveError(null);
+    setIsNoteEditing(false);
   };
 
   const handleSaveNote = async () => {
@@ -338,6 +333,7 @@ export default function JobDetailsPage() {
       lastSyncedNoteRef.current = confirmedNote;
       setNoteDraft(confirmedNote);
       setIsNoteDirty(false);
+      setIsNoteEditing(false);
     } catch (err) {
       setNoteSaveError(getErrorMessage(err));
     } finally {
@@ -528,6 +524,7 @@ export default function JobDetailsPage() {
                   color="primary"
                   isDisabled={hasTrackedApplication}
                   size="sm"
+                  startContent={<BookmarkIcon />}
                   variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
@@ -545,6 +542,7 @@ export default function JobDetailsPage() {
                   color="default"
                   isDisabled={hasTrackedApplication}
                   size="sm"
+                  startContent={<EyeOffIcon />}
                   variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
                   onPress={() => {
                     const isSkipped = !!jobPostingState?.skipped_at;
@@ -601,22 +599,10 @@ export default function JobDetailsPage() {
 
           <SignedIn>
             <div className="border-t border-divider pt-3">
-              <button
-                className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-left transition-colors hover:bg-default-100"
-                type="button"
-                onClick={() => setIsNoteExpanded((prev) => !prev)}
-              >
-                <ChevronDownIcon
-                  className={`h-4 w-4 text-default-500 transition-transform duration-200 ${isNoteExpanded ? "rotate-0" : "-rotate-90"}`}
-                />
-                <span className="text-sm font-medium text-default-600">My note (private)</span>
-                {!isNoteExpanded && noteDraft && (
-                  <span className="ml-1 truncate text-xs text-default-400">&mdash; {noteDraft}</span>
-                )}
-              </button>
+              <p className="mb-2 text-sm font-medium text-default-600">My note (private)</p>
 
-              {isNoteExpanded && (
-                <div className="mt-2 pl-6">
+              {isNoteEditing ? (
+                <div>
                   <Textarea
                     isDisabled={isSavingNote}
                     minRows={3}
@@ -628,20 +614,37 @@ export default function JobDetailsPage() {
                       setNoteSaveError(null);
                     }}
                   />
-                  {(isNoteDirty || isSavingNote || noteSaveError) && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
-                        Save note
-                      </CustomButton>
-                      <CustomButton color="default" isDisabled={!isNoteDirty || isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
-                        Cancel
-                      </CustomButton>
-                      {isSavingNote ? <p className="text-xs text-default-500">Saving…</p> : null}
-                      {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
-                      {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
-                    </div>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <CustomButton color="default" isDisabled={isSavingNote} size="sm" variant="flat" onPress={handleCancelNote}>
+                      Cancel
+                    </CustomButton>
+                    <CustomButton color="primary" isDisabled={!isNoteDirty || isSavingNote} isLoading={isSavingNote} size="sm" onPress={handleSaveNote}>
+                      Save note
+                    </CustomButton>
+                    {isSavingNote ? <p className="text-xs text-default-500">Saving…</p> : null}
+                    {!isSavingNote && noteSaveError ? <p className="text-xs text-danger">{noteSaveError}</p> : null}
+                    {!isSavingNote && !noteSaveError && isNoteDirty ? <p className="text-xs text-default-500">Unsaved changes</p> : null}
+                  </div>
                 </div>
+              ) : noteDraft ? (
+                <div className="group relative rounded-lg border border-default-200 p-3">
+                  <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
+                  <CustomButton className="mt-2 gap-1" color="default" size="sm" startContent={<EditIcon />} variant="flat" onPress={() => setIsNoteEditing(true)}>
+                    Edit
+                  </CustomButton>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsNoteEditing(true)}
+                  className={
+                    "flex w-full items-center gap-2 rounded-lg border border-dashed border-default-300 " +
+                    "p-3 text-left text-sm text-default-400 transition-colors hover:border-default-400 hover:text-default-500"
+                  }
+                >
+                  <EditIcon />
+                  Add a private note for this job posting…
+                </button>
               )}
             </div>
           </SignedIn>
