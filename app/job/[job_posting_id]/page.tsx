@@ -22,7 +22,7 @@ import { SuggestLinkModal } from "./SuggestLinkModal";
 import { ReviewContent } from "./ReviewContent";
 
 import { fetcher } from "@/lib/fetcher";
-import { ArrowLeftIcon, BookmarkIcon, ChevronDownIcon, EditIcon, FlagIcon, PinIcon, PlusIcon, StarIcon, XCircleIcon } from "@/components/icons";
+import { ArrowLeftIcon, BookmarkFilledIcon, BookmarkIcon, ChevronDownIcon, EditIcon, FlagIcon, PinIcon, PlusIcon, StarIcon, XCircleIcon } from "@/components/icons";
 import { useCreateApplication } from "@/lib/hooks/useCreateApplication";
 import { API } from "@/lib/constants/apiRoutes";
 import { JOB_POST_PAGE_TABS } from "@/lib/constants/jobPostPageTabs";
@@ -600,8 +600,10 @@ export default function JobDetailsPage() {
                   color="primary"
                   isDisabled={hasTrackedApplication}
                   size="sm"
-                  startContent={toApplyIcon === "star" ? <StarIcon /> : toApplyIcon === "pin" ? <PinIcon /> : <BookmarkIcon />}
-                  variant={jobPostingState?.to_apply_at ? "solid" : "bordered"}
+                  startContent={
+                    toApplyIcon === "star" ? <StarIcon /> : toApplyIcon === "pin" ? <PinIcon /> : jobPostingState?.to_apply_at ? <BookmarkFilledIcon /> : <BookmarkIcon />
+                  }
+                  variant={jobPostingState?.to_apply_at ? "flat" : "bordered"}
                   onPress={() => {
                     const isToApply = !!jobPostingState?.to_apply_at && !jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
@@ -712,7 +714,7 @@ export default function JobDetailsPage() {
                     onKeyDown={(e) => e.key === "Enter" && setIsNoteEditing(true)}
                   >
                     <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
-                    <span className="absolute right-2 top-2 text-default-400 opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="absolute right-2 top-2 text-default-400 opacity-40 transition-opacity group-hover:opacity-100">
                       <EditIcon />
                     </span>
                   </div>
@@ -721,7 +723,7 @@ export default function JobDetailsPage() {
                     <p className="whitespace-pre-wrap text-sm text-default-700">{noteDraft}</p>
                     <CustomButton
                       isIconOnly
-                      className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute right-2 top-2 opacity-40 transition-opacity group-hover:opacity-100"
                       color="default"
                       size="sm"
                       variant="light"
