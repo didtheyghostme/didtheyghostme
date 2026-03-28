@@ -208,7 +208,20 @@ export const BookmarkIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const BookmarkFilledIcon: React.FC<IconSvgProps> = ({ size = 16, width, height, ...props }) => (
-  <svg aria-hidden="true" fill="currentColor" focusable="false" height={size || height} role="presentation" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" width={size || width} {...props}>
+  <svg
+    aria-hidden="true"
+    fill="currentColor"
+    focusable="false"
+    height={size || height}
+    role="presentation"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth={2}
+    viewBox="0 0 24 24"
+    width={size || width}
+    {...props}
+  >
     <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
   </svg>
 );

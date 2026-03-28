@@ -211,6 +211,7 @@ export default function JobDetailsPage() {
   if (!jobDetails) return <DataNotFoundMessage message="Job not found" />;
   if (!applications?.data) return <DataNotFoundMessage message="Applications not found" />;
   const hasTrackedApplication = !!applications.currentUserItemId;
+  const isSkipped = !!jobPostingState?.skipped_at;
 
   const handleBackClick = () => {
     mixpanel.track("back_button_clicked", {
@@ -594,6 +595,12 @@ export default function JobDetailsPage() {
 
         <CardBody className="gap-4">
           <SignedIn>
+            {isSkipped && !hasTrackedApplication && (
+              <div className="flex items-center gap-2 rounded-lg bg-warning-50 px-3 py-2 text-sm text-warning-600 dark:bg-warning-900/20 dark:text-warning-400">
+                <XCircleIcon className="h-4 w-4 flex-shrink-0" />
+                <span>You skipped this job posting</span>
+              </div>
+            )}
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <CustomButton
@@ -613,17 +620,16 @@ export default function JobDetailsPage() {
                     submitToggleAction(action, isToApply ? "Job removed from your To Apply list" : "Job added to your To Apply list");
                   }}
                 >
-                  {jobPostingState?.to_apply_at ? "In To Apply" : "To Apply"}
+                  To Apply
                 </CustomButton>
 
                 <CustomButton
-                  color="default"
+                  color={isSkipped ? "warning" : "default"}
                   isDisabled={hasTrackedApplication}
                   size="sm"
                   startContent={<XCircleIcon />}
-                  variant={jobPostingState?.skipped_at ? "solid" : "bordered"}
+                  variant={isSkipped ? "flat" : "bordered"}
                   onPress={() => {
-                    const isSkipped = !!jobPostingState?.skipped_at;
                     const action: JobPostingStateToggleAction = {
                       action: isSkipped ? "clear_skipped" : "set_skipped",
                     };
@@ -631,10 +637,14 @@ export default function JobDetailsPage() {
                     submitToggleAction(action, isSkipped ? "Job removed from your Skipped list" : "Job added to your Skipped list");
                   }}
                 >
-                  {jobPostingState?.skipped_at ? "Skipped" : "Skip"}
+                  {isSkipped ? "Skipped" : "Skip"}
                 </CustomButton>
               </div>
-              {hasTrackedApplication ? <p className="text-xs text-default-500">Tracked jobs cannot be added to To Apply or Skipped.</p> : null}
+              {hasTrackedApplication ? (
+                <p className="text-xs text-default-500">Tracked jobs cannot be added to To Apply or Skipped.</p>
+              ) : isSkipped ? (
+                <p className="text-xs text-default-400">You can still track this job — doing so will remove it from Skipped.</p>
+              ) : null}
             </div>
           </SignedIn>
 
@@ -654,7 +664,7 @@ export default function JobDetailsPage() {
               <CustomButton
                 className="w-full transition-all duration-200 hover:bg-primary/90 hover:text-primary-foreground sm:w-auto"
                 color="primary"
-                variant="solid"
+                variant={isSkipped ? "bordered" : "solid"}
                 onPress={handleTrackThisJobClick}
               >
                 Track this job
@@ -684,7 +694,7 @@ export default function JobDetailsPage() {
                   <Textarea
                     isDisabled={isSavingNote}
                     minRows={3}
-                    placeholder="Add a private note for this job posting…"
+                    placeholder={isSkipped ? "Why did you skip this job? (optional)" : "Add a private note for this job posting…"}
                     value={noteDraft}
                     onValueChange={(value) => {
                       setNoteDraft(value);
@@ -743,7 +753,7 @@ export default function JobDetailsPage() {
                   onClick={() => setIsNoteEditing(true)}
                 >
                   <EditIcon />
-                  Add a private note for this job posting…
+                  {isSkipped ? "Note why you skipped this job…" : "Add a private note for this job posting…"}
                 </button>
               )}
             </div>
