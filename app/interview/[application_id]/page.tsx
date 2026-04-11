@@ -12,7 +12,7 @@ import { EditInterviewDetails } from "./EditInterviewDetails";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { ArrowLeftIcon } from "@/components/icons";
-import { INTERVIEW_FORM_ID, InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
+import { InterviewExperienceFormValues } from "@/lib/schema/updateInterviewRoundSchema";
 import { InterviewExperienceCardData } from "@/lib/sharedTypes";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { CommentSection } from "@/app/question/[comment_id]/CommentSection";
@@ -166,27 +166,6 @@ export default function InterviewExperiencePage() {
         Back to job
       </CustomButton>
 
-      <div className="flex flex-col items-end pb-4">
-        {applicationDetails.isCurrentUserItem && (
-          <>
-            {isEditing ? (
-              <div className="flex gap-2">
-                <CustomButton color="primary" form={INTERVIEW_FORM_ID} isLoading={isUpdating} type="submit">
-                  Save
-                </CustomButton>
-                <CustomButton color="secondary" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </CustomButton>
-              </div>
-            ) : (
-              <CustomButton className="self-end sm:self-auto" color="primary" onClick={handleEditInterviewRoundsButtonClick}>
-                Edit Interview Rounds
-              </CustomButton>
-            )}
-          </>
-        )}
-      </div>
-
       {applicationDetails.isCurrentUserItem ? (
         <Card className="mb-8">
           <CardHeader>
@@ -229,16 +208,20 @@ export default function InterviewExperiencePage() {
       ) : null}
 
       {isEditing ? (
-        <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} onSave={handleSaveForm} />
+        <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} isUpdating={isUpdating} onCancel={() => setIsEditing(false)} onSave={handleSaveForm} />
       ) : (
-        <ViewInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} />
+        <ViewInterviewDetails
+          applicationDetails={applicationDetails}
+          interviewRounds={interviewRounds}
+          onEdit={applicationDetails.isCurrentUserItem ? handleEditInterviewRoundsButtonClick : undefined}
+        />
       )}
 
       <Spacer y={8} />
 
       <CommentSection entity_id={application_id} entity_type="interview_experience" />
 
-      <Modal isOpen={isDeleteReviewModalOpen} onClose={onDeleteReviewModalClose}>
+      <Modal isOpen={isDeleteReviewModalOpen} placement="center" onClose={onDeleteReviewModalClose}>
         <ModalContent>
           <ModalHeader>Delete review</ModalHeader>
           <ModalBody>

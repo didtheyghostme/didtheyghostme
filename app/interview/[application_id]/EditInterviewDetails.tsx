@@ -20,10 +20,12 @@ import { EmptyContent } from "@/components/EmptyContent";
 type EditInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
   interviewRounds: InterviewExperienceCardData[];
+  isUpdating: boolean;
   onSave: (data: InterviewExperienceFormValues) => Promise<void>;
+  onCancel: () => void;
 };
 
-export function EditInterviewDetails({ applicationDetails, interviewRounds, onSave }: EditInterviewDetailsProps) {
+export function EditInterviewDetails({ applicationDetails, interviewRounds, isUpdating, onSave, onCancel }: EditInterviewDetailsProps) {
   const [openModalIndex, setOpenModalIndex] = useState<number | null>(null);
 
   const methods = useForm<InterviewExperienceFormValues>({
@@ -161,7 +163,7 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
     <FormProvider {...methods}>
       <form noValidate id={INTERVIEW_FORM_ID} onSubmit={handleFormSubmit}>
         <Card>
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 flex-shrink-0">
                 <ImageWithFallback
@@ -174,6 +176,14 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, onSa
                 <h2 className="text-lg">{applicationDetails.job_posting.title}</h2>
                 <p className="text-default-500">{applicationDetails.job_posting.company.company_name}</p>
               </div>
+            </div>
+            <div className="flex gap-2">
+              <CustomButton color="primary" isLoading={isUpdating} type="submit">
+                Save
+              </CustomButton>
+              <CustomButton color="default" variant="light" onPress={onCancel}>
+                Cancel
+              </CustomButton>
             </div>
           </CardHeader>
           <Divider />

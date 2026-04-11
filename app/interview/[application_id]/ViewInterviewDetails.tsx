@@ -6,20 +6,22 @@ import { formatDateDayMonthYear, formatHowLongAgo, getDaysBetween } from "@/lib/
 import { getStatusColor } from "@/app/job/[job_posting_id]/ApplicationCard";
 import { GetApplicationByIdResponse } from "@/app/api/application/[application_id]/route";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
-import { CalendarIcon } from "@/components/icons";
+import { CalendarIcon, EditIcon } from "@/components/icons";
 import { CustomChip } from "@/components/CustomChip";
+import { CustomButton } from "@/components/CustomButton";
 import { EmptyContent } from "@/components/EmptyContent";
 
 type ViewInterviewDetailsProps = {
   applicationDetails: GetApplicationByIdResponse;
   interviewRounds: InterviewExperienceCardData[];
+  onEdit?: () => void;
 };
 
-export function ViewInterviewDetails({ applicationDetails, interviewRounds }: ViewInterviewDetailsProps) {
+export function ViewInterviewDetails({ applicationDetails, interviewRounds, onEdit }: ViewInterviewDetailsProps) {
   return (
     <>
       <Card className="mb-8">
-        <CardHeader>
+        <CardHeader className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 flex-shrink-0">
               <ImageWithFallback
@@ -33,6 +35,11 @@ export function ViewInterviewDetails({ applicationDetails, interviewRounds }: Vi
               <p className="text-default-500">{applicationDetails.job_posting.company.company_name}</p>
             </div>
           </div>
+          {onEdit && (
+            <CustomButton isIconOnly color="default" size="sm" variant="light" onPress={onEdit}>
+              <EditIcon />
+            </CustomButton>
+          )}
         </CardHeader>
         <Divider />
         <CardBody>
