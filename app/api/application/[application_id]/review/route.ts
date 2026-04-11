@@ -52,3 +52,19 @@ export async function PUT(request: NextRequest, { params }: { params: { applicat
 
   return NextResponse.json(data);
 }
+
+export type DeleteApplicationReviewResponse = { deleted: true };
+
+export async function DELETE(_request: NextRequest, { params }: { params: { application_id: string } }) {
+  const { userId } = auth();
+
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const supabase = await createClerkSupabaseClientSsr();
+
+  const { error } = await supabase.from(DBTable.APPLICATION_REVIEW).delete().eq("application_id", params.application_id).eq("user_id", userId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ deleted: true } satisfies DeleteApplicationReviewResponse);
+}

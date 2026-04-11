@@ -1,5 +1,6 @@
-import type { GetApplicationReviewResponse } from "@/app/api/application/[application_id]/review/route";
+import type { DeleteApplicationReviewResponse, GetApplicationReviewResponse } from "@/app/api/application/[application_id]/review/route";
 import type { GetAllReviewsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/review/route";
+import type { ClerkAuthUserId } from "@/lib/hooks/useSWRWithAuthKey";
 import type { PutApplicationReviewBody } from "@/lib/schema/applicationReviewSchema";
 
 import useSWR from "swr";
@@ -7,7 +8,6 @@ import useSWRMutation from "swr/mutation";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
-import type { ClerkAuthUserId } from "@/lib/hooks/useSWRWithAuthKey";
 
 async function putJson<TBody, TResult>(url: string, body: TBody): Promise<TResult> {
   const res = await fetch(url, {
@@ -17,6 +17,16 @@ async function putJson<TBody, TResult>(url: string, body: TBody): Promise<TResul
     },
     body: JSON.stringify(body),
   });
+
+  const data = (await res.json().catch(() => null)) as any;
+
+  if (!res.ok) throw new Error(data?.error ?? "Request failed");
+
+  return data as TResult;
+}
+
+async function deleteJson<TResult>(url: string): Promise<TResult> {
+  const res = await fetch(url, { method: "DELETE" });
 
   const data = (await res.json().catch(() => null)) as any;
 
@@ -53,5 +63,30 @@ export function useUpsertApplicationReview(application_id: string, userId: Clerk
       return trigger({ content });
     },
     isUpdating: isMutating,
+  };
+}
+
+export function useDeleteApplicationReview(application_id: string, userId: ClerkAuthUserId) {
+  const url = userId ? API.REVIEW.getByApplicationId(application_id) : null;
+  const { trigger, isMutating } = useSWRMutation<GetApplicationReviewResponse, Error, string | null>(
+    url,
+    async (url) => {
+      await deleteJson<DeleteApplicationReviewResponse>(url);
+
+      return null;
+    },
+    {
+      populateCache: true,
+      revalidate: false,
+    },
+  );
+
+  return {
+    deleteApplicationReview: async () => {
+      if (!userId) throw new Error("Unauthorized");
+
+      return trigger();
+    },
+    isDeleting: isMutating,
   };
 }

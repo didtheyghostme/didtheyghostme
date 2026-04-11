@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Avatar, Card, CardBody, CardHeader, Divider, Spacer, Textarea } from "@heroui/react";
+import { Avatar, Card, CardBody, CardHeader, Divider, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Spacer, Textarea, useDisclosure } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
@@ -25,7 +25,7 @@ import { ErrorMessageContent } from "@/components/ErrorMessageContent";
 import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
-import { useApplicationReview, useUpsertApplicationReview } from "@/lib/hooks/useApplicationReview";
+import { useApplicationReview, useDeleteApplicationReview, useUpsertApplicationReview } from "@/lib/hooks/useApplicationReview";
 import { formatHowLongAgo } from "@/lib/formatDateUtils";
 
 export default function InterviewExperiencePage() {
@@ -50,6 +50,8 @@ export default function InterviewExperiencePage() {
   const [isEditing, setIsEditing] = useState(false);
   const { data: applicationReview } = useApplicationReview(application_id);
   const { upsertApplicationReview, isUpdating: isUpdatingReview } = useUpsertApplicationReview(application_id, userId);
+  const { deleteApplicationReview, isDeleting: isDeletingReview } = useDeleteApplicationReview(application_id, userId);
+  const { isOpen: isDeleteReviewModalOpen, onOpen: onDeleteReviewModalOpen, onClose: onDeleteReviewModalClose } = useDisclosure();
   const [reviewDraft, setReviewDraft] = useState("");
   const [hasHydratedReview, setHasHydratedReview] = useState(false);
 
@@ -122,7 +124,7 @@ export default function InterviewExperiencePage() {
   const handleSaveReview = async () => {
     try {
       await upsertApplicationReview(reviewDraft);
-      const reviewTransition = applicationReview?.content ? (reviewDraft ? "updated" : "cleared") : "added";
+      const reviewTransition = applicationReview?.content ? "updated" : "added";
 
       mixpanel.track("Interview Experience Page - Public Review Saved", {
         action: "review_saved",
@@ -137,6 +139,25 @@ export default function InterviewExperiencePage() {
     } catch {
       toast.error("Failed to save review");
     }
+  };
+
+  const handleDeleteReview = async () => {
+    try {
+      await deleteApplicationReview();
+      setReviewDraft("");
+
+      mixpanel.track("Interview Experience Page - Public Review Deleted", {
+        action: "review_deleted",
+        application_id: application_id,
+        job_id: applicationDetails.job_posting_id,
+        job_title: applicationDetails.job_posting.title,
+        company_name: applicationDetails.job_posting.company.company_name,
+      });
+      toast.success("Review deleted");
+    } catch {
+      toast.error("Failed to delete review");
+    }
+    onDeleteReviewModalClose();
   };
 
   return (
@@ -177,8 +198,13 @@ export default function InterviewExperiencePage() {
           <Divider />
           <CardBody className="flex flex-col gap-3">
             <Textarea minRows={4} placeholder="Write your review..." value={reviewDraft} onValueChange={setReviewDraft} />
-            <div className="flex justify-end">
-              <CustomButton color="primary" isLoading={isUpdatingReview} onPress={handleSaveReview}>
+            <div className="flex justify-end gap-2">
+              {applicationReview?.content && (
+                <CustomButton color="danger" isLoading={isDeletingReview} variant="light" onPress={onDeleteReviewModalOpen}>
+                  Delete review
+                </CustomButton>
+              )}
+              <CustomButton color="primary" isDisabled={!reviewDraft.trim()} isLoading={isUpdatingReview} onPress={handleSaveReview}>
                 Save review
               </CustomButton>
             </div>
@@ -211,6 +237,23 @@ export default function InterviewExperiencePage() {
       <Spacer y={8} />
 
       <CommentSection entity_id={application_id} entity_type="interview_experience" />
+
+      <Modal isOpen={isDeleteReviewModalOpen} onClose={onDeleteReviewModalClose}>
+        <ModalContent>
+          <ModalHeader>Delete review</ModalHeader>
+          <ModalBody>
+            <p className="text-sm text-default-600">Are you sure you want to delete your public review? This action cannot be undone.</p>
+          </ModalBody>
+          <ModalFooter>
+            <CustomButton color="default" variant="light" onPress={onDeleteReviewModalClose}>
+              Cancel
+            </CustomButton>
+            <CustomButton color="danger" isLoading={isDeletingReview} onPress={handleDeleteReview}>
+              Delete
+            </CustomButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
