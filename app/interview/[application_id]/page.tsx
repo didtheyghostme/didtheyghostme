@@ -47,19 +47,18 @@ export default function InterviewExperiencePage() {
 
   // local states
   const [isEditing, setIsEditing] = useState(false);
-  const { data: applicationReview } = useApplicationReview(application_id, userId);
+  const { data: applicationReview } = useApplicationReview(application_id);
   const { upsertApplicationReview, isUpdating: isUpdatingReview } = useUpsertApplicationReview(application_id, userId);
   const [reviewDraft, setReviewDraft] = useState("");
   const [hasHydratedReview, setHasHydratedReview] = useState(false);
 
   useEffect(() => {
     if (hasHydratedReview) return;
-    if (!userId) return;
     if (applicationReview === undefined) return;
 
     setReviewDraft(applicationReview?.content ?? "");
     setHasHydratedReview(true);
-  }, [applicationReview, hasHydratedReview, userId]);
+  }, [applicationReview, hasHydratedReview]);
 
   if (isLoading || interviewRoundsLoading) return <LoadingContent />;
   if (error || interviewRoundsError) {
