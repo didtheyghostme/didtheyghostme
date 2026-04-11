@@ -2,11 +2,12 @@ import type { GetApplicationReviewResponse } from "@/app/api/application/[applic
 import type { GetAllReviewsByJobPostingIdResponse } from "@/app/api/job/[job_posting_id]/review/route";
 import type { PutApplicationReviewBody } from "@/lib/schema/applicationReviewSchema";
 
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
 import { API } from "@/lib/constants/apiRoutes";
 import { fetcher } from "@/lib/fetcher";
-import { useSWRMutationWithAuthKey, type ClerkAuthUserId } from "@/lib/hooks/useSWRWithAuthKey";
+import type { ClerkAuthUserId } from "@/lib/hooks/useSWRWithAuthKey";
 
 async function putJson<TBody, TResult>(url: string, body: TBody): Promise<TResult> {
   const res = await fetch(url, {
@@ -35,20 +36,21 @@ export function useApplicationReview(application_id: string) {
 }
 
 export function useUpsertApplicationReview(application_id: string, userId: ClerkAuthUserId) {
-  const { trigger, isMutating } = useSWRMutationWithAuthKey<PutApplicationReviewBody, GetApplicationReviewResponse>(
-    userId ? API.REVIEW.getByApplicationId(application_id) : null,
-    userId,
+  const url = userId ? API.REVIEW.getByApplicationId(application_id) : null;
+  const { trigger, isMutating } = useSWRMutation<GetApplicationReviewResponse, Error, string | null, PutApplicationReviewBody>(
+    url,
     async (url, { arg }) => putJson<typeof arg, GetApplicationReviewResponse>(url, arg),
+    {
+      populateCache: true,
+      revalidate: false,
+    },
   );
 
   return {
     upsertApplicationReview: async (content: string) => {
       if (!userId) throw new Error("Unauthorized");
-      const result = await trigger({ content });
 
-      mutate(API.REVIEW.getByApplicationId(application_id));
-
-      return result;
+      return trigger({ content });
     },
     isUpdating: isMutating,
   };
