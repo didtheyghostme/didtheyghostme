@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardBody, CardHeader, Divider, Spacer, Textarea } from "@heroui/react";
+import { Avatar, Card, CardBody, CardHeader, Divider, Spacer, Textarea } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import mixpanel from "mixpanel-browser";
@@ -26,6 +26,7 @@ import { DataNotFoundMessage } from "@/components/DataNotFoundMessage";
 import { CustomButton } from "@/components/CustomButton";
 import { useSWRWithAuthKey } from "@/lib/hooks/useSWRWithAuthKey";
 import { useApplicationReview, useUpsertApplicationReview } from "@/lib/hooks/useApplicationReview";
+import { formatHowLongAgo } from "@/lib/formatDateUtils";
 
 export default function InterviewExperiencePage() {
   const { application_id } = useParams<{ application_id: string }>();
@@ -165,7 +166,7 @@ export default function InterviewExperiencePage() {
         )}
       </div>
 
-      {applicationDetails.isCurrentUserItem && (
+      {applicationDetails.isCurrentUserItem ? (
         <Card className="mb-8">
           <CardHeader>
             <div>
@@ -183,7 +184,23 @@ export default function InterviewExperiencePage() {
             </div>
           </CardBody>
         </Card>
-      )}
+      ) : applicationReview ? (
+        <Card className="mb-8">
+          <CardHeader className="flex flex-col items-start gap-3">
+            <p className="text-base font-semibold">Review</p>
+            <div className="flex items-center gap-3">
+              <Avatar isBordered src={applicationDetails.user_data.profile_pic_url} />
+              <div>
+                <p className="text-sm font-medium">{applicationDetails.user_data.full_name}</p>
+                <p className="text-xs text-default-500">{formatHowLongAgo(applicationReview.created_at)}</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardBody>
+            <p className="whitespace-pre-wrap text-sm text-default-700">{applicationReview.content}</p>
+          </CardBody>
+        </Card>
+      ) : null}
 
       {isEditing ? (
         <EditInterviewDetails applicationDetails={applicationDetails} interviewRounds={interviewRounds} onSave={handleSaveForm} />
