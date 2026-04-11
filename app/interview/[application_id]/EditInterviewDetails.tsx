@@ -177,12 +177,12 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, isUp
                 <p className="text-default-500">{applicationDetails.job_posting.company.company_name}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <CustomButton color="primary" isLoading={isUpdating} type="submit">
-                Save
-              </CustomButton>
+            <div className="hidden gap-2 sm:flex">
               <CustomButton color="default" variant="light" onPress={onCancel}>
                 Cancel
+              </CustomButton>
+              <CustomButton color="primary" isLoading={isUpdating} type="submit">
+                Save
               </CustomButton>
             </div>
           </CardHeader>
@@ -447,6 +447,17 @@ export function EditInterviewDetails({ applicationDetails, interviewRounds, isUp
         )}
 
         {!hasFirstResponseDate && <div className="mb-4 text-2xl font-semibold">Please set the first response date before you can add interview rounds</div>}
+
+        <div className="h-16 sm:hidden" />
+
+        <div className="fixed inset-x-0 bottom-0 z-50 flex gap-2 border-t border-default-200 bg-background/80 p-3 backdrop-blur-md sm:hidden">
+          <CustomButton className="flex-1" color="default" variant="light" onPress={onCancel}>
+            Cancel
+          </CustomButton>
+          <CustomButton className="flex-1" color="primary" isLoading={isUpdating} type="submit">
+            Save
+          </CustomButton>
+        </div>
       </form>
     </FormProvider>
   );
