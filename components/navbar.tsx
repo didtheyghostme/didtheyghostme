@@ -3,17 +3,15 @@
 import NextLink from "next/link";
 import clsx from "clsx";
 import { Link, Navbar as HeroUINavbar, NavbarContent, NavbarMenu, NavbarItem, NavbarMenuItem, NavbarMenuToggle, Chip } from "@heroui/react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import mixpanel from "mixpanel-browser";
 
-import { ClerkUserButton } from "./ClerkUserButton";
 import { GithubIcon } from "./icons";
+import { NavbarLoginOrUserButton } from "./NavbarLoginOrUserButton";
 import { NumberTicker } from "./NumberTicker";
 
 import { siteConfig } from "@/config/site";
-import { CustomButton } from "@/components/CustomButton";
 import { useGithubStars } from "@/lib/hooks/useGithubStars";
 
 export const Navbar = () => {
@@ -70,36 +68,8 @@ export const Navbar = () => {
       onMenuOpenChange={handleMenuToggle}
     >
       {/* Left side: Menu Toggle, Logo and Nav Items */}
-      <NavbarContent justify="start">
+      <NavbarContent as="div" justify="start">
         <NavbarMenuToggle className="sm:hidden" />
-
-        {/* Mobile Menu */}
-        <NavbarMenu>
-          <div className="mx-4 mt-2 flex flex-col gap-2">
-            {siteConfig.navMenuItems.map((item, index) => (
-              <NavbarMenuItem key={`${item}-${index}`}>
-                <Link
-                  color="foreground"
-                  href={item.href}
-                  size="lg"
-                  onPress={() => {
-                    handleNavBarClick(item.label);
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <span className="inline-flex items-center gap-2">
-                    {item.label}
-                    {item.isNew && (
-                      <Chip color="primary" size="sm" variant="flat">
-                        New
-                      </Chip>
-                    )}
-                  </span>
-                </Link>
-              </NavbarMenuItem>
-            ))}
-          </div>
-        </NavbarMenu>
 
         <div className="flex w-full items-center gap-1.5 sm:gap-12">
           {/* Nav Items - Always visible on mobile and desktop */}
@@ -130,26 +100,47 @@ export const Navbar = () => {
         </div>
       </NavbarContent>
 
+      {/* Mobile Menu */}
+      <NavbarMenu>
+        {siteConfig.navMenuItems.map((item) => (
+          <NavbarMenuItem key={item.href}>
+            <Link
+              color="foreground"
+              href={item.href}
+              size="lg"
+              onPress={() => {
+                handleNavBarClick(item.label);
+                setIsMenuOpen(false);
+              }}
+            >
+              <span className="inline-flex items-center gap-2">
+                {item.label}
+                {item.isNew && (
+                  <Chip color="primary" size="sm" variant="flat">
+                    New
+                  </Chip>
+                )}
+              </span>
+            </Link>
+          </NavbarMenuItem>
+        ))}
+      </NavbarMenu>
+
       {/* Right side: Theme Switch + Login + Mobile Menu Toggle */}
       <NavbarContent className="gap-2 sm:hidden" justify="end">
-        <Link isExternal className="flex items-center" href={siteConfig.githubRepoUrl} showAnchorIcon={false} onPress={handleGithubClick}>
-          <GithubIcon className="text-default-600 transition-colors hover:text-default-900" />
-        </Link>
-        <SignedOut>
-          <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-            <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={handleLoginClick}>
-              Login
-            </CustomButton>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <ClerkUserButton />
-        </SignedIn>
+        <NavbarItem>
+          <Link isExternal className="flex items-center" href={siteConfig.githubRepoUrl} showAnchorIcon={false} onPress={handleGithubClick}>
+            <GithubIcon className="text-default-600 transition-colors hover:text-default-900" />
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <NavbarLoginOrUserButton fallbackRedirectUrl={pathname} onLoginClick={handleLoginClick} />
+        </NavbarItem>
       </NavbarContent>
 
       {/* Desktop Right side */}
       <NavbarContent className="hidden basis-1/5 sm:flex sm:basis-auto" justify="end">
-        <NavbarItem className="hidden sm:flex">
+        <NavbarItem>
           <Link
             isExternal
             // eslint-disable-next-line max-len
@@ -163,17 +154,8 @@ export const Navbar = () => {
           </Link>
         </NavbarItem>
 
-        <NavbarItem className="hidden sm:flex">
-          <SignedOut>
-            <SignInButton fallbackRedirectUrl={pathname} mode="modal">
-              <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={handleLoginClick}>
-                Login
-              </CustomButton>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <ClerkUserButton />
-          </SignedIn>
+        <NavbarItem>
+          <NavbarLoginOrUserButton fallbackRedirectUrl={pathname} onLoginClick={handleLoginClick} />
         </NavbarItem>
       </NavbarContent>
     </HeroUINavbar>
