@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
 import { ClerkUserButton } from "./ClerkUserButton";
@@ -14,26 +14,29 @@ type NavbarLoginOrUserButtonProps = {
 
 export function NavbarLoginOrUserButton({ fallbackRedirectUrl, onLoginClick }: NavbarLoginOrUserButtonProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { isLoaded: isAuthLoaded } = useAuth();
+  const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
+  const canRenderAuthButton = isMounted && isAuthLoaded;
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted || !isAuthLoaded) return null;
+  if (!canRenderAuthButton) return <div aria-hidden="true" className="h-10 w-20 shrink-0" />;
+
+  if (isSignedIn)
+    return (
+      <div className="flex h-10 shrink-0 items-center justify-end">
+        <ClerkUserButton />
+      </div>
+    );
 
   return (
-    <>
-      <SignedOut>
-        <SignInButton fallbackRedirectUrl={fallbackRedirectUrl} mode="modal">
-          <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={onLoginClick}>
-            Login
-          </CustomButton>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <ClerkUserButton />
-      </SignedIn>
-    </>
+    <div className="flex h-10 w-20 shrink-0 items-center justify-end">
+      <SignInButton fallbackRedirectUrl={fallbackRedirectUrl} mode="modal">
+        <CustomButton className="bg-[#282828] text-sm font-normal text-white" variant="flat" onClick={onLoginClick}>
+          Login
+        </CustomButton>
+      </SignInButton>
+    </div>
   );
 }
