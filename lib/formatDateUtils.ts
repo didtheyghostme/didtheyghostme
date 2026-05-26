@@ -54,3 +54,25 @@ export function formatHowLongAgo(date: Date | string | number) {
 export function getDaysBetween(earlierDate: Date | string | number, laterDate: Date | string | number) {
   return differenceInDays(new Date(laterDate), new Date(earlierDate));
 }
+
+export function formatClosingDate(date: Date | string | number): string {
+  const now = new Date();
+  const closeDate = new Date(date);
+
+  if (closeDate < now) {
+    return `Closed ${formatDistanceToNowStrict(closeDate, { addSuffix: true })}`;
+  }
+
+  // Check if it's today
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const todayDate = today(getLocalTimeZone());
+    const [year, month, day] = date.split("-").map(Number);
+    const compareDate = new CalendarDate(year, month, day);
+
+    if (compareDate.compare(todayDate) === 0) {
+      return "Closes today";
+    }
+  }
+
+  return `Closes ${formatDistanceToNowStrict(closeDate, { addSuffix: true })}`;
+}
